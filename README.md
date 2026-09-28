@@ -65,7 +65,7 @@ All facts live in [`content/profile.ts`](content/profile.ts), validated by a Zod
 
 - `.github/workflows/ci.yml` runs on every push and PR: install → lint → typecheck → unit → build → bundle budget → e2e + axe.
 - `.github/workflows/lighthouse.yml` runs Lighthouse CI (mobile, ≥ 95 in all four categories) against each **Vercel preview** URL. Deployment Protection stays on. Requests use the `VERCEL_AUTOMATION_BYPASS_SECRET` repository secret (Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation).
-- Vercel Git integration: pushes to `main` deploy to production, and each PR gets a preview URL. Node 22.x.
+- Vercel Git integration: pushes to `main` deploy to production, and each PR gets a preview URL. Node 22.x (`engines.node: "22.x"`).
 
 ## Workflow
 
