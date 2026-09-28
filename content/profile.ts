@@ -1,0 +1,225 @@
+import { ProfileSchema, type Profile } from "@/lib/content/profile-schema";
+
+/**
+ * SINGLE SOURCE OF TRUTH for every fact about Vishal.
+ * Components, the AI assistant, the résumé PDF and JSON-LD all read from here.
+ * Never invent facts. Unknown values are `null` + a TODO(vishal) comment; the UI hides them.
+ */
+const data = {
+  name: "Vishal B G",
+  headline: "Full-stack developer turning ideas into products people actually use",
+  shortRole: "Full Stack Developer",
+  location: "Bengaluru, India",
+  timezone: "Asia/Kolkata",
+  status: "Available for SDE / Full Stack roles",
+  targetRole: {
+    title: "Full Stack / Application Development",
+    coreSkills: [
+      "Java",
+      "JavaScript",
+      "HTML & CSS",
+      "SQL",
+      "REST / API & function integration",
+      "RAG fundamentals",
+    ],
+  },
+  contact: {
+    phone: "+91 96639 72259",
+    phoneHref: "tel:+919663972259",
+    whatsapp: "https://wa.me/919663972259",
+    email: "vishalbg02@gmail.com",
+    collegeEmail: "vishal.bg@mca.christuniversity.in",
+    linkedin: "https://linkedin.com/in/vishalbg",
+    github: "https://github.com/vishalbg02",
+    calLink: null, // TODO(vishal): Cal.com 15-min link — "Book a call" stays hidden until set
+  },
+
+  education: [
+    {
+      degree: "Master of Computer Applications (MCA)",
+      school: "CHRIST (Deemed to be University), Bengaluru",
+      period: "2026 – 2028 (expected)",
+      note: "Pursuing",
+    },
+    {
+      degree: "Bachelor of Computer Applications (BCA)",
+      school: "CHRIST (Deemed to be University), Bengaluru",
+      period: "2023 – 2026",
+      note: "CGPA 8.45 / 10",
+    },
+  ],
+
+  experience: [
+    {
+      role: "App Developer Intern",
+      company: "Social Agent (Bricstal Pvt. Ltd.), Bengaluru",
+      period: "May 2025 – Present",
+      current: true,
+      points: [
+        "Built and shipped Talnio, an employee management platform on web (React 19, Tailwind CSS) and mobile (Flutter/Dart) with Firebase Authentication and Cloud Firestore real-time sync — live on Google Play.",
+        "Implemented geolocation- and NFC-based attendance with automated PDF/Excel reports powering workforce analytics.",
+        "Integrated Google Generative AI APIs to automate productivity workflows, and the Agora SDK for live video/audio meetings.",
+      ],
+    },
+    {
+      role: "Backend Developer Intern",
+      company: "Kaha Technologies Pvt. Ltd. (Cove IoT), Bengaluru",
+      period: "May 2024 – Jul 2024",
+      current: false,
+      points: [
+        "Optimised Java Spring Boot backend services for boAt's IoT devices, handling real-time data across concurrent connections.",
+        "Designed secure REST APIs in Java with Spring Data JPA (SQL) and Spring Security on a Spring Cloud microservices architecture.",
+        "Enhanced device-management dashboards using AngularJS and TypeScript.",
+      ],
+    },
+  ],
+
+  projects: [
+    {
+      slug: "golden-verdict",
+      name: "Golden Verdict",
+      tagline: "Legal & tax compliance SaaS",
+      type: "Freelance · Production",
+      period: null, // TODO(vishal): project period
+      live: "https://goldenverdict.com",
+      repo: null,
+      stack: ["Next.js", "TypeScript", "Firebase", "Firestore", "Tailwind CSS", "Brevo API"],
+      summary:
+        "Production SaaS serving Customers, Legal Partners, Managers and Administrators with role-based access control.",
+      highlights: [
+        "End-to-end service workflows — service purchase, document upload, application tracking via unique request IDs, automated status updates — backed by Firestore transactional operations and a scalable schema.",
+        "Admin dashboards managing 50+ services, users, pricing and workflow assignments.",
+        "Brevo APIs for automated invoice generation and email; CSRF protection, secure session handling, SEO-optimised public service pages.",
+      ],
+    },
+    {
+      slug: "talnio",
+      name: "Talnio",
+      tagline: "Employee management platform (web + mobile)",
+      type: "Internship · Social Agent · Live on Google Play",
+      period: null, // TODO(vishal): project period
+      live: null, // TODO(vishal): Google Play URL
+      repo: null,
+      stack: [
+        "React 19",
+        "Tailwind CSS",
+        "Flutter",
+        "Dart",
+        "Firebase Auth",
+        "Cloud Firestore",
+        "Agora SDK",
+        "Google Generative AI",
+      ],
+      summary:
+        "Dual-platform workforce platform with real-time sync, attendance, analytics, meetings and AI automation.",
+      highlights: [
+        "Geolocation- and NFC-based attendance; automated PDF/Excel analytics reports.",
+        "Live video/audio meetings via Agora SDK.",
+        "Google Generative AI to automate productivity workflows.",
+      ],
+    },
+    {
+      slug: "lansymphony",
+      name: "LanSymphony",
+      tagline: "Offline, encrypted peer-to-peer communication over LAN",
+      type: "Personal · Built live at Windsurf × The AI Collective OpenBuild (2nd place)",
+      period: null, // TODO(vishal): project period
+      live: null,
+      repo: null, // TODO(vishal): repository URL
+      stack: ["Python", "Sockets", "AES-256", "Multi-threading"],
+      summary: "Serverless, internet-free communication system for local networks.",
+      highlights: [
+        "AES-256 encryption, automatic peer discovery, multi-threaded architecture.",
+        "HD video calling, VoIP audio, screen sharing with customisable quality and Picture-in-Picture.",
+      ],
+    },
+    {
+      slug: "virtual-tour",
+      name: "CHRIST University Virtual Tour",
+      tagline: "Immersive 360° web experience",
+      type: "Personal",
+      period: null, // TODO(vishal): project period
+      live: "https://virtual-tour-opal.vercel.app",
+      repo: "https://github.com/vishalbg02/virtual_tour",
+      stack: ["React", "Three.js", "TypeScript", "Vercel"],
+      summary: "360-degree campus tour with interactive hotspots and multimedia.",
+      highlights: [
+        "Interactive hotspots, multimedia integration, smooth navigation controls.",
+        "Optimised for web and mobile with responsive design.",
+      ],
+    },
+  ],
+
+  recognition: [
+    {
+      place: "1st Place",
+      event: "Gamecraft",
+      org: "Dept. of CS, CHRIST University",
+      date: "Aug 2024",
+      detail: "Team Lead; game: CosmoStrike",
+    },
+    {
+      place: "Winner",
+      event: "24-Hour Hackathon 2026",
+      org: "CPCG, CHRIST University",
+      date: "Mar 2026",
+      detail: "with Pod.ai",
+    },
+    {
+      place: "2nd Place",
+      event: "Windsurf × The AI Collective OpenBuild",
+      org: "Bengaluru",
+      date: "Aug 2025",
+      detail: "LanSymphony, 20+ teams",
+    },
+    {
+      place: "1st Runner-Up",
+      event: "Innovation Sprint 2026",
+      org: "Dept. of CS (PG), CHRIST University × NEOSTATS",
+      date: "Jun 2026",
+      detail: null,
+    },
+  ],
+  leadership: [
+    "Core Committee, Technical Team (App Development) — GATEWAYS 2026, CHRIST University: built the official fest app in React Native.",
+  ],
+
+  skills: {
+    backend: [
+      "Java",
+      "Spring Boot",
+      "Spring Security",
+      "Spring Data JPA",
+      "Node.js",
+      "REST APIs",
+      "Microservices",
+      "SQL/MySQL",
+    ],
+    frontend: [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Next.js",
+      "HTML5",
+      "CSS3",
+      "Tailwind CSS",
+      "Three.js",
+      "Angular",
+    ],
+    mobile: ["Flutter", "Dart", "React Native", "Android (Kotlin)"],
+    dataCloud: ["Firebase", "Firestore", "MySQL", "MongoDB", "AWS"],
+    ai: ["Generative AI APIs", "RAG fundamentals", "Function calling / API integration"],
+    tools: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code", "Vercel"],
+  },
+  certifications: [
+    "AWS Academy Cloud Foundations — Amazon Web Services (2025)",
+    "Advanced Android with Kotlin — Infosys Springboard (2024)",
+    "Introduction to Artificial Intelligence — Infosys Springboard (2024)",
+  ],
+  languages: ["English", "Kannada", "Telugu"],
+  motto: "Ship it. Measure it. Improve it.",
+} satisfies Profile;
+
+export const profile: Profile = ProfileSchema.parse(data);
+
+export const projectBySlug = (slug: string) => profile.projects.find((p) => p.slug === slug);
