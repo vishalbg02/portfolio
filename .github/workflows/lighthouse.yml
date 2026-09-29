@@ -1,0 +1,54 @@
+name: Lighthouse (Vercel preview)
+
+# Vercel reports each deployment to GitHub; run Lighthouse against the preview URL
+# once it is ready. Deployment Protection stays on — requests carry the
+# "Protection Bypass for Automation" secret instead.
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  lighthouse:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment.environment == 'Preview'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.deployment.sha }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Lighthouse CI (mobile, ≥ 95 in all categories)
+        env:
+          PREVIEW_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          if [ -z "$VERCEL_AUTOMATION_BYPASS_SECRET" ]; then
+            echo "::warning::VERCEL_AUTOMATION_BYPASS_SECRET is not set — protected previews will return a login page."
+          fi
+          HEADERS=$(printf '{"x-vercel-protection-bypass":"%s","x-vercel-set-bypass-cookie":"true"}' "$VERCEL_AUTOMATION_BYPASS_SECRET")
+          pnpm exec lhci autorun \
+            --collect.url="$PREVIEW_URL/" \
+            --collect.settings.extraHeaders="$HEADERS"
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 7

@@ -1,0 +1,37 @@
+/*
+ * Design tokens — single source for colors, radii and motion.
+ * Dark theme only. Flat colors only: no gradients anywhere (enforced by scripts/check-no-gradients.ts).
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-2: #1c2128;
+  --border: #30363d;
+  --border-2: #3d444d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --subtle: #6e7681;
+  --accent: #3fb950;
+  --accent-dim: #238636;
+  --link: #58a6ff;
+  --danger: #f85149;
+  --warning: #d29922;
+
+  /* Contribution levels */
+  --grid-0: #161b22;
+  --grid-1: #0e4429;
+  --grid-2: #006d32;
+  --grid-3: #26a641;
+  --grid-4: #39d353;
+
+  /* Project identity chips — small tags/dots only */
+  --id-golden-verdict: #e3b341;
+  --id-talnio: #3fb950;
+  --id-lansymphony: #58a6ff;
+  --id-virtual-tour: #bc8cff;
+
+  --nav-height: 56px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
