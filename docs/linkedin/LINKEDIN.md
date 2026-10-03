@@ -46,6 +46,7 @@ Reach me: vishalbg02@gmail.com
 • Implemented geolocation- and NFC-based attendance with automated PDF/Excel reports powering workforce analytics.
 • Integrated Google Generative AI APIs to automate productivity workflows, and the Agora SDK for live video and audio meetings.
 ```
+
 Skills to tag: Flutter, React, Firebase, Cloud Firestore, Generative AI, Kotlin, AWS.
 
 **Backend Developer Intern: Kaha Technologies Pvt. Ltd. (Cove IoT)** · Internship · May 2024 to Jul 2024 · Bengaluru, Hybrid
@@ -55,6 +56,7 @@ Skills to tag: Flutter, React, Firebase, Cloud Firestore, Generative AI, Kotlin,
 • Designed secure REST APIs in Java with Spring Data JPA (SQL) and Spring Security on a Spring Cloud microservices architecture.
 • Enhanced device-management dashboards using AngularJS and TypeScript.
 ```
+
 Skills to tag: Java, Spring Boot, Spring Security, Hibernate, REST APIs, MySQL, Angular.
 
 Add a third entry for **Golden Verdict** (Freelance, Full-stack developer, still ongoing per your About) with: "Built and deployed a production legal and tax compliance SaaS (goldenverdict.com) with role-based access for Customers, Legal Partners, Managers and Admins. Purchase, document upload and request-ID tracking workflows on Firestore; admin dashboards for 50+ services; Brevo APIs for automated invoicing and email." Dates: add the real ones when you have them.
