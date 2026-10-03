@@ -1,0 +1,63 @@
+---
+slug: talnio
+description: Case study of Talnio, an employee management platform on web and mobile with Firebase real-time sync, NFC attendance, Agora meetings and AI automation.
+glance:
+  role: App Developer Intern, Social Agent
+  platform: Web + mobile
+  status: Live on Google Play
+todo:
+  - "TODO(vishal): add the Google Play URL (profile.projects[talnio].live) so the Live button and status probe appear."
+  - "TODO(vishal): add the project period."
+  - "TODO(vishal): the Why / Trade-off lines are written from the properties of each technology, not from your own notes. Replace with your real reasoning."
+  - "TODO(vishal): replace the illustrative snippets with real code if you want to show it."
+---
+
+## The problem
+
+Talnio is an employee management platform. It has to work on web and on mobile, with the same data in step on both, and cover attendance, analytics, meetings and day-to-day productivity.
+
+## What I built
+
+I built and shipped Talnio as App Developer Intern at Social Agent (Bricstal Pvt. Ltd.), Bengaluru, from May 2025. The web app uses React 19 and Tailwind CSS, the mobile app uses Flutter and Dart, and both sit on Firebase Authentication and Cloud Firestore real-time sync.
+
+- **Attendance** based on geolocation and NFC, with automated PDF and Excel reports that power workforce analytics.
+- **Live video and audio meetings** through the Agora SDK.
+- **AI automation:** Google Generative AI APIs automate productivity workflows.
+
+## Key decisions
+
+<Decisions>
+  <Decision
+    title="Firestore real-time sync as the shared backbone"
+    why="Both clients subscribe to the same data, so a change on one shows up on the other without polling or a manual refresh."
+    tradeoff="Live listeners keep reading as data changes, so queries need to be scoped tightly to stay efficient."
+  />
+  <Decision
+    title="A Flutter app and a React web app"
+    why="Mobile and web have different strengths: device features such as location and NFC on one, wide dashboards and reports on the other."
+    tradeoff="Two codebases to keep consistent, so shared behaviour has to live in the data model rather than in shared UI code."
+  />
+  <Decision
+    title="SDKs and APIs for meetings and AI"
+    why="Video and audio calls and language models are specialised problems. Agora and Google Generative AI let the product add them as integrations."
+    tradeoff="Each adds an external dependency and its own failure modes."
+  />
+</Decisions>
+
+## Architecture
+
+Pick a flow, then press **Run request** to send it through the system. The meetings and AI paths branch off the client apps.
+
+<Architecture />
+
+## Code in the wild
+
+The same Firestore data feeds both platforms. These snippets are illustrative and not lifted from the production repositories.
+
+<Snippet id="tn-attendance-stream" />
+
+<Snippet id="tn-attendance-hook" />
+
+## Outcome
+
+Talnio is live on Google Play. It delivers attendance, analytics reports, meetings and AI automation on web and mobile, with real-time sync between them.

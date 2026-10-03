@@ -1,0 +1,62 @@
+---
+slug: lansymphony
+description: Case study of LanSymphony, an offline, AES-256 encrypted peer-to-peer communication system for local networks, built live at the Windsurf x The AI Collective OpenBuild.
+glance:
+  role: Personal project
+  platform: Local network (LAN)
+  status: 2nd place at OpenBuild
+todo:
+  - "TODO(vishal): add the repository URL (profile.projects[lansymphony].repo) so the Code button appears."
+  - "TODO(vishal): add the project period."
+  - "TODO(vishal): confirm the 'Key exchange' step in the diagram and the Why / Trade-off lines; they are written from the properties of each technology, not from your own notes."
+  - "TODO(vishal): replace the illustrative snippets with real code if you want to show it."
+---
+
+## The problem
+
+Communication that works on a local network with no server and no internet connection, and stays private while doing it.
+
+## What I built
+
+LanSymphony is a serverless, internet-free communication system for local networks, written in Python with sockets and multi-threading. I built it live at the Windsurf × The AI Collective OpenBuild in Bengaluru.
+
+- **Security and discovery:** AES-256 encryption and automatic peer discovery, on a multi-threaded architecture.
+- **Calls:** HD video calling, VoIP audio and screen sharing, with customisable quality and Picture-in-Picture.
+
+## Key decisions
+
+<Decisions>
+  <Decision
+    title="Peer-to-peer with automatic discovery"
+    why="With no central server there is nothing to host and nothing that needs the internet. Peers find each other on the network by themselves."
+    tradeoff="Every client carries the networking logic, and peers have to discover each other without help."
+  />
+  <Decision
+    title="AES-256 for everything on the wire"
+    why="Other devices on a shared local network can see its traffic. Encryption keeps the conversation private."
+    tradeoff="Encrypting every frame costs CPU, which matters most for real-time video."
+  />
+  <Decision
+    title="A multi-threaded architecture"
+    why="Video, audio and screen sharing run at the same time and shouldn't block one another."
+    tradeoff="Threads bring synchronisation and shutdown complexity that a single loop avoids."
+  />
+</Decisions>
+
+## Architecture
+
+From discovery to a live call. Hover or focus a step for details, or press **Run request** to walk through a connection.
+
+<Architecture />
+
+## Code in the wild
+
+Two short snippets show the shape of the handshake and the encrypted frames. They are illustrative and not lifted from the project.
+
+<Snippet id="ls-handshake" />
+
+<Snippet id="ls-encrypted-frame" />
+
+## Outcome
+
+LanSymphony placed 2nd at the Windsurf × The AI Collective OpenBuild in Bengaluru, among 20+ teams, in August 2025.
