@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MatchTool } from "@/components/match/MatchTool";
 import { ResumeView } from "@/components/resume/ResumeView";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -71,6 +72,15 @@ export default function ResumePage() {
       <div className="mt-8">
         <ResumeView model={model} />
       </div>
+
+      <section id="match" aria-labelledby="match-label" className="mt-16">
+        <SectionHeader prefix="=" label="Match" id="match-label" title="Does this résumé fit your role?" />
+        <p className="mb-5 max-w-2xl text-muted">
+          Paste a job description to see which requirements Vishal&apos;s work supports, with evidence — and
+          which it doesn&apos;t.
+        </p>
+        <MatchTool />
+      </section>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Hero } from "@/components/hero/Hero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { homeJsonLd } from "@/lib/seo/jsonld";
+import { AskVishal } from "@/components/sections/AskVishal";
 import { Contact } from "@/components/sections/Contact";
 import { Experience } from "@/components/sections/Experience";
 import { LiveGitHub } from "@/components/sections/LiveGitHub";
@@ -26,6 +27,8 @@ export default function HomePage() {
       <LiveGitHub />
 
       <Recognition />
+
+      <AskVishal />
 
       <Contact />
     </>

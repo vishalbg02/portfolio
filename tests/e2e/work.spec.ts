@@ -63,7 +63,7 @@ test.describe("work cards & status", () => {
     await mockStatus(page, statusBody(), 700);
     await page.goto("/");
     const gv = page.locator("#work article", { hasText: "Golden Verdict" });
-    await expect(gv.getByRole("status", { name: "Checking status" })).toBeVisible();
+    await expect(gv.getByRole("status").getByText("Checking status")).toBeVisible();
     await expect(gv.getByText("Live · 142 ms")).toBeVisible();
     await expect(
       page.locator("#work article", { hasText: "CHRIST University Virtual Tour" }).getByText("Degraded"),

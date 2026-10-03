@@ -49,16 +49,12 @@ export function StatusBadge({
   if (phase === "error") return <span className={cn(base, "text-muted")}>Status unavailable</span>;
   if (!status || !status.state) {
     return (
+      // No invisible text: it fails contrast checks. The label is for screen readers only.
       <span
-        aria-label="Checking status"
         role="status"
-        className={cn(
-          base,
-          "animate-pulse text-transparent",
-          bare ? "w-20 rounded-sm bg-surface-2" : "w-24 bg-surface-2",
-        )}
+        className={cn(base, "animate-pulse", bare ? "w-20 rounded-sm bg-surface-2" : "w-24 bg-surface-2")}
       >
-        checking
+        <span className="sr-only">Checking status</span>
       </span>
     );
   }
