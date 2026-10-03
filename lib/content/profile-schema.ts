@@ -19,6 +19,8 @@ export const ProjectSchema = z.object({
   tagline: nonEmpty,
   type: nonEmpty,
   period: nonEmpty.nullable(),
+  /** Shown instead of a live-status badge when there is no public URL to probe. */
+  badge: nonEmpty.nullable(),
   live: url.nullable(),
   repo: url.nullable(),
   stack: z.array(nonEmpty).min(1),
