@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils/cn";
  */
 export function Experience() {
   return (
-    <section id="experience" aria-labelledby="exp-label" className="container-page py-16 md:py-24">
+    <section id="experience" aria-labelledby="exp-label" className="container-page section-y">
       <SectionHeader prefix="//" label="Experience" id="exp-label" title="Where I've shipped" />
 
       <ol className="relative">

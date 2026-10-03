@@ -158,6 +158,15 @@
   }
 }
 
+/* Vertical rhythm: two stacked sections are 96px (desktop) / 64px (mobile) apart. */
+@utility section-y {
+  padding-block: 32px;
+
+  @media (width >= 48rem) {
+    padding-block: 48px;
+  }
+}
+
 @utility container-page {
   width: 100%;
   max-width: 1200px;

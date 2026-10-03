@@ -80,16 +80,14 @@ test.describe("terminal", () => {
 });
 
 test.describe("404 snake", () => {
-  test("shows the 404, loads the game on demand, and plays", async ({ page }) => {
+  test("shows the 404 with the board visible immediately, and any key starts the game", async ({ page }) => {
     const res = await page.goto("/definitely-not-a-page");
     expect(res?.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("404");
-    // the game is not on the page until asked for
-    await expect(page.getByRole("img", { name: /Snake game board/ })).toHaveCount(0);
-    await page.getByRole("button", { name: /Play snake/ }).click();
     const board = page.getByRole("img", { name: /Snake game board/ });
     await expect(board).toBeVisible();
-    await page.getByRole("button", { name: "Play", exact: true }).click();
+    await expect(page.getByText("Press any key or tap to start")).toBeVisible();
+    await page.keyboard.press("x");
     await page.keyboard.press("ArrowDown");
     // run into a wall: the board reports game over
     await expect(page.getByText("Game over", { exact: true })).toBeVisible({ timeout: 8000 });
@@ -100,7 +98,7 @@ test.describe("404 snake", () => {
   test("fits at 360px without horizontal scroll", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/nope");
-    await page.getByRole("button", { name: /Play snake/ }).click();
+    await expect(page.getByRole("img", { name: /Snake game board/ })).toBeVisible();
     await expect(page.getByLabel("Direction pad")).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);

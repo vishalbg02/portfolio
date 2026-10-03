@@ -1,6 +1,6 @@
 /*
- * Code-drawn project visuals. Static by default; they animate only while the card is hovered
- * or focused (animation-play-state is paused otherwise). prefers-reduced-motion is handled
+ * Code-drawn project visuals. They play for a few seconds when scrolled into view (and again on
+ * tap), and while the card is hovered or focused; otherwise paused (SketchPlayer sets data-sketch-play). prefers-reduced-motion is handled
  * globally in globals.css. Flat fills/strokes only.
  */
 /* Specificity must beat the per-element `animation:` shorthands below (they reset play-state). */
@@ -9,6 +9,7 @@ svg.sketch * {
 }
 .group:hover svg.sketch *,
 .group:focus-within svg.sketch *,
+[data-sketch-play="true"] svg.sketch *,
 svg.sketch.sketch-live * {
   animation-play-state: running;
 }

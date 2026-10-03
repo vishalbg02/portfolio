@@ -119,14 +119,17 @@ test.describe("work cards & status", () => {
     expect(Object.keys((await probe.json()).statuses)).toHaveLength(4);
   });
 
-  test("project visuals animate on hover only", async ({ page }) => {
+  test("project visuals idle, run on hover, and are not frozen for touch (see v2-phase0.spec)", async ({
+    page,
+  }) => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
     const card = page.locator("#work article", { hasText: "Golden Verdict" });
     const state = () =>
       card.locator(".sk-gv-progress").evaluate((el) => getComputedStyle(el).animationPlayState);
     await card.scrollIntoViewIfNeeded();
-    expect(await state()).toBe("paused");
+    // plays for a few seconds when it scrolls into view, then idles
+    await expect.poll(state, { timeout: 12000 }).toBe("paused");
     await card.hover();
     expect(await state()).toBe("running");
   });

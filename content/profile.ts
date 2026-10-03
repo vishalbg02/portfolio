@@ -15,7 +15,7 @@ const data = {
   // Your own summary, taken from your current résumé (Vishal_BG_Resume.pdf). "4-time podium finisher"
   // must stay in step with the four entries in `recognition` (a unit test checks this).
   summary:
-    "MCA student and Full-Stack Application Developer skilled in Java, JavaScript/TypeScript, HTML & CSS and SQL, with production experience building Spring Boot REST APIs, React/Next.js web apps and Generative AI integrations. Shipped Talnio (live on Google Play) and Golden Verdict (live SaaS); 4-time hackathon podium finisher.",
+    "MCA student and Full-Stack Developer skilled in Java, JavaScript/TypeScript, HTML & CSS and SQL, with production experience building Spring Boot REST APIs, React/Next.js web apps and Generative AI integrations. Shipped Talnio (live on Google Play) and Golden Verdict (live SaaS); 4-time hackathon podium finisher.",
   targetRole: {
     title: "Full Stack / Application Development",
     coreSkills: [
@@ -185,7 +185,7 @@ const data = {
       detail: "LanSymphony, 20+ teams",
     },
     {
-      place: "1st Runner-Up",
+      place: "2nd Place",
       event: "Innovation Sprint 2026",
       org: "Dept. of CS (PG), CHRIST University × NEOSTATS",
       date: "Jun 2026",

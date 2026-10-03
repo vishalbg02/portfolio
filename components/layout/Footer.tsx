@@ -26,7 +26,7 @@ export function Footer() {
   const built = formatBuildDate(site.buildTime);
 
   return (
-    <footer className="mt-24 border-t border-border">
+    <footer className="mt-8 border-t border-border md:mt-12">
       <div className="container-page flex flex-col gap-8 py-10 text-sm text-muted">
         <p className="font-mono text-text">
           <span className="text-accent">$</span> exit <span className="text-muted">·</span> thanks for

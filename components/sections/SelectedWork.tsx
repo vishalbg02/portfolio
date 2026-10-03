@@ -6,7 +6,7 @@ import { ProjectCard } from "@/components/work/ProjectCard";
 /** Home: the four products as cards (2×2 on desktop). */
 export function SelectedWork() {
   return (
-    <section id="work" aria-labelledby="work-label" className="container-page py-16 md:py-24">
+    <section id="work" aria-labelledby="work-label" className="container-page section-y">
       <SectionHeader prefix="{ }" label="Work" id="work-label" title="Selected work" />
       <ul className="grid gap-4 md:grid-cols-2">
         {profile.projects.map((p) => (
