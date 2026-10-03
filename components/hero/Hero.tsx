@@ -6,11 +6,11 @@ import { resumeHref } from "@/lib/site";
 import { Greeting } from "./Greeting";
 import { Magnetic } from "./Magnetic";
 import { TrailLoader } from "./TrailLoader";
-import { VbgGrid } from "./VbgGrid";
+import { ShipConsole } from "./ShipConsole";
 
 /**
- * Hero. The text column (H1 = LCP element) is fully server-rendered and works with JS off;
- * the canvas trail mounts on idle, the greeting/clock are tiny client islands.
+ * Hero. The text column is fully server-rendered and works with JS off; the right column is the
+ * "ship console" (live project status). The canvas trail mounts on idle; greeting/clock are tiny islands.
  */
 export function Hero() {
   const [city] = profile.location.split(",");
@@ -76,10 +76,8 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="lg:self-center lg:justify-self-end">
-          <div className="rounded-card border border-border bg-bg p-4 sm:p-6">
-            <VbgGrid />
-          </div>
+        <div className="min-w-0 lg:self-center">
+          <ShipConsole />
         </div>
       </div>
 

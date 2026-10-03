@@ -1,5 +1,6 @@
 import { profile } from "@/content/profile";
 import { Hero } from "@/components/hero/Hero";
+import { SelectedWork } from "@/components/sections/SelectedWork";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
 /**
@@ -11,18 +12,7 @@ export default function HomePage() {
     <>
       <Hero />
 
-      <section id="work" aria-labelledby="work-label" className="container-page py-16">
-        <SectionHeader prefix="{ }" label="Work" id="work-label" title="Selected work" />
-        <ul className="grid gap-4 md:grid-cols-2">
-          {profile.projects.map((p) => (
-            <li key={p.slug} className="rounded-card border border-border bg-surface p-6">
-              <p className="font-mono text-xs text-muted">{p.type}</p>
-              <h3 className="mt-2 text-xl font-semibold">{p.name}</h3>
-              <p className="mt-1 text-muted">{p.tagline}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <SelectedWork />
 
       <section id="experience" aria-labelledby="exp-label" className="container-page py-16">
         <SectionHeader prefix=">_" label="Experience" id="exp-label" />

@@ -11,7 +11,10 @@ test.describe("hero", () => {
     await expect(page.getByText("Full-stack developer turning ideas into products")).toBeVisible();
     await expect(page.getByRole("link", { name: "View work" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Résumé" }).first()).toBeVisible();
-    await expect(page.getByRole("img", { name: /spelling VBG/ })).toBeVisible();
+    const consoleCard = page.locator("section[aria-labelledby='hero-title']").getByRole("list");
+    for (const name of ["Golden Verdict", "Talnio", "LanSymphony", "CHRIST University Virtual Tour"]) {
+      await expect(consoleCard.getByText(name)).toBeVisible();
+    }
     await context.close();
   });
 
@@ -66,12 +69,59 @@ test.describe("hero", () => {
     expect(results.violations.filter((v) => v.impact === "serious" || v.impact === "critical")).toEqual([]);
   });
 
-  test("fits at 360, 768, 1280 and 1920 without horizontal scroll", async ({ page }) => {
-    for (const width of [360, 768, 1280, 1920]) {
+  test("fits at 360, 768, 1280 and 1920 without horizontal scroll (with live statuses rendered)", async ({
+    page,
+  }) => {
+    const at = new Date().toISOString();
+    await page.route("**/api/status", (route) =>
+      route.fulfill({
+        json: {
+          checkedAt: at,
+          statuses: {
+            "golden-verdict": { slug: "golden-verdict", state: "live", latencyMs: 1063, checkedAt: at },
+            talnio: { slug: "talnio", state: null, latencyMs: null, checkedAt: at },
+            lansymphony: { slug: "lansymphony", state: null, latencyMs: null, checkedAt: at },
+            "virtual-tour": { slug: "virtual-tour", state: "degraded", latencyMs: 2100, checkedAt: at },
+          },
+        },
+      }),
+    );
+    for (const width of [320, 360, 768, 1280, 1920]) {
       await page.setViewportSize({ width, height: 800 });
       await page.goto("/");
+      await expect(page.getByText("Live · 1063 ms").first()).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `horizontal overflow at ${width}px`).toBeLessThanOrEqual(0);
+    }
+  });
+
+  test("the headline never runs into the ship console (1024–1920)", async ({ page }) => {
+    const at = new Date().toISOString();
+    await page.route("**/api/status", (route) =>
+      route.fulfill({
+        json: {
+          checkedAt: at,
+          statuses: {
+            "golden-verdict": { slug: "golden-verdict", state: "live", latencyMs: 1063, checkedAt: at },
+            talnio: { slug: "talnio", state: null, latencyMs: null, checkedAt: at },
+            lansymphony: { slug: "lansymphony", state: null, latencyMs: null, checkedAt: at },
+            "virtual-tour": { slug: "virtual-tour", state: "degraded", latencyMs: 2100, checkedAt: at },
+          },
+        },
+      }),
+    );
+    for (const width of [1024, 1100, 1280, 1920]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/");
+      await expect(page.getByText("Live · 1063 ms").first()).toBeVisible();
+      const { headlineRight, consoleLeft, consoleRight } = await page.evaluate(() => {
+        const section = document.querySelector("section[aria-labelledby='hero-title']")!;
+        const headline = section.querySelector("p.text-lg")!.getBoundingClientRect();
+        const card = section.querySelector("div.rounded-card")!.getBoundingClientRect();
+        return { headlineRight: headline.right, consoleLeft: card.left, consoleRight: card.right };
+      });
+      expect(headlineRight, `headline overlaps console at ${width}px`).toBeLessThanOrEqual(consoleLeft);
+      expect(consoleRight, `console leaves the viewport at ${width}px`).toBeLessThanOrEqual(width);
     }
   });
 });
