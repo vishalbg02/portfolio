@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { baseMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <Footer />
+        <ShortcutsHost />
         <ToastHost />
       </body>
     </html>
