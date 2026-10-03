@@ -1,0 +1,275 @@
+/*
+ * Code-drawn project visuals. Static by default; they animate only while the card is hovered
+ * or focused (animation-play-state is paused otherwise). prefers-reduced-motion is handled
+ * globally in globals.css. Flat fills/strokes only.
+ */
+/* Specificity must beat the per-element `animation:` shorthands below (they reset play-state). */
+svg.sketch * {
+  animation-play-state: paused;
+}
+.group:hover svg.sketch *,
+.group:focus-within svg.sketch *,
+svg.sketch.sketch-live * {
+  animation-play-state: running;
+}
+
+/* Golden Verdict — role switcher + status timeline */
+.sk-gv-role {
+  animation: sk-gv-role 6s steps(1, end) infinite;
+}
+.sk-gv-role:nth-of-type(2) {
+  animation-delay: 1.5s;
+}
+.sk-gv-role:nth-of-type(3) {
+  animation-delay: 3s;
+}
+.sk-gv-role:nth-of-type(4) {
+  animation-delay: 4.5s;
+}
+@keyframes sk-gv-role {
+  0%,
+  24.9% {
+    fill: var(--id-golden-verdict);
+    fill-opacity: 0.22;
+    stroke: var(--id-golden-verdict);
+  }
+  25%,
+  100% {
+    fill: var(--surface-2);
+    fill-opacity: 1;
+    stroke: var(--border);
+  }
+}
+.sk-gv-progress {
+  transform-origin: left center;
+  transform-box: fill-box;
+  animation: sk-gv-progress 4s ease-in-out infinite;
+}
+@keyframes sk-gv-progress {
+  0% {
+    transform: scaleX(0.08);
+  }
+  70%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+.sk-gv-step {
+  animation: sk-gv-step 4s steps(1, end) infinite;
+}
+.sk-gv-step:nth-of-type(2) {
+  animation-delay: 0.9s;
+}
+.sk-gv-step:nth-of-type(3) {
+  animation-delay: 1.8s;
+}
+.sk-gv-step:nth-of-type(4) {
+  animation-delay: 2.7s;
+}
+@keyframes sk-gv-step {
+  0% {
+    fill: var(--surface-2);
+    stroke: var(--border-2);
+  }
+  15%,
+  100% {
+    fill: var(--id-golden-verdict);
+    stroke: var(--id-golden-verdict);
+  }
+}
+
+/* Talnio — attendance check-in pulse + map pin + NFC arcs */
+.sk-tn-pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: sk-tn-pulse 1.8s ease-out infinite;
+}
+@keyframes sk-tn-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+.sk-tn-pin {
+  animation: sk-tn-pin 1.8s ease-in-out infinite;
+}
+@keyframes sk-tn-pin {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+.sk-tn-nfc {
+  animation: sk-tn-nfc 1.8s steps(1, end) infinite;
+}
+.sk-tn-nfc:nth-of-type(2) {
+  animation-delay: 0.3s;
+}
+.sk-tn-nfc:nth-of-type(3) {
+  animation-delay: 0.6s;
+}
+@keyframes sk-tn-nfc {
+  0%,
+  100% {
+    stroke-opacity: 0.2;
+  }
+  30% {
+    stroke-opacity: 1;
+  }
+}
+
+/* LanSymphony — peers discover each other, encrypted packet travels the ring */
+.sk-ls-ring {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: sk-ls-ring 2.4s ease-out infinite;
+}
+.sk-ls-ring:nth-of-type(2) {
+  animation-delay: 0.8s;
+}
+.sk-ls-ring:nth-of-type(3) {
+  animation-delay: 1.6s;
+}
+@keyframes sk-ls-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+.sk-ls-link {
+  stroke-dasharray: 4 4;
+  animation: sk-ls-dash 1.2s linear infinite;
+}
+@keyframes sk-ls-dash {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+.sk-ls-packet {
+  animation: sk-ls-packet 4.5s ease-in-out infinite;
+}
+@keyframes sk-ls-packet {
+  0%,
+  8% {
+    transform: translate(160px, 52px);
+  }
+  33%,
+  41% {
+    transform: translate(76px, 150px);
+  }
+  66%,
+  74% {
+    transform: translate(244px, 150px);
+  }
+  100% {
+    transform: translate(160px, 52px);
+  }
+}
+
+/* Virtual Tour — panorama ring with hotspots travelling along it */
+.sk-vt-hotspot {
+  animation: sk-vt-orbit 8s linear infinite;
+}
+.sk-vt-hotspot:nth-of-type(2) {
+  animation-delay: -2.6s;
+}
+.sk-vt-hotspot:nth-of-type(3) {
+  animation-delay: -5.3s;
+}
+/* Sampled around the ring ellipse (center 160,100 · rx 104 · ry 32); scale gives front/back depth. */
+@keyframes sk-vt-orbit {
+  0.00% {
+    transform: translate(264px, 100px) scale(1);
+  }
+  4.17% {
+    transform: translate(260.5px, 108.3px) scale(1.06);
+  }
+  8.33% {
+    transform: translate(250.1px, 116px) scale(1.12);
+  }
+  12.50% {
+    transform: translate(233.5px, 122.6px) scale(1.18);
+  }
+  16.67% {
+    transform: translate(212px, 127.7px) scale(1.22);
+  }
+  20.83% {
+    transform: translate(186.9px, 130.9px) scale(1.24);
+  }
+  25.00% {
+    transform: translate(160px, 132px) scale(1.25);
+  }
+  29.17% {
+    transform: translate(133.1px, 130.9px) scale(1.24);
+  }
+  33.33% {
+    transform: translate(108px, 127.7px) scale(1.22);
+  }
+  37.50% {
+    transform: translate(86.5px, 122.6px) scale(1.18);
+  }
+  41.67% {
+    transform: translate(69.9px, 116px) scale(1.12);
+  }
+  45.83% {
+    transform: translate(59.5px, 108.3px) scale(1.06);
+  }
+  50.00% {
+    transform: translate(56px, 100px) scale(1);
+  }
+  54.17% {
+    transform: translate(59.5px, 91.7px) scale(0.94);
+  }
+  58.33% {
+    transform: translate(69.9px, 84px) scale(0.88);
+  }
+  62.50% {
+    transform: translate(86.5px, 77.4px) scale(0.82);
+  }
+  66.67% {
+    transform: translate(108px, 72.3px) scale(0.78);
+  }
+  70.83% {
+    transform: translate(133.1px, 69.1px) scale(0.76);
+  }
+  75.00% {
+    transform: translate(160px, 68px) scale(0.75);
+  }
+  79.17% {
+    transform: translate(186.9px, 69.1px) scale(0.76);
+  }
+  83.33% {
+    transform: translate(212px, 72.3px) scale(0.78);
+  }
+  87.50% {
+    transform: translate(233.5px, 77.4px) scale(0.82);
+  }
+  91.67% {
+    transform: translate(250.1px, 84px) scale(0.87);
+  }
+  95.83% {
+    transform: translate(260.5px, 91.7px) scale(0.94);
+  }
+  100.00% {
+    transform: translate(264px, 100px) scale(1);
+  }
+}
+.sk-vt-ticks {
+  animation: sk-vt-ticks 3s linear infinite;
+}
+@keyframes sk-vt-ticks {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
