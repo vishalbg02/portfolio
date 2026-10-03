@@ -17,6 +17,8 @@ const EVENTS = [
   "project_live_click",
   "contact_submit",
   "easter_egg_found",
+  // V2
+  "rail_jump",
 ];
 
 function* files(dir: string): Generator<string> {

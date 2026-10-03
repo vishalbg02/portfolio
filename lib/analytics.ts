@@ -13,7 +13,8 @@ export type AnalyticsEvent =
   | "jd_match_run"
   | "project_live_click"
   | "contact_submit"
-  | "easter_egg_found";
+  | "easter_egg_found"
+  | "rail_jump";
 
 export function track(event: AnalyticsEvent, props?: Record<string, string | number | boolean>) {
   if (typeof window === "undefined") return;

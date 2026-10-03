@@ -1,0 +1,70 @@
+/*
+ * Grid Rail. Flat squares in the contribution-graph palette (tokens only, no gradients).
+ * Decorative: the nav is labelled "Page progress", the squares are aria-hidden, only the ticks are focusable.
+ */
+.rail-sq {
+  background: var(--grid-0);
+  box-shadow: inset 0 0 0 1px var(--border);
+  transition: background-color 160ms linear;
+}
+.rail-sq[data-l="1"] {
+  background: var(--grid-1);
+  box-shadow: none;
+}
+.rail-sq[data-l="2"] {
+  background: var(--grid-2);
+  box-shadow: none;
+}
+.rail-sq[data-l="3"] {
+  background: var(--grid-3);
+  box-shadow: none;
+}
+.rail-sq[data-l="4"] {
+  background: var(--grid-4);
+  box-shadow: none;
+}
+
+/* Labelled tick: the name appears on hover and keyboard focus. */
+.rail-tick::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 8px;
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 11px/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.rail-tick:hover::after,
+.rail-tick:focus-visible::after {
+  opacity: 1;
+}
+.rail-tick:hover .rail-tick-dot,
+.rail-tick:focus-visible .rail-tick-dot,
+.rail-tick[aria-current="location"] .rail-tick-dot {
+  background: var(--accent);
+}
+.rail-tick[aria-current="location"] .rail-tick-dot {
+  width: 20px;
+}
+
+/* One-shot pulse when a section becomes current. */
+.rail-pulse .rail-tick-dot {
+  animation: rail-pulse 700ms ease-out 1;
+}
+@keyframes rail-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(63 185 80 / 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgb(63 185 80 / 0);
+  }
+}

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils/cn";
+import { Decode } from "./Decode";
 
 /**
  * Mono uppercase label with a green prefix and a 1px rule — echoes the GitHub profile.
@@ -24,11 +25,15 @@ export function SectionHeader({
           {prefix}
         </span>
         <span id={id} className="text-muted">
-          {label}
+          <Decode text={label} />
         </span>
         <span aria-hidden="true" className="h-px flex-1 bg-border" />
       </div>
-      {title ? <h2 className="mt-4 text-2xl font-semibold text-text md:text-3xl">{title}</h2> : null}
+      {title ? (
+        <h2 className="mt-4 text-2xl font-semibold text-text md:text-3xl">
+          <Decode text={title} />
+        </h2>
+      ) : null}
     </header>
   );
 }
