@@ -127,7 +127,7 @@ export function ContactForm({ toEmail }: { toEmail: string }) {
         <div className="mt-4 flex flex-wrap gap-3">
           <a
             href={href}
-            className="inline-flex h-11 items-center rounded-sm border border-accent bg-accent px-4 font-medium text-bg hover:bg-accent-dim hover:text-text"
+            className="inline-flex h-11 items-center rounded-sm border border-accent bg-accent px-4 font-medium text-bg hover:brightness-110"
           >
             Open in my email app
           </a>

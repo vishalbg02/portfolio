@@ -70,6 +70,15 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 
 To add a post, create `content/log/<slug>.mdx` (the filename must equal the `slug`), then push.
 
+## Terminal and games
+
+All lazy: the always-mounted [`DelightHost`](components/delight/DelightHost.tsx) only listens for keys and events, and each overlay is its own chunk, fetched on first use, so the home bundle is unchanged.
+
+- **Terminal**: press `~` (or choose "Open terminal" in the palette). Commands are pure functions in [`lib/terminal/commands.ts`](lib/terminal/commands.ts) that print facts from `profile.ts`: `help`, `whoami`, `status`, `projects`, `open <project|page>`, `skills`, `experience`, `contact`, `resume`, `recruiter`, `ask`, and a few jokes. Tab completes, ↑/↓ browse history, Ctrl+L clears, Esc closes.
+- **Snake** lives on the 404 page (arrows or WASD, swipe, on-screen pad on phones; best score kept in `localStorage`).
+- **CosmoStrike** is a tiny homage to the space game from Gamecraft, opened by the Konami code or the `cosmostrike` terminal command. Esc quits, hiding the tab pauses.
+- Game rules live in [`lib/games`](lib/games) as pure, unit-tested reducers; the canvas components only draw and read input. Finding an easter egg sends the `easter_egg_found` analytics event.
+
 ## Design rules (enforced)
 
 - Dark theme only. Tokens are in [`styles/tokens.css`](styles/tokens.css) and mapped in the Tailwind `@theme` ([`app/globals.css`](app/globals.css)). The default Tailwind palette is reset, so only token colors exist as utilities.

@@ -22,6 +22,8 @@ export const ProjectSchema = z.object({
   /** Shown instead of a live-status badge when there is no public URL to probe. */
   badge: nonEmpty.nullable(),
   live: url.nullable(),
+  /** App-store listing (e.g. Google Play), shown as its own link. Not probed for status. */
+  store: url.nullable(),
   repo: url.nullable(),
   stack: z.array(nonEmpty).min(1),
   summary: nonEmpty,
@@ -97,6 +99,15 @@ export const ProfileSchema = z
     certifications: z.array(nonEmpty),
     languages: z.array(nonEmpty),
     motto: nonEmpty,
+    /** What he is looking for. Feeds /recruiter, /now and the AI assistant. */
+    workPreferences: z.object({
+      locations: nonEmpty,
+      modes: z.array(nonEmpty).min(1),
+      startDate: nonEmpty,
+      roles: z.array(nonEmpty).min(1),
+    }),
+    strongestAt: nonEmpty,
+    outsideWork: nonEmpty,
   })
   .superRefine((p, ctx) => {
     const slugs = p.projects.map((x) => x.slug);

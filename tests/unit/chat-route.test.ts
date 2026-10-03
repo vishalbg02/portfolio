@@ -138,7 +138,7 @@ describe("/api/chat — failure handling & daily budget", () => {
     provider.setProviderForTests(mockProvider(failingModel()));
     const events = await readEvents(await route.POST(ask("What has he built with Spring Boot?", "6.6.6.6")));
     expect(metaOf(events)).toMatchObject({ mode: "offline", reason: "error" });
-    expect(textOf(events)).toContain("Kaha");
+    expect(textOf(events)).toContain("Spring Boot");
     expect(events.at(-1)).toEqual({ t: "done" });
   });
 

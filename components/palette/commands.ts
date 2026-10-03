@@ -204,6 +204,15 @@ export function buildPaletteGroups(): PaletteGroup[] {
         action: { type: "external", href: p.live, event: "project_live_click" },
       });
     }
+    if (p.store) {
+      items.push({
+        id: `proj-${p.slug}-play`,
+        label: `${p.name} — open on Google Play`,
+        hint: "↗",
+        keywords: [p.slug, "play", "store", "android", "app"],
+        action: { type: "external", href: p.store, event: "project_live_click" },
+      });
+    }
     return items;
   });
 

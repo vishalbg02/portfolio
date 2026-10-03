@@ -15,8 +15,8 @@ export const now = {
   studying: mca ? `${mca.degree} at ${mca.school}, ${mca.period}.` : null,
   building:
     "This portfolio: a static Next.js site with an assistant that answers only from its own content, a résumé matcher, and a Ship Log.",
-  lookingFor: profile.status,
+  lookingFor: `${profile.status}. ${profile.workPreferences.locations}; ${profile.workPreferences.modes.join(", ").toLowerCase()} all fine. ${profile.workPreferences.startDate}.`,
   reading: null as string | null, // TODO(vishal): a book or paper you're reading
-  learning: null as string | null, // TODO(vishal): what you're learning this month
-  elsewhere: null as string | null, // TODO(vishal): anything else you want visitors to know
+  learning: "Pushing through the MCA programme at CHRIST, one semester at a time.",
+  elsewhere: "When I'm free I build things: side projects, mostly.",
 } as const;

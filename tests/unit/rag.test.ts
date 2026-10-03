@@ -52,7 +52,7 @@ describe("corpus (built from the same sources as the site)", () => {
       expect(c.title.length, c.id).toBeGreaterThan(2);
       expect(c.text.length, c.id).toBeGreaterThan(30);
       expect(c.text.length, `${c.id} is over ~450 tokens`).toBeLessThanOrEqual(MAX_CHUNK_CHARS + 200);
-      expect(c.url, c.id).toMatch(/^\/(#[a-z-]+|work\/[a-z-]+(#[a-z-]+)?|resume|now)?$/);
+      expect(c.url, c.id).toMatch(/^\/(#[a-z-]+|work\/[a-z-]+(#[a-z-]+)?|resume|now|recruiter)?$/);
     }
   });
 
