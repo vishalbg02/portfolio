@@ -1,4 +1,5 @@
 import { profile } from "@/content/profile";
+import { workStatus } from "@/lib/content/work-status";
 
 /**
  * /now — what Vishal is doing at the moment. Facts come from profile.ts wherever they exist, so
@@ -7,11 +8,16 @@ import { profile } from "@/content/profile";
  */
 const current = profile.experience.find((e) => e.current);
 const mca = profile.education[0];
+const ws = workStatus(profile);
 
 export const now = {
   updatedAt: "2026-10-03",
   // Shown only while a role is marked current in profile.ts (the Social Agent internship ended Mar 2026).
-  working: current ? `${current.role} at ${current.company} (${current.period}).` : null,
+  working: current
+    ? `${current.role} at ${current.company} (${current.period}).`
+    : ws.ongoing.length
+      ? `Freelance full-stack developer on ${ws.ongoing.map((x) => `${x.name} (${x.period})`).join(" and ")}.`
+      : null,
   studying: mca ? `${mca.degree} at ${mca.school}, ${mca.period}.` : null,
   building:
     "This portfolio: a static Next.js site with an assistant that answers only from its own content, a résumé matcher, and a Ship Log.",

@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { graphs } from "@/components/diagram/graphs";
 import { profile as defaultProfile } from "@/content/profile";
 import type { Profile } from "@/lib/content/profile-schema";
+import { workStatus } from "@/lib/content/work-status";
 import { slugify } from "@/lib/utils/slugify";
 import type { Chunk } from "./types";
 
@@ -35,8 +36,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
   });
 
   // Right now: the question recruiters ask most. Derived, so it can never disagree with the timeline.
-  const currentRole = p.experience.find((e) => e.current);
-  const lastRole = p.experience.find((e) => !e.current);
+  const ws = workStatus(p);
   const studying = p.education.filter((e) => /pursuing|expected/i.test(`${e.note} ${e.period}`));
   chunks.push({
     id: "status",
@@ -44,9 +44,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     url: "/now",
     text: join([
       "Current status, what he is doing now, where he works at the moment, and whether he is employed or available:",
-      currentRole
-        ? `He currently works as ${currentRole.role} at ${currentRole.company} (${currentRole.period}).`
-        : `He is not currently working in a job or internship.${lastRole ? ` His most recent role was ${lastRole.role} at ${lastRole.company}, ${lastRole.period}.` : ""}`,
+      ws.sentence,
       `Availability: ${p.status}.`,
       studying.length
         ? `Studies: currently pursuing ${studying.map((e) => `${e.degree} at ${e.school} (${e.period})`).join("; ")}.`

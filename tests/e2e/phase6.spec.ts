@@ -77,8 +77,11 @@ test.describe("now", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("What I'm doing now");
     await expect(page.getByText("Available for SDE / Full Stack roles")).toBeVisible();
     await expect(page.getByText("Studying", { exact: true })).toBeVisible();
-    // The Social Agent internship ended (Mar 2026), so there is no "Working" row.
-    await expect(page.getByText("Working", { exact: true })).toHaveCount(0);
+    // The Social Agent internship ended (Mar 2026); the only "Working" line is the ongoing freelance project.
+    await expect(page.getByText("Working", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(/Freelance full-stack developer on Golden Verdict \(Jan 2026 – Present\)/),
+    ).toBeVisible();
     // Unset TODO(vishal) fields stay hidden.
     await expect(page.getByText("Reading", { exact: true })).toHaveCount(0);
     expect(await axe(page)).toEqual([]);
