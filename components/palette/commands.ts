@@ -1,4 +1,5 @@
 import { profile } from "@/content/profile";
+import { RESUME_FILENAME } from "@/lib/resume/model";
 import { resumeHref, shipped } from "@/lib/site";
 import type { AnalyticsEvent } from "@/lib/analytics";
 
@@ -9,7 +10,7 @@ import type { AnalyticsEvent } from "@/lib/analytics";
 export type PaletteAction =
   | { type: "route"; href: string }
   | { type: "external"; href: string; event?: AnalyticsEvent }
-  | { type: "download"; href: string; event?: AnalyticsEvent }
+  | { type: "download"; href: string; filename?: string; event?: AnalyticsEvent }
   | { type: "tel"; href: string }
   | { type: "copy"; text: string; label: string; event?: AnalyticsEvent }
   | { type: "event"; name: "open-terminal" | "toggle-recruiter" };
@@ -71,6 +72,17 @@ export function buildPaletteGroups(): PaletteGroup[] {
           } satisfies PaletteItem,
         ]
       : []),
+    ...(shipped.resume
+      ? [
+          {
+            id: "nav-resume",
+            label: "Résumé",
+            hint: "/resume",
+            keywords: ["cv", "experience", "skills"],
+            action: { type: "route", href: "/resume" },
+          } satisfies PaletteItem,
+        ]
+      : []),
     {
       id: "nav-contact",
       label: "Contact",
@@ -114,7 +126,7 @@ export function buildPaletteGroups(): PaletteGroup[] {
       label: "Download résumé",
       hint: "PDF",
       keywords: ["cv", "resume"],
-      action: { type: "download", href: resumeHref, event: "resume_download" },
+      action: { type: "download", href: resumeHref, filename: RESUME_FILENAME, event: "resume_download" },
     },
     {
       id: "act-linkedin",

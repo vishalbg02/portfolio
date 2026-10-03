@@ -43,7 +43,13 @@ export default function MobileSheet({
             ))}
           </nav>
           <div className="border-t border-border p-4">
-            <a href={resumeHref} className={buttonClass("outline", "md", "w-full")}>
+            <a
+              href={resumeHref}
+              target="_blank"
+              rel="noopener"
+              className={buttonClass("outline", "md", "w-full")}
+              data-track="resume_download"
+            >
               Download résumé
             </a>
           </div>

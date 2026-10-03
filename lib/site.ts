@@ -18,6 +18,7 @@ export const site = {
   buildTime: process.env.NEXT_PUBLIC_BUILD_TIME ?? null,
   commitSha: process.env.NEXT_PUBLIC_COMMIT_SHA || null,
   gscVerification: process.env.NEXT_PUBLIC_GSC_VERIFICATION || null,
+  bingVerification: process.env.NEXT_PUBLIC_BING_VERIFICATION || null,
 } as const;
 
 /**
@@ -28,6 +29,7 @@ export const shipped = {
   caseStudies: true, // Phase 3
   log: false, // Phase 6
   now: false, // Phase 6
+  resume: true, // Phase 4
   recruiter: false, // Phase 6
   terminal: false, // Phase 7
 } as const;

@@ -34,7 +34,13 @@ export function Nav() {
         </nav>
         <div className="flex items-center gap-2">
           <PaletteButton />
-          <a href={resumeHref} className={buttonClass("outline", "sm")}>
+          <a
+            href={resumeHref}
+            target="_blank"
+            rel="noopener"
+            className={buttonClass("outline", "sm")}
+            data-track="resume_download"
+          >
             Résumé
           </a>
           <MobileMenu />

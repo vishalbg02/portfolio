@@ -1,5 +1,5 @@
 import { profile } from "@/content/profile";
-import { resumeHref, site } from "@/lib/site";
+import { site } from "@/lib/site";
 import { LocalTime } from "./LocalTime";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -17,7 +17,7 @@ const footerLinks = [
   { label: "GitHub", href: profile.contact.github, external: true },
   { label: "LinkedIn", href: profile.contact.linkedin, external: true },
   { label: "Email", href: `mailto:${profile.contact.email}`, external: false },
-  { label: "Résumé", href: resumeHref, external: false },
+  { label: "Résumé", href: "/resume", external: false },
 ];
 
 export function Footer() {
