@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { settleAnimations } from "./helpers";
 
 test.describe("foundation", () => {
   test("home renders the name as the H1 and core CTAs", async ({ page }) => {
@@ -12,6 +13,8 @@ test.describe("foundation", () => {
 
   test("home has no serious or critical axe violations", async ({ page }) => {
     await page.goto("/");
+    await expect(page.getByText(/Good (morning|afternoon|evening)|Up late\?/)).toBeVisible();
+    await settleAnimations(page);
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
       .analyze();

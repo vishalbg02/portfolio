@@ -3,6 +3,7 @@ import { navLinks, resumeHref } from "@/lib/site";
 import { buttonClass } from "@/components/ui/Button";
 import { NavShell } from "./NavShell";
 import { MobileMenu } from "./MobileMenu";
+import { PaletteButton } from "./PaletteButton";
 
 export function Wordmark() {
   return (
@@ -32,6 +33,7 @@ export function Nav() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <PaletteButton />
           <a href={resumeHref} className={buttonClass("outline", "sm")}>
             Résumé
           </a>

@@ -20,10 +20,23 @@ export const site = {
   gscVerification: process.env.NEXT_PUBLIC_GSC_VERIFICATION || null,
 } as const;
 
-// Routes are added here as they ship (Log and Now arrive in Phase 6) so nav never links to a 404.
+/**
+ * Routes that have shipped. Nav, palette and sitemap read this so nothing links to a 404.
+ * Flip a flag in the phase that ships the route.
+ */
+export const shipped = {
+  caseStudies: false, // Phase 3
+  log: false, // Phase 6
+  now: false, // Phase 6
+  recruiter: false, // Phase 6
+  terminal: false, // Phase 7
+} as const;
+
 export const navLinks: ReadonlyArray<{ label: string; href: string }> = [
   { label: "Work", href: "/#work" },
   { label: "Experience", href: "/#experience" },
+  ...(shipped.log ? [{ label: "Log", href: "/log" }] : []),
+  ...(shipped.now ? [{ label: "Now", href: "/now" }] : []),
   { label: "Contact", href: "/#contact" },
 ];
 

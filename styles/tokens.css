@@ -12,6 +12,8 @@
   --border-2: #3d444d;
   --text: #e6edf3;
   --muted: #8b949e;
+  /* --subtle is 4.1:1 on --bg — below WCAG AA for text. Decorative use only (icons, dividers);
+     deliberately NOT exposed as a Tailwind color so it can't be used for text. */
   --subtle: #6e7681;
   --accent: #3fb950;
   --accent-dim: #238636;
