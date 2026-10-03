@@ -107,7 +107,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     title: "How to contact Vishal",
     url: "/#contact",
     text: join([
-      `Contact ${p.name}: email ${contact.email} (college email ${contact.collegeEmail}), phone ${contact.phone}, WhatsApp ${contact.whatsapp}, LinkedIn ${contact.linkedin}, GitHub ${contact.github}.`,
+      `Contact ${p.name}: email ${contact.email}, phone ${contact.phone}, WhatsApp ${contact.whatsapp}, LinkedIn ${contact.linkedin}, GitHub ${contact.github}.`,
       "There is also a contact form on the site; he usually replies within a few hours (Bengaluru, IST).",
     ]),
   });

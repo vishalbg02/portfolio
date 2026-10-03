@@ -58,13 +58,17 @@ describe("résumé config stays in step with profile.ts", () => {
     expect(Number(m![1])).toBe(profile.recognition.length);
   });
 
-  it("prints the college email by default and can switch to the primary one", () => {
-    expect(model.contact[0]!.text).toBe(profile.contact.collegeEmail);
-    const primary = buildResumeModel(profile, {
+  it("prints the personal email by default and can switch to the college one", () => {
+    expect(model.contact[0]!.text).toBe(profile.contact.email);
+    const college = buildResumeModel(profile, {
       ...resumeConfig,
-      header: { ...resumeConfig.header, email: "primary" },
+      header: { ...resumeConfig.header, email: "college" },
     });
-    expect(primary.contact[0]!.text).toBe(profile.contact.email);
+    expect(college.contact[0]!.text).toBe(profile.contact.collegeEmail);
+  });
+
+  it("keeps the header free of college branding", () => {
+    expect(model.subtitle).not.toMatch(/christ|batch|university/i);
   });
 });
 

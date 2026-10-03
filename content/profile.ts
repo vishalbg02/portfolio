@@ -102,7 +102,7 @@ const data = {
       name: "Talnio",
       tagline: "Employee management platform (web + mobile)",
       type: "Internship · Social Agent · Live on Google Play",
-      period: null, // TODO(vishal): project period
+      period: "May 2025 – Present", // the internship it was built in
       badge: "Live on Google Play",
       live: null, // TODO(vishal): Google Play URL
       repo: null,
@@ -129,7 +129,7 @@ const data = {
       name: "LanSymphony",
       tagline: "Offline, encrypted peer-to-peer communication over LAN",
       type: "Personal · Built live at Windsurf × The AI Collective OpenBuild (2nd place)",
-      period: null, // TODO(vishal): project period
+      period: "Aug 2025",
       badge: "2nd place · OpenBuild",
       live: null,
       repo: null, // TODO(vishal): repository URL
@@ -145,7 +145,7 @@ const data = {
       name: "CHRIST University Virtual Tour",
       tagline: "Immersive 360° web experience",
       type: "Personal",
-      period: null, // TODO(vishal): project period
+      period: "Jan 2025",
       badge: null,
       live: "https://virtual-tour-opal.vercel.app",
       repo: "https://github.com/vishalbg02/virtual_tour",

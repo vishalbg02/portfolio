@@ -41,20 +41,20 @@ test.describe("résumé", () => {
     const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
     expect(headings.map((h) => h.replace(/^#\s*/, ""))).toEqual([
       "Professional Summary",
-      "Work Experience & Internships",
+      "Work Experience",
       "Projects",
-      "Skills",
-      "Certifications & Training",
-      "Co-curricular & Leadership",
-      "Achievements & Awards",
+      "Technical Skills",
       "Education",
+      "Certifications",
+      "Achievements & Awards",
+      "Leadership & Activities",
       "Does this résumé fit your role?",
     ]);
     const download = page.getByRole("link", { name: "Download PDF" });
     await expect(download).toHaveAttribute("href", "/resume.pdf");
     await expect(download).toHaveAttribute("download", "Vishal_BG_Resume.pdf");
     await expect(page.getByText(/Last updated/)).toBeVisible();
-    await expect(page.getByText("vishal.bg@mca.christuniversity.in")).toBeVisible();
+    await expect(page.getByText("vishalbg02@gmail.com").first()).toBeVisible();
     await expect(page.getByText("boAt’s IoT devices")).toBeVisible(); // curly apostrophe
     expect(await axe(page)).toEqual([]);
   });
