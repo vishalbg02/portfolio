@@ -283,7 +283,9 @@ describe("current-status questions (the Social Agent internship ended Mar 2026)"
   const status = profileChunks().find((c) => c.id === "status")!;
 
   it("has a derived status chunk that says he is not currently employed and names the last role", () => {
-    expect(status.text).toMatch(/not currently working/i);
+    expect(status.text).toMatch(/not currently in a full-time job or internship/i);
+    expect(status.text).toContain("Golden Verdict"); // ongoing freelance work
+    expect(status.text).toContain("Jan 2026");
     expect(status.text).toContain("Social Agent");
     expect(status.text).toContain("Mar 2026");
     expect(status.text).toContain(profile.status);

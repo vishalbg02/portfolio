@@ -84,7 +84,7 @@ const data = {
       name: "Golden Verdict",
       tagline: "Legal & tax compliance SaaS",
       type: "Freelance · Production",
-      period: null, // TODO(vishal): project period
+      period: "Jan 2026 – Present",
       badge: null,
       live: "https://goldenverdict.com",
       repo: null,

@@ -27,7 +27,7 @@ export const resumeConfig = ResumeConfigSchema.parse({
       slug: "golden-verdict",
       title: "Golden Verdict – Legal & Tax Compliance SaaS",
       stack: "Next.js, TypeScript, Firebase",
-      date: "Freelance",
+      date: "Jan 2026 – Present",
       bullets: [
         "Built and deployed a production SaaS (goldenverdict.com) with role-based access for Customers, Legal Partners, Managers and Admins.",
         "Engineered purchase, document upload and request-ID tracking workflows on Firestore; built admin dashboards for 50+ services and integrated Brevo REST APIs for automated invoicing and email.",

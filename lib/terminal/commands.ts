@@ -1,4 +1,5 @@
 import { profile } from "@/content/profile";
+import { workStatus } from "@/lib/content/work-status";
 import { RESUME_FILENAME } from "@/lib/resume/model";
 import { resumeHref, shipped } from "@/lib/site";
 
@@ -53,8 +54,7 @@ export function findProject(query: string) {
 
 type Command = { summary: string; usage?: string; hidden?: boolean; run: (args: string[]) => Result };
 
-const lastRole = profile.experience.find((e) => !e.current);
-const currentRole = profile.experience.find((e) => e.current);
+const ws = workStatus(profile);
 
 const commands: Record<string, Command> = {
   help: {
@@ -84,9 +84,9 @@ const commands: Record<string, Command> = {
     run: () => ({
       lines: [
         out(
-          currentRole
-            ? `Working: ${currentRole.role} at ${currentRole.company} (${currentRole.period}).`
-            : `Not in a job or internship right now.${lastRole ? ` Most recent: ${lastRole.role} at ${lastRole.company.split(",")[0]} (${lastRole.period}).` : ""}`,
+          ws.currentRole
+            ? `Working: ${ws.currentRole.role} at ${ws.currentRole.company} (${ws.currentRole.period}).`
+            : `Not in a full-time job or internship right now.${ws.ongoing.length ? ` Working on: ${ws.ongoingText.join(", ")}.` : ""}${ws.lastRole ? ` Most recent internship: ${ws.lastRole.role} at ${ws.lastRole.company.split(",")[0]} (${ws.lastRole.period}).` : ""}`,
         ),
         out(`Looking for: ${profile.workPreferences.roles.join("; ")}.`),
         out(
