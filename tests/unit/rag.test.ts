@@ -52,7 +52,7 @@ describe("corpus (built from the same sources as the site)", () => {
       expect(c.title.length, c.id).toBeGreaterThan(2);
       expect(c.text.length, c.id).toBeGreaterThan(30);
       expect(c.text.length, `${c.id} is over ~450 tokens`).toBeLessThanOrEqual(MAX_CHUNK_CHARS + 200);
-      expect(c.url, c.id).toMatch(/^\/(#[a-z-]+|work\/[a-z-]+(#[a-z-]+)?|resume)?$/);
+      expect(c.url, c.id).toMatch(/^\/(#[a-z-]+|work\/[a-z-]+(#[a-z-]+)?|resume|now)?$/);
     }
   });
 
@@ -276,5 +276,40 @@ describe("Bm25Index", () => {
     const { hits } = idx.search("cats");
     expect(hits.map((h) => h.index)).toContain(0);
     expect(hits.map((h) => h.index)).not.toContain(2);
+  });
+});
+
+describe("current-status questions (the Social Agent internship ended Mar 2026)", () => {
+  const status = profileChunks().find((c) => c.id === "status")!;
+
+  it("has a derived status chunk that says he is not currently employed and names the last role", () => {
+    expect(status.text).toMatch(/not currently working/i);
+    expect(status.text).toContain("Social Agent");
+    expect(status.text).toContain("Mar 2026");
+    expect(status.text).toContain(profile.status);
+  });
+
+  it.each([
+    "Where is he currently working?",
+    "Where does Vishal work now?",
+    "Is he employed right now?",
+    "What is he doing at the moment?",
+    "Is he available for hire?",
+  ])("%s → status chunk first, with full coverage", (q) => {
+    const r = retriever.retrieve(q, 5);
+    expect(r.results[0]!.chunk.id).toBe("status");
+    expect(r.coverage).toBeGreaterThanOrEqual(0.4);
+  });
+
+  it("answers 'which companies has he worked at' from the work-history chunk", () => {
+    expect(top("Which companies has he worked at?", 4)).toContain("employers");
+  });
+
+  it("no chunk still calls the finished internship a current role", () => {
+    const text = profileChunks()
+      .map((c) => c.text)
+      .join("\n");
+    expect(text).not.toMatch(/\(current role\)/);
+    expect(text).not.toMatch(/Present/);
   });
 });

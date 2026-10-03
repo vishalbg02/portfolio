@@ -1,14 +1,16 @@
 import { resumeConfig as defaultConfig } from "@/content/resume";
 import { profile as defaultProfile } from "@/content/profile";
 import type { Profile } from "@/lib/content/profile-schema";
+import { site } from "@/lib/site";
 import { smart } from "@/lib/text/typography";
 import type { ResumeConfig } from "./config-schema";
 
 /**
  * One résumé model feeds both the HTML /resume page and the generated PDF, so they cannot drift
  * apart. Shared facts come from content/profile.ts; résumé-only wording from content/resume.ts.
- * Sections follow your own résumé: Professional Summary, Work Experience & Internships, Projects,
- * Skills, Certifications & Training, Co-curricular & Leadership, Achievements & Awards, Education.
+ * Sections use the standard headings ATS parsers look for, in the order recruiters read them:
+ * Summary, Work Experience, Projects, Technical Skills, Education, Certifications, Achievements,
+ * Leadership.
  */
 export const RESUME_FILENAME = "Vishal_BG_Resume.pdf";
 
@@ -31,13 +33,13 @@ export type ResumeModel = {
 
 export const RESUME_SECTION_TITLES = {
   summary: "Professional Summary",
-  experience: "Work Experience & Internships",
+  experience: "Work Experience",
   projects: "Projects",
-  skills: "Skills",
-  certifications: "Certifications & Training",
-  leadership: "Co-curricular & Leadership",
-  achievements: "Achievements & Awards",
+  skills: "Technical Skills",
   education: "Education",
+  certifications: "Certifications",
+  achievements: "Achievements & Awards",
+  leadership: "Leadership & Activities",
 } as const;
 
 const stripProtocol = (url: string) => url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
@@ -59,6 +61,7 @@ export function buildResumeModel(p: Profile = defaultProfile, c: ResumeConfig = 
       { text: p.contact.phone, href: p.contact.phoneHref },
       { text: stripProtocol(p.contact.linkedin), href: p.contact.linkedin },
       { text: stripProtocol(p.contact.github), href: p.contact.github },
+      { text: stripProtocol(site.url), href: site.url },
       { text: c.header.location, href: null },
     ],
     updatedAt: c.updatedAt,

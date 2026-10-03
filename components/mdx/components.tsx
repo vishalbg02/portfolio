@@ -8,8 +8,8 @@ import { Snippet } from "./Snippet";
 
 const prose = "max-w-[68ch]";
 
-/** MDX element map for a case study. `slug` binds <Architecture /> to the right graph. */
-export function getMdxComponents(slug: ProjectSlug) {
+/** Typography shared by case studies and Ship Log posts. */
+export function getBaseMdxComponents() {
   return {
     // id = slug of the heading, so citations can deep-link ("/work/talnio#key-decisions").
     h2: ({ children, ...p }: ComponentProps<"h2">) => (
@@ -40,6 +40,28 @@ export function getMdxComponents(slug: ProjectSlug) {
         {...p}
       />
     ),
+    ol: (p: ComponentProps<"ol">) => (
+      <ol
+        className={`${prose} my-4 list-decimal space-y-2.5 pl-6 text-[17px] leading-[1.7] text-muted marker:text-muted`}
+        {...p}
+      />
+    ),
+    blockquote: (p: ComponentProps<"blockquote">) => (
+      <blockquote className={`${prose} my-6 border-l-2 border-accent pl-4 text-[17px] text-text`} {...p} />
+    ),
+    pre: (p: ComponentProps<"pre">) => (
+      <pre
+        className="my-6 overflow-x-auto rounded-card border border-border bg-surface p-4 font-mono text-[13px] leading-relaxed text-text [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0"
+        {...p}
+      />
+    ),
+  };
+}
+
+/** MDX element map for a case study. `slug` binds <Architecture /> to the right graph. */
+export function getMdxComponents(slug: ProjectSlug) {
+  return {
+    ...getBaseMdxComponents(),
     Decisions,
     Decision,
     Snippet,

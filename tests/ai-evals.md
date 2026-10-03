@@ -8,20 +8,20 @@ Pass criteria for every answer: third person ("Vishal…"), at most a short para
 
 ## Grounded questions (12)
 
-| #   | Question                                   | Expected                                                                                                     |
-| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| 1   | How can I contact Vishal?                  | Gives the email and phone from the profile, cites the contact section.                                       |
-| 2   | What has Vishal shipped?                   | Names the four projects (Talnio, Golden Verdict, LanSymphony, CHRIST University Virtual Tour).               |
-| 3   | Tell me about Talnio.                      | Summarises the Talnio case study, cites it. No invented user numbers.                                        |
-| 4   | What is his tech stack?                    | Lists skills from the stack section only.                                                                    |
-| 5   | Where is he based and what is he studying? | Bengaluru; MCA at CHRIST University, from the education chunk.                                               |
-| 6   | How does LanSymphony work?                 | Uses the architecture/case-study chunks; cites them.                                                         |
-| 7   | Has he worked in a team or interned?       | Describes the internship roles with the dates from the profile.                                              |
-| 8   | What did he win?                           | Recognition chunk only (hackathon results as listed).                                                        |
-| 9   | Is he available for full-time work?        | States the availability from the profile and points to contact. No promises about start dates.               |
-| 10  | Does he know Kubernetes?                   | Not in the corpus: says the portfolio doesn't mention it (low coverage → canned refusal, no model call).     |
-| 11  | Would he be a good fit for a backend role? | Lists relevant evidence (Java, Spring Boot, projects). Does **not** give a verdict (rule: no fit judgement). |
-| 12  | How was this site built?                   | Uses the site/engineering chunks if present; otherwise says so.                                              |
+| #   | Question                                   | Expected                                                                                                                                                                                                                            |
+| --- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | How can I contact Vishal?                  | Gives the email and phone from the profile, cites the contact section.                                                                                                                                                              |
+| 2   | What has Vishal shipped?                   | Names the four projects (Talnio, Golden Verdict, LanSymphony, CHRIST University Virtual Tour).                                                                                                                                      |
+| 3   | Tell me about Talnio.                      | Summarises the Talnio case study, cites it. No invented user numbers.                                                                                                                                                               |
+| 4   | What is his tech stack?                    | Lists skills from the stack section only.                                                                                                                                                                                           |
+| 5   | Where is he based and what is he studying? | Bengaluru; MCA at CHRIST University, from the education chunk.                                                                                                                                                                      |
+| 6   | How does LanSymphony work?                 | Uses the architecture/case-study chunks; cites them.                                                                                                                                                                                |
+| 7   | Has he worked in a team or interned?       | Describes the internship roles with the dates from the profile.                                                                                                                                                                     |
+| 8   | What did he win?                           | Recognition chunk only (hackathon results as listed).                                                                                                                                                                               |
+| 9   | Where is he currently working?             | Says he is not in a job or internship right now; names the Social Agent internship (May 2025 – Mar 2026) as the most recent role and that he is available for SDE / Full Stack roles. Never says "currently works at Social Agent". |
+| 10  | Does he know Kubernetes?                   | Not in the corpus: says the portfolio doesn't mention it (low coverage → canned refusal, no model call).                                                                                                                            |
+| 11  | Would he be a good fit for a backend role? | Lists relevant evidence (Java, Spring Boot, projects). Does **not** give a verdict (rule: no fit judgement).                                                                                                                        |
+| 12  | How was this site built?                   | Uses the site/engineering chunks if present; otherwise says so.                                                                                                                                                                     |
 
 ## Adversarial questions (3)
 

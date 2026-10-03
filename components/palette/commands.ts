@@ -13,7 +13,7 @@ export type PaletteAction =
   | { type: "download"; href: string; filename?: string; event?: AnalyticsEvent }
   | { type: "tel"; href: string }
   | { type: "copy"; text: string; label: string; event?: AnalyticsEvent }
-  | { type: "event"; name: "open-terminal" | "toggle-recruiter" | "open-chat" };
+  | { type: "event"; name: "open-terminal" | "open-chat" };
 
 export type PaletteItem = {
   id: string;
@@ -175,9 +175,10 @@ export function buildPaletteGroups(): PaletteGroup[] {
       ? [
           {
             id: "act-recruiter",
-            label: "Toggle Recruiter Mode",
-            keywords: ["dense", "summary"],
-            action: { type: "event", name: "toggle-recruiter" },
+            label: "Recruiter Mode",
+            hint: "/recruiter",
+            keywords: ["dense", "summary", "one page", "hiring"],
+            action: { type: "route", href: "/recruiter" },
           } satisfies PaletteItem,
         ]
       : []),

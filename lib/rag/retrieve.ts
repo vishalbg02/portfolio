@@ -29,6 +29,9 @@ export const RELEVANCE_MIN = 0.4;
 const FLOOR = 0.35;
 const KEEP_TOP = 3;
 /** Stemmed words that mean "evaluate him overall" rather than "find a specific fact". */
+/** Raw-text check (stemming would turn "working" into "work", which also means "work experience"). */
+const STATUS_QUESTION =
+  /\b(currently|current|presently|right now|now|today|working|works|employed|employer|workplace|available|availability|latest|most recent)\b/i;
 const INTENT_WORDS = [
   "fit",
   "suitable",
@@ -40,6 +43,11 @@ const INTENT_WORDS = [
   "candidate",
   "good",
   "best",
+  "strongest",
+  "expertise",
+  "specialize",
+  "specialty",
+  "speciality",
 ];
 
 export type RetrievalResult = {
@@ -147,6 +155,14 @@ export class Retriever {
     ranked: T[],
   ): T[] {
     const words = new Set(tokenize(query));
+    if (STATUS_QUESTION.test(query)) {
+      const status = this.chunks.find((c) => c.id === "status");
+      if (status) {
+        const rest = ranked.filter((r) => r.chunk.id !== "status");
+        const hit = ranked.find((r) => r.chunk.id === "status");
+        return [hit ?? ({ chunk: status, score: 0 } as T), ...rest];
+      }
+    }
     if (!INTENT_WORDS.some((w) => words.has(w))) return ranked;
     const want = ["about", "experience-0", "experience-1", "skills-backend", "skills-frontend"];
     const have = new Set(ranked.map((r) => r.chunk.id));

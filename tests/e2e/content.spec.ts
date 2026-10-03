@@ -41,20 +41,20 @@ test.describe("résumé", () => {
     const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
     expect(headings.map((h) => h.replace(/^#\s*/, ""))).toEqual([
       "Professional Summary",
-      "Work Experience & Internships",
+      "Work Experience",
       "Projects",
-      "Skills",
-      "Certifications & Training",
-      "Co-curricular & Leadership",
-      "Achievements & Awards",
+      "Technical Skills",
       "Education",
+      "Certifications",
+      "Achievements & Awards",
+      "Leadership & Activities",
       "Does this résumé fit your role?",
     ]);
     const download = page.getByRole("link", { name: "Download PDF" });
     await expect(download).toHaveAttribute("href", "/resume.pdf");
     await expect(download).toHaveAttribute("download", "Vishal_BG_Resume.pdf");
     await expect(page.getByText(/Last updated/)).toBeVisible();
-    await expect(page.getByText("vishal.bg@mca.christuniversity.in")).toBeVisible();
+    await expect(page.getByText("vishalbg02@gmail.com").first()).toBeVisible();
     await expect(page.getByText("boAt’s IoT devices")).toBeVisible(); // curly apostrophe
     expect(await axe(page)).toEqual([]);
   });
@@ -84,15 +84,13 @@ test.describe("résumé", () => {
 });
 
 test.describe("experience", () => {
-  test("shows each role with its first bullet, a pulsing current node, and expandable details", async ({
-    page,
-  }) => {
+  test("shows each role with its first bullet, and expandable details", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
     const exp = page.locator("#experience");
     await expect(exp.getByRole("heading", { name: "App Developer Intern" })).toBeVisible();
-    await expect(exp.getByText("May 2025 – Present")).toBeVisible();
-    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(1);
+    await expect(exp.getByText("May 2025 – Mar 2026")).toBeVisible();
+    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(0); // no current role
     const second = exp.locator("li", { hasText: "Implemented geolocation- and NFC-based attendance" });
     await expect(second.getByText("Implemented geolocation- and NFC-based attendance")).toBeHidden();
     await exp.getByText("Show details").first().click();

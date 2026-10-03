@@ -2,8 +2,8 @@ import { Document, Link, Page, StyleSheet, Text, View } from "@react-pdf/rendere
 import { RESUME_SECTION_TITLES, type ResumeModel } from "./model";
 
 /**
- * ATS-friendly PDF that follows the layout of the original résumé: centered header, navy section
- * headings with a rule, bold organisation + right-aligned dates, italic roles, one page.
+ * ATS-friendly PDF: centered header, plain black section headings with a thin rule, bold organisation
+ * + right-aligned dates, italic roles, one page, no colour or decoration.
  * One column, real text, built-in Helvetica (no embedded fonts, no images). Every glyph must stay
  * inside WinAnsi (see tests/unit/resume.test.ts).
  *
@@ -11,10 +11,10 @@ import { RESUME_SECTION_TITLES, type ResumeModel } from "./model";
  * PDF text extraction then reads "S U M M A R Y", which ATS parsers can miss. Headings are
  * uppercased in JS instead.
  */
-const NAVY = "#1e3a8a";
+const NAVY = "#111111";
 const INK = "#111111";
 const MUTED = "#555555";
-const GOLD = "#b8860b";
+const GOLD = "#111111";
 
 const s = StyleSheet.create({
   page: {
@@ -27,8 +27,7 @@ const s = StyleSheet.create({
     color: INK,
   },
   name: {
-    fontFamily: "Helvetica",
-    fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     fontSize: 22,
     color: NAVY,
     textAlign: "center",
@@ -45,23 +44,22 @@ const s = StyleSheet.create({
   },
   dot: { color: GOLD },
   link: { color: MUTED, textDecoration: "none" },
-  headerRule: { borderBottomWidth: 1.6, borderBottomColor: NAVY, marginTop: 6 },
+  headerRule: { borderBottomWidth: 1, borderBottomColor: "#888888", marginTop: 6 },
   section: { marginTop: 7 },
   heading: {
-    fontFamily: "Helvetica",
-    fontWeight: 700,
+    fontFamily: "Helvetica-Bold",
     fontSize: 9.2,
     color: NAVY,
     borderBottomWidth: 0.7,
-    borderBottomColor: NAVY,
+    borderBottomColor: "#888888",
     paddingBottom: 1.2,
     marginBottom: 3,
   },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   grow: { flex: 1, paddingRight: 8 },
-  bold: { fontFamily: "Helvetica", fontWeight: 700 },
-  italic: { fontFamily: "Helvetica", fontStyle: "italic", color: MUTED },
-  role: { fontFamily: "Helvetica", fontWeight: 700, fontStyle: "italic", color: NAVY },
+  bold: { fontFamily: "Helvetica-Bold" },
+  italic: { fontFamily: "Helvetica-Oblique", color: MUTED },
+  role: { fontFamily: "Helvetica-Oblique", color: MUTED },
   muted: { color: MUTED },
   entry: { marginBottom: 3 },
   bulletRow: { flexDirection: "row", marginTop: 0.6, paddingLeft: 6 },
@@ -83,7 +81,7 @@ const Dash = ({ items }: { items: string[] }) => (
   <>
     {items.map((t) => (
       <View key={t} style={s.bulletRow} wrap={false}>
-        <Text style={s.dash}>–</Text>
+        <Text style={s.dash}>•</Text>
         <Text style={s.bulletText}>{t}</Text>
       </View>
     ))}
@@ -97,7 +95,7 @@ export function ResumeDocument({ model }: { model: ResumeModel }) {
       title={`${model.name} – Résumé`}
       author={model.name}
       subject="Full Stack Developer résumé"
-      keywords="Full Stack Developer, Java, Spring Boot, JavaScript, React, SQL, RAG, MCA, CHRIST University"
+      keywords="Full Stack Developer, Java, Spring Boot, JavaScript, TypeScript, React, Next.js, SQL, REST APIs, Firebase, Flutter, Generative AI, RAG"
       creator="vishalbg.vercel.app"
       producer="@react-pdf/renderer"
     >
@@ -161,6 +159,18 @@ export function ResumeDocument({ model }: { model: ResumeModel }) {
           ))}
         </Section>
 
+        <Section title={T.education}>
+          {model.education.map((e) => (
+            <View key={e.line} style={{ marginBottom: 2 }}>
+              <View style={s.row}>
+                <Text style={[s.bold, s.grow]}>{e.school}</Text>
+                <Text style={s.italic}>{e.period}</Text>
+              </View>
+              <Text style={s.muted}>{e.line}</Text>
+            </View>
+          ))}
+        </Section>
+
         <Section title={T.certifications}>
           {model.certifications.map((c) => (
             <View key={c.title} style={[s.row, { marginTop: 0.6 }]}>
@@ -170,6 +180,19 @@ export function ResumeDocument({ model }: { model: ResumeModel }) {
                 <Text style={s.muted}> – {c.org}</Text>
               </Text>
               <Text style={s.italic}>{c.year}</Text>
+            </View>
+          ))}
+        </Section>
+
+        <Section title={T.achievements}>
+          {model.achievements.map((a) => (
+            <View key={a.title} style={[s.row, { marginTop: 0.6 }]} wrap={false}>
+              <Text style={s.goldBullet}>•</Text>
+              <Text style={s.grow}>
+                <Text style={s.bold}>{a.title}</Text>
+                <Text style={s.muted}> – {a.detail}</Text>
+              </Text>
+              <Text style={s.italic}>{a.date}</Text>
             </View>
           ))}
         </Section>
@@ -188,31 +211,6 @@ export function ResumeDocument({ model }: { model: ResumeModel }) {
             ))}
           </Section>
         ) : null}
-
-        <Section title={T.achievements}>
-          {model.achievements.map((a) => (
-            <View key={a.title} style={[s.row, { marginTop: 0.6 }]} wrap={false}>
-              <Text style={s.goldBullet}>•</Text>
-              <Text style={s.grow}>
-                <Text style={s.bold}>{a.title}</Text>
-                <Text style={s.muted}> – {a.detail}</Text>
-              </Text>
-              <Text style={s.italic}>{a.date}</Text>
-            </View>
-          ))}
-        </Section>
-
-        <Section title={T.education}>
-          {model.education.map((e) => (
-            <View key={e.line} style={{ marginBottom: 2 }}>
-              <View style={s.row}>
-                <Text style={[s.bold, s.grow]}>{e.school}</Text>
-                <Text style={s.italic}>{e.period}</Text>
-              </View>
-              <Text style={s.muted}>{e.line}</Text>
-            </View>
-          ))}
-        </Section>
       </Page>
     </Document>
   );

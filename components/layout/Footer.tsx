@@ -18,6 +18,8 @@ const footerLinks = [
   { label: "LinkedIn", href: profile.contact.linkedin, external: true },
   { label: "Email", href: `mailto:${profile.contact.email}`, external: false },
   { label: "Résumé", href: "/resume", external: false },
+  { label: "Recruiter mode", href: "/recruiter", external: false },
+  { label: "Now", href: "/now", external: false },
 ];
 
 export function Footer() {

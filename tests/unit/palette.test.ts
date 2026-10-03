@@ -36,6 +36,7 @@ describe("palette registry", () => {
       if (href.startsWith("/work/")) expect(shipped.caseStudies).toBe(true);
       else if (href === "/log") expect(shipped.log).toBe(true);
       else if (href === "/now") expect(shipped.now).toBe(true);
+      else if (href === "/recruiter") expect(shipped.recruiter).toBe(true);
       else throw new Error(`Unexpected route in palette: ${href}`);
     }
   });

@@ -4,12 +4,7 @@ import { RESUME_SECTION_TITLES, type ResumeModel } from "@/lib/resume/model";
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section aria-label={title} className="border-t border-border py-7 first:border-t-0 first:pt-0">
-      <h2 className="mb-4 flex items-center gap-3 font-mono text-xs tracking-[0.12em] text-muted uppercase">
-        <span aria-hidden="true" className="text-accent">
-          #
-        </span>
-        {title}
-      </h2>
+      <h2 className="mb-4 text-sm font-semibold tracking-wide text-text uppercase">{title}</h2>
       {children}
     </section>
   );
@@ -26,8 +21,8 @@ const Bullets = ({ items }: { items: string[] }) => (
   <ul className="mt-2 space-y-1.5 text-[15px] leading-relaxed text-muted">
     {items.map((t) => (
       <li key={t} className="flex gap-2.5">
-        <span aria-hidden="true" className="text-accent">
-          –
+        <span aria-hidden="true" className="text-muted">
+          •
         </span>
         <span>{t}</span>
       </li>
@@ -49,7 +44,7 @@ export function ResumeView({ model }: { model: ResumeModel }) {
           {model.experience.map((e) => (
             <article key={e.org + e.role}>
               <Row left={<h3 className="font-semibold">{e.org}</h3>} right={e.period} />
-              <p className="mt-0.5 text-sm font-medium text-accent">{e.role}</p>
+              <p className="mt-0.5 text-sm text-muted italic">{e.role}</p>
               <Bullets items={e.bullets} />
             </article>
           ))}
@@ -85,6 +80,17 @@ export function ResumeView({ model }: { model: ResumeModel }) {
         </dl>
       </Section>
 
+      <Section title={T.education}>
+        <div className="space-y-3">
+          {model.education.map((e) => (
+            <div key={e.line}>
+              <Row left={<h3 className="font-semibold">{e.school}</h3>} right={e.period} />
+              <p className="text-sm text-muted">{e.line}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
       <Section title={T.certifications}>
         <ul className="space-y-1.5">
           {model.certifications.map((c) => (
@@ -102,18 +108,6 @@ export function ResumeView({ model }: { model: ResumeModel }) {
           ))}
         </ul>
       </Section>
-
-      {model.leadership.length > 0 ? (
-        <Section title={T.leadership}>
-          {model.leadership.map((l) => (
-            <article key={l.title}>
-              <Row left={<h3 className="font-semibold">{l.title}</h3>} right={l.date} />
-              <p className="mt-0.5 text-sm font-medium text-accent">{l.role}</p>
-              <Bullets items={l.bullets} />
-            </article>
-          ))}
-        </Section>
-      ) : null}
 
       <Section title={T.achievements}>
         <ul className="space-y-1.5">
@@ -133,16 +127,17 @@ export function ResumeView({ model }: { model: ResumeModel }) {
         </ul>
       </Section>
 
-      <Section title={T.education}>
-        <div className="space-y-3">
-          {model.education.map((e) => (
-            <div key={e.line}>
-              <Row left={<h3 className="font-semibold">{e.school}</h3>} right={e.period} />
-              <p className="text-sm text-muted">{e.line}</p>
-            </div>
+      {model.leadership.length > 0 ? (
+        <Section title={T.leadership}>
+          {model.leadership.map((l) => (
+            <article key={l.title}>
+              <Row left={<h3 className="font-semibold">{l.title}</h3>} right={l.date} />
+              <p className="mt-0.5 text-sm text-muted italic">{l.role}</p>
+              <Bullets items={l.bullets} />
+            </article>
           ))}
-        </div>
-      </Section>
+        </Section>
+      ) : null}
     </div>
   );
 }

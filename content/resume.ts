@@ -17,10 +17,9 @@ export const resumeConfig = ResumeConfigSchema.parse({
   updatedAt: "2026-10-03",
 
   header: {
-    subtitle:
-      "Master of Computer Applications (MCA) | Batch 2026–28 | CHRIST (Deemed to be University), Bengaluru",
+    subtitle: "Full-Stack Application Developer | Java, Spring Boot, React, Next.js, SQL",
     location: "Bengaluru, Karnataka",
-    email: "college", // "college" = vishal.bg@mca.christuniversity.in · "primary" = vishalbg02@gmail.com
+    email: "primary", // "primary" = vishalbg02@gmail.com · "college" = the university address
   },
 
   projects: [
@@ -57,28 +56,24 @@ export const resumeConfig = ResumeConfigSchema.parse({
   // Talnio is described under Work Experience instead of Projects.
   omittedProjects: [{ slug: "talnio", reason: "Already covered under Work Experience" }],
 
+  // Grouped by what recruiters and ATS filters search for. Items mirror content/profile.ts (stack).
   skills: [
+    { label: "Languages", items: ["Java", "JavaScript", "TypeScript", "SQL", "Dart", "HTML5", "CSS3"] },
     {
-      label: "Technical",
-      items: [
-        "Java",
-        "JavaScript",
-        "TypeScript",
-        "HTML5",
-        "CSS3",
-        "SQL",
-        "Spring Boot",
-        "React.js",
-        "Next.js",
-        "Node.js",
-        "React Native",
-        "Firebase",
-        "Git",
-      ],
+      label: "Backend",
+      items: ["Spring Boot", "Spring Security", "Spring Data JPA", "Node.js", "REST APIs", "Microservices"],
     },
-    { label: "Domain", items: ["API & Function Integration", "RAG Fundamentals"] },
-    { label: "Soft Skills", items: ["Problem Solving"] },
-    { label: "Languages", items: ["English", "Kannada", "Telugu"] },
+    {
+      label: "Frontend & Mobile",
+      items: ["React", "Next.js", "Tailwind CSS", "Three.js", "Flutter", "React Native"],
+    },
+    { label: "Databases & Cloud", items: ["MySQL", "Firebase", "Firestore", "MongoDB", "AWS"] },
+    {
+      label: "AI",
+      items: ["Generative AI APIs", "RAG fundamentals", "Function calling / API integration"],
+    },
+    { label: "Tools", items: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code", "Vercel"] },
+    { label: "Spoken Languages", items: ["English", "Kannada", "Telugu"] },
   ],
 
   leadership: [

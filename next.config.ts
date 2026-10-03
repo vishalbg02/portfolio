@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { countVisiblePosts } from "./lib/content/log-meta";
 import { buildCsp } from "./lib/security/csp";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -25,6 +26,18 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
     NEXT_PUBLIC_COMMIT_SHA: (process.env.VERCEL_GIT_COMMIT_SHA ?? "").slice(0, 7),
     NEXT_PUBLIC_ON_VERCEL: process.env.VERCEL ? "1" : "",
+    NEXT_PUBLIC_LOG_POSTS: String(countVisiblePosts()),
+  },
+  async redirects() {
+    // Recruiter Mode is a static route; the old query-string form lands there.
+    return [
+      {
+        source: "/",
+        has: [{ type: "query" as const, key: "mode", value: "recruiter" }],
+        destination: "/recruiter",
+        permanent: false,
+      },
+    ];
   },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];

@@ -119,3 +119,39 @@ export function pageJsonLd(name: string, path: string, crumbs: Crumb[]) {
     ],
   };
 }
+
+/** Ship Log post: BlogPosting + breadcrumbs. */
+export function postJsonLd(post: {
+  title: string;
+  description: string;
+  slug: string;
+  date: string;
+  updated?: string;
+  tags: string[];
+}) {
+  const path = `/log/${post.slug}`;
+  return {
+    "@context": ctx,
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${abs(path)}#post`,
+        headline: post.title,
+        description: post.description,
+        url: abs(path),
+        datePublished: post.date,
+        dateModified: post.updated ?? post.date,
+        inLanguage: "en",
+        keywords: post.tags.join(", "),
+        author: { "@id": id("person") },
+        isPartOf: { "@id": id("website") },
+        mainEntityOfPage: abs(path),
+      },
+      breadcrumbNode([
+        { name: "Home", path: "/" },
+        { name: "Ship Log", path: "/log" },
+        { name: post.title, path },
+      ]),
+    ],
+  };
+}

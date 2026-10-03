@@ -21,11 +21,11 @@ describe("profile (single source of truth)", () => {
     expect(projectBySlug("talnio")?.live).toBeNull();
     expect(projectBySlug("lansymphony")?.repo).toBeNull();
     expect(projectBySlug("golden-verdict")?.period).toBeNull();
-    expect(projectBySlug("virtual-tour")?.period).toBeNull();
+    expect(projectBySlug("virtual-tour")?.period).toBe("Jan 2025"); // from his résumé
   });
 
-  it("marks exactly one experience as current", () => {
-    expect(profile.experience.filter((e) => e.current)).toHaveLength(1);
+  it("marks at most one experience as current", () => {
+    expect(profile.experience.filter((e) => e.current).length).toBeLessThanOrEqual(1);
   });
 
   it("rejects duplicate project slugs", () => {

@@ -44,6 +44,9 @@ jobs:
 
       - name: Build (no env vars — must degrade gracefully)
         run: pnpm build
+        env:
+          # Ship Log drafts are hidden in production builds; show them here so e2e can cover the post template.
+          SHOW_DRAFTS: "true"
 
       - name: Bundle budget (home initial JS ≤ 170 KB gz)
         run: pnpm check:bundle

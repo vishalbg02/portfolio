@@ -65,7 +65,7 @@ test.describe("job-description matcher on /resume", () => {
     await expect(row("Docker").getByText("Gap", { exact: true })).toBeVisible();
     await expect(row("Kubernetes").getByText("Gap", { exact: true })).toBeVisible();
     await expect(row("Docker").getByText(/shown as a gap/)).toBeVisible();
-    await expect(row("2+ years of experience").getByText("Partial", { exact: true })).toBeVisible();
+    await expect(row("2+ years of experience").getByText("Gap", { exact: true })).toBeVisible();
     await expect(result.getByText(/Not covered: .*Docker.*Kubernetes/)).toBeVisible();
 
     await row("Java")
