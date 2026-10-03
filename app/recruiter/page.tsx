@@ -68,6 +68,11 @@ export default function RecruiterPage() {
           </p>
           <h1 className="mt-2 text-3xl font-semibold md:text-4xl">{profile.name}</h1>
           <p className="mt-2 max-w-2xl text-muted">{profile.summary}</p>
+          <p className="mt-3 max-w-2xl text-sm text-text">
+            <span className="font-mono text-xs tracking-[0.12em] text-muted uppercase">Looking for </span>
+            {profile.workPreferences.roles.join(" · ")}. {profile.workPreferences.locations};{" "}
+            {profile.workPreferences.modes.join(" / ").toLowerCase()}. {profile.workPreferences.startDate}.
+          </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <ButtonLink
@@ -141,6 +146,17 @@ export default function RecruiterPage() {
                       data-track="project_live_click"
                     >
                       Live site<span aria-hidden="true"> ↗</span>
+                    </a>
+                  ) : null}
+                  {p.store ? (
+                    <a
+                      href={p.store}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-link underline underline-offset-4"
+                      data-track="project_live_click"
+                    >
+                      Google Play<span aria-hidden="true"> ↗</span>
                     </a>
                   ) : null}
                   {p.repo ? (

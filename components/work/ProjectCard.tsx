@@ -89,6 +89,12 @@ export function ProjectCard({
             <span className="sr-only"> ({project.name}, opens in a new tab)</span>
           </a>
         ) : null}
+        {project.store ? (
+          <a href={project.store} target="_blank" rel="noopener noreferrer" className={action}>
+            Google Play <span aria-hidden="true">↗</span>
+            <span className="sr-only"> ({project.name} on Google Play, opens in a new tab)</span>
+          </a>
+        ) : null}
         {project.repo ? (
           <a href={project.repo} target="_blank" rel="noopener noreferrer" className={action}>
             Code <span aria-hidden="true">↗</span>

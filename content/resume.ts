@@ -58,7 +58,10 @@ export const resumeConfig = ResumeConfigSchema.parse({
 
   // Grouped by what recruiters and ATS filters search for. Items mirror content/profile.ts (stack).
   skills: [
-    { label: "Languages", items: ["Java", "JavaScript", "TypeScript", "SQL", "Dart", "HTML5", "CSS3"] },
+    {
+      label: "Languages",
+      items: ["Java", "JavaScript", "TypeScript", "SQL", "Kotlin", "Dart", "HTML5", "CSS3"],
+    },
     {
       label: "Backend",
       items: ["Spring Boot", "Spring Security", "Spring Data JPA", "Node.js", "REST APIs", "Microservices"],
@@ -94,9 +97,9 @@ export const resumeConfig = ResumeConfigSchema.parse({
       date: "Jun 2026",
     },
     {
-      title: "24-Hour Hackathon 2026 – Winner",
-      detail: "CPCG, CHRIST University, in association with Pod.ai",
-      date: "Mar 2026",
+      title: "24-Hour Hackathon 2026 – 2nd Place",
+      detail: "CPCG, CHRIST University, with Pod.ai; built SurakshaAI, a fraud-detection platform",
+      date: "Feb 2026",
     },
     {
       title: "Windsurf x The AI Collective OpenBuild – 2nd Place",

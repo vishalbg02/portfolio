@@ -166,13 +166,13 @@ describe("years of experience is computed honestly from profile.ts", () => {
   });
   it("sums internships into years", () => {
     const s = experienceSummary(profile, NOW);
-    expect(s.months).toBe(14); // May 2025 – Mar 2026 (11) + May – Jul 2024 (3)
-    expect(s.years).toBe(1.2);
+    expect(s.months).toBe(13); // Jun 2025 – Mar 2026 (10) + May – Jul 2024 (3)
+    expect(s.years).toBe(1.1);
     expect(s.text).toContain("internship");
   });
   it.each([
     ["1+ years of experience", "strong"],
-    ["2+ years of experience", "gap"], // 1.2 years is under 75% of 2
+    ["2+ years of experience", "gap"], // 1.1 years is under 75% of 2
     ["3+ years of experience", "gap"],
     ["5 years of experience", "gap"],
   ])("%s → %s", (skill, expected) => {

@@ -88,8 +88,8 @@ test.describe("experience", () => {
     await mockStatus(page);
     await page.goto("/");
     const exp = page.locator("#experience");
-    await expect(exp.getByRole("heading", { name: "App Developer Intern" })).toBeVisible();
-    await expect(exp.getByText("May 2025 – Mar 2026")).toBeVisible();
+    await expect(exp.getByRole("heading", { name: "Full-Stack & App Developer Intern" })).toBeVisible();
+    await expect(exp.getByText("Jun 2025 – Mar 2026")).toBeVisible();
     await expect(exp.locator(".animate-pulse-dot")).toHaveCount(0); // no current role
     const second = exp.locator("li", { hasText: "Implemented geolocation- and NFC-based attendance" });
     await expect(second.getByText("Implemented geolocation- and NFC-based attendance")).toBeHidden();

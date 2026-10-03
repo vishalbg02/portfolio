@@ -55,6 +55,31 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     ]),
   });
 
+  const wp = p.workPreferences;
+  chunks.push({
+    id: "preferences",
+    title: "What roles he wants: availability, relocation, remote and start date",
+    url: "/recruiter",
+    text: join([
+      `What ${p.name} is looking for (roles, job preferences, relocation, remote or hybrid work, notice period, start date):`,
+      `Roles: ${wp.roles.join("; ")}.`,
+      `Location: ${wp.locations}.`,
+      `Work modes he is open to: ${wp.modes.join(", ")} (so remote, hybrid and relocation are all fine).`,
+      `Start date and notice period: ${wp.startDate}.`,
+      `Availability: ${p.status}.`,
+    ]),
+  });
+  chunks.push({
+    id: "strengths",
+    title: "Strongest skills, what he is best at, and life outside work",
+    url: "/#stack",
+    text: join([
+      `${p.name}'s strongest areas, in his own words: ${p.strongestAt}.`,
+      `Core skills: ${p.targetRole.coreSkills.join(", ")}.`,
+      p.outsideWork,
+      `Languages spoken: ${p.languages.join(", ")}.`,
+    ]),
+  });
   chunks.push({
     id: "employers",
     title: "Work history: companies and roles",
@@ -91,6 +116,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
         ...pr.highlights,
         `Stack: ${pr.stack.join(", ")}.`,
         pr.live ? `Live at ${pr.live}.` : pr.badge ? `${pr.badge}.` : null,
+        pr.store ? `Available on Google Play: ${pr.store}.` : null,
         pr.repo ? `Source code: ${pr.repo}.` : null,
       ]),
     }),

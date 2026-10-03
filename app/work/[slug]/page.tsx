@@ -80,6 +80,11 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
                 Live site <span aria-hidden="true">↗</span>
               </ButtonLink>
             ) : null}
+            {project.store ? (
+              <ButtonLink href={project.store} external variant="solid" size="sm">
+                Google Play <span aria-hidden="true">↗</span>
+              </ButtonLink>
+            ) : null}
             {project.repo ? (
               <ButtonLink href={project.repo} external variant="ghost" size="sm">
                 Code <span aria-hidden="true">↗</span>
