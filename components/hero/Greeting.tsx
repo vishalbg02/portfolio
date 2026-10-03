@@ -18,7 +18,10 @@ const getServerHour = () => null;
 export function Greeting() {
   const hour = useSyncExternalStore(subscribe, getHour, getServerHour);
   return (
-    <p className="inline-flex h-7 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 font-mono text-xs text-muted">
+    <p
+      data-visual-mask
+      className="inline-flex h-7 items-center gap-1.5 rounded-pill border border-border bg-surface px-3 font-mono text-xs text-muted"
+    >
       <span>Namaskara</span>
       <span aria-hidden="true">👋</span>
       {hour === null ? null : <span className="animate-fade-in text-text">{greetingFor(hour)}</span>}

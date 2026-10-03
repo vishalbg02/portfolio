@@ -15,7 +15,7 @@ export function LocalTime({ className }: { className?: string }) {
   const now = useMinute();
   const text = now === null ? "--:-- --" : formatter.format(now).toUpperCase();
   return (
-    <span className={cn("inline-block min-w-[8ch] font-mono font-tabular", className)}>
+    <span data-visual-mask className={cn("inline-block min-w-[8ch] font-mono font-tabular", className)}>
       <time dateTime={now === null ? undefined : new Date(now).toISOString()} suppressHydrationWarning>
         {text}
       </time>{" "}

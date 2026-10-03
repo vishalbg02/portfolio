@@ -28,6 +28,8 @@ No environment variables are required. Every integration degrades gracefully whe
 | `NEXT_PUBLIC_SITE_URL`                               | Canonical URLs, sitemap, OG           | `https://vishalbg.vercel.app`      |
 | `NEXT_PUBLIC_GSC_VERIFICATION`                       | Google Search Console meta tag        | Omitted                            |
 | `SHOW_RECOGNITION`                                   | Recognition strip                     | `true`                             |
+| `AI_DAILY_LIMIT`                                     | Global daily cap on AI calls          | `400`                              |
+| `SHOW_DRAFTS`                                        | Show Ship Log drafts in a build       | Hidden in production               |
 
 ## Scripts
 
@@ -39,6 +41,7 @@ No environment variables are required. Every integration degrades gracefully whe
 | `pnpm build`            | Production build (all pages static)                                                           |
 | `pnpm check:bundle`     | Fails if the home route's initial JS is over **170 KB gzipped** (run after build)             |
 | `pnpm e2e`              | Playwright e2e + axe against the production build                                             |
+| `pnpm resume`           | Validates and builds the résumé PDF (`--open` to view); see docs/UPDATING-RESUME.md           |
 | `pnpm embeddings`       | Re-embeds changed content chunks (needs `GEMINI_API_KEY`); commit `generated/embeddings.json` |
 | `pnpm check:embeddings` | Warns if the committed embeddings are stale. Never fails, never calls the API                 |
 | `pnpm analyze`          | Turbopack bundle analyzer (`next experimental-analyze`)                                       |
@@ -96,9 +99,30 @@ All lazy: the always-mounted [`DelightHost`](components/delight/DelightHost.tsx)
 - **Contact form bundle.** The browser validates with a zero-dependency module (`lib/contact/rules.ts`); the server validates with Zod (`lib/contact/schema.ts`). Importing Zod client-side added ~90 KB gzipped; a parity test keeps both in agreement.
 - **Hydration safety.** Time-dependent UI (clock, greeting) renders a fixed-width placeholder on the server and fills in on the client via `useSyncExternalStore`.
 
+## Where things live
+
+| To change…                   | Edit                                                                                                                                                     |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Any fact about Vishal        | [`content/profile.ts`](content/profile.ts) (everything else reads from it)                                                                               |
+| Résumé wording / which email | [`content/resume.ts`](content/resume.ts), then `pnpm resume`                                                                                             |
+| Add a **project**            | `profile.ts` (+ slug in `lib/content/profile-schema.ts`), `content/work/<slug>.mdx`, a diagram in `components/diagram/graphs.ts`, then `pnpm embeddings` |
+| Add a **Ship Log post**      | `content/log/<slug>.mdx` (filename = slug, `draft: false` to publish)                                                                                    |
+| The /now page                | [`content/now.ts`](content/now.ts)                                                                                                                       |
+| What the AI knows            | It is built from the files above. After editing them run `pnpm embeddings` and commit                                                                    |
+| Colors, radii, motion        | [`styles/tokens.css`](styles/tokens.css)                                                                                                                 |
+
+## Installable app, headers and tests
+
+- **PWA**: `app/manifest.ts` plus generated icons (`/pwa-icon/192|512|maskable`, `/apple-icon`) make the site installable. There is deliberately no service worker: every page is already static and CDN-cached, and a worker would add stale-content risk for no real gain.
+- **Headers**: CSP, HSTS, nosniff, frame, referrer and permissions policies are set in `next.config.ts` and asserted by `tests/e2e/routes.spec.ts`.
+- **Every route** is loaded in CI with the console, network and a 360px viewport watched (hydration mismatches surface as console errors).
+- **Visual regression** (`tests/visual`) runs only on Linux in Playwright's Docker image via `.github/workflows/visual.yml`. Run that workflow manually with `update` ticked to create or refresh baselines (it commits them). Pull requests compare against them once they exist. Never generate baselines on macOS.
+- **Analytics** are cookieless Vercel Analytics + Speed Insights, mounted only on Vercel. `tests/unit/analytics-audit.test.ts` checks every specified event is emitted and none carries personal data.
+
 ## CI / deploy
 
 - `.github/workflows/ci.yml` runs on every push and PR: install → lint → typecheck → unit → build → bundle budget → e2e + axe.
+- `.github/workflows/visual.yml`: visual regression (see above).
 - `.github/workflows/lighthouse.yml` runs Lighthouse CI (mobile, ≥ 95 in all four categories) against each **Vercel preview** URL. Deployment Protection stays on. Requests use the `VERCEL_AUTOMATION_BYPASS_SECRET` repository secret (Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation).
 - Vercel Git integration: pushes to `main` deploy to production, and each PR gets a preview URL. Node 22.x (`engines.node: "22.x"`).
 

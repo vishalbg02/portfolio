@@ -1,0 +1,82 @@
+name: Visual regression
+
+# Baselines are generated and compared ONLY here (Linux, Playwright's Docker image) so font rendering is
+# deterministic. Never generate them on macOS.
+#   - On pull requests: compare against the committed baselines (skipped until baselines exist).
+#   - Run manually ("Run workflow") with update=true to regenerate baselines and commit them to the branch.
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      update:
+        description: "Regenerate baselines and commit them to this branch"
+        type: boolean
+        default: false
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+    env:
+      VISUAL: "1"
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Allow git inside the container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Update baselines
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.update }}
+        run: pnpm exec playwright test --update-snapshots
+
+      - name: Commit baselines
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.update }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/visual
+          git diff --cached --quiet || git commit -m "test(visual): update Linux baselines"
+          git push
+
+      - name: Compare against baselines
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update) && hashFiles('tests/visual/**/*.png') != '' }}
+        run: pnpm exec playwright test
+
+      - name: No baselines yet
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.update) && hashFiles('tests/visual/**/*.png') == '' }}
+        run: echo "No baselines committed yet - run this workflow manually with update=true."
+
+      - name: Upload diff report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff
+          path: |
+            test-results
+            playwright-report
+          retention-days: 7
