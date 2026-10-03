@@ -11,3 +11,9 @@ export async function settleAnimations(page: Page) {
     ),
   );
 }
+
+/** Navigates and waits until client islands (diagram, status badges) have hydrated. */
+export async function gotoHydrated(page: Page, url: string) {
+  await page.goto(url);
+  await page.waitForLoadState("networkidle");
+}
