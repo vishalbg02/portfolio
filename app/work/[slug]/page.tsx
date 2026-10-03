@@ -10,6 +10,8 @@ import { identityBg } from "@/components/work/identity";
 import { ProjectStatus } from "@/components/work/ProjectStatus";
 import { Sketch } from "@/components/work/Sketch";
 import { getAdjacentProjects, getAllCaseStudySlugs, getCaseStudy } from "@/lib/content/work";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { projectJsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { cn } from "@/lib/utils/cn";
 
@@ -56,6 +58,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
 
   return (
     <article className="container-page py-10 md:py-16">
+      <JsonLd data={projectJsonLd(project, study.frontmatter.description)} />
       <Link href="/work" className="font-mono text-sm text-muted transition-colors hover:text-text">
         <span aria-hidden="true">←</span> All work
       </Link>
