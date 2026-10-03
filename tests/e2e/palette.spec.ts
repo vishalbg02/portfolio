@@ -76,17 +76,17 @@ test.describe("command palette", () => {
     await expect(page.getByRole("dialog", { name: "Command palette" })).toBeVisible();
   });
 
-  test("typing '/' inside an input does not open the palette", async ({ page }) => {
+  test("typing '/' or '?' inside a form field does not open the palette or help", async ({ page }) => {
+    // A real field (the contact form), not an injected node: hydration can discard injected DOM.
+    await page.route("**/api/status", (route) => route.fulfill({ json: { checkedAt: "", statuses: {} } }));
     await page.goto("/");
-    await page.evaluate(() => {
-      const i = document.createElement("input");
-      i.id = "probe";
-      i.setAttribute("aria-label", "probe");
-      document.querySelector("main")!.appendChild(i);
-    });
-    await page.locator("#probe").focus();
-    await page.keyboard.press("/");
-    await expect(page.getByRole("dialog", { name: "Command palette" })).toHaveCount(0);
+    await page.waitForLoadState("networkidle");
+    const message = page.getByLabel("Message");
+    await message.scrollIntoViewIfNeeded();
+    await message.focus();
+    await page.keyboard.type("a/b?c");
+    await expect(message).toHaveValue("a/b?c");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
   test("'?' opens the shortcut help overlay", async ({ page }) => {
