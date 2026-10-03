@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { ClickTracker } from "@/components/analytics/ClickTracker";
+import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
 import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { baseMetadata } from "@/lib/seo/metadata";
@@ -39,6 +41,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Footer />
         <ShortcutsHost />
         <ToastHost />
+        <ClickTracker />
+        <VercelAnalytics />
       </body>
     </html>
   );
