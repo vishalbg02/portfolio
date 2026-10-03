@@ -66,7 +66,7 @@ const data = {
       ],
     },
     {
-      role: "Full-Stack Developer Intern",
+      role: "Backend Developer Intern",
       company: "Kaha Technologies Pvt. Ltd. (Cove IoT), Bengaluru",
       period: "May 2024 – Jul 2024",
       current: false,
@@ -225,7 +225,7 @@ const data = {
   },
   certifications: [
     "AWS Academy Cloud Foundations — Amazon Web Services (2025)",
-    "Advanced Android with Kotlin — Infosys Springboard (2024)",
+    "Android App Development with Kotlin — Infosys Springboard (2024)",
     "Introduction to Artificial Intelligence — Infosys Springboard (2024)",
     "Modern Artificial Intelligence Masterclass — Udemy (2026)",
     "Intro to Big Data, Data Science and Artificial Intelligence — Udemy (2026)",
