@@ -14,6 +14,15 @@ export async function settleAnimations(page: Page) {
 
 /** Navigates and waits until client islands (diagram, status badges) have hydrated. */
 export async function gotoHydrated(page: Page, url: string) {
-  await page.goto(url);
+  await gotoReady(page, url);
   await page.waitForLoadState("networkidle");
+}
+
+/**
+ * Navigates and waits until global keyboard shortcuts are live. Pressing Ctrl+K before React has
+ * hydrated is a silent no-op, which made palette tests flaky on slow CI runners.
+ */
+export async function gotoReady(page: Page, url: string) {
+  await page.goto(url);
+  await page.locator('html[data-shortcuts="ready"]').waitFor({ state: "attached" });
 }

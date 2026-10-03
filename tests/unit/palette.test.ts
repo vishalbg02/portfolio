@@ -30,6 +30,7 @@ describe("palette registry", () => {
       .filter((a): a is { type: "route"; href: string } => a.type === "route")
       .map((a) => a.href);
     const allowed = ["/", "/#work", "/#experience", "/#contact"];
+    if (shipped.resume) allowed.push("/resume");
     for (const href of internal) {
       if (allowed.includes(href)) continue;
       if (href.startsWith("/work/")) expect(shipped.caseStudies).toBe(true);

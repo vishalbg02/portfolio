@@ -1,37 +1,33 @@
-import { profile } from "@/content/profile";
 import { Hero } from "@/components/hero/Hero";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { homeJsonLd } from "@/lib/seo/jsonld";
+import { Contact } from "@/components/sections/Contact";
+import { Experience } from "@/components/sections/Experience";
+import { LiveGitHub } from "@/components/sections/LiveGitHub";
+import { Recognition } from "@/components/sections/Recognition";
 import { SelectedWork } from "@/components/sections/SelectedWork";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Stack } from "@/components/sections/Stack";
 
 /**
- * Phase 1 shell: server-rendered hero text (the LCP element) and section anchors.
- * Phase 2+ replaces these placeholders with the full sections.
+ * Home: Hero → Work → Experience → Stack → Live GitHub → Recognition → (Ask Vishal, Phase 5) → Contact.
  */
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={homeJsonLd()} />
       <Hero />
 
       <SelectedWork />
 
-      <section id="experience" aria-labelledby="exp-label" className="container-page py-16">
-        <SectionHeader prefix=">_" label="Experience" id="exp-label" />
-        <p className="text-muted">Timeline ships in Phase 4.</p>
-      </section>
+      <Experience />
 
-      <section id="contact" aria-labelledby="contact-label" className="container-page py-16">
-        <SectionHeader prefix="@" label="Contact" id="contact-label" title="Let's build something." />
-        <p className="text-muted">
-          Email{" "}
-          <a className="text-link underline" href={`mailto:${profile.contact.email}`}>
-            {profile.contact.email}
-          </a>{" "}
-          · Phone{" "}
-          <a className="text-link underline" href={profile.contact.phoneHref}>
-            {profile.contact.phone}
-          </a>
-        </p>
-      </section>
+      <Stack />
+
+      <LiveGitHub />
+
+      <Recognition />
+
+      <Contact />
     </>
   );
 }

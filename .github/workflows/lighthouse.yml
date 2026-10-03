@@ -41,9 +41,12 @@ jobs:
             echo "::warning::VERCEL_AUTOMATION_BYPASS_SECRET is not set — protected previews will return a login page."
           fi
           HEADERS=$(printf '{"x-vercel-protection-bypass":"%s","x-vercel-set-bypass-cookie":"true"}' "$VERCEL_AUTOMATION_BYPASS_SECRET")
+          # Vercel serves every preview with "x-robots-tag: noindex" (production does not), so the
+          # crawlability audit is skipped for previews only. Everything else is asserted as-is.
           pnpm exec lhci autorun \
             --collect.url="$PREVIEW_URL/" \
-            --collect.settings.extraHeaders="$HEADERS"
+            --collect.settings.extraHeaders="$HEADERS" \
+            --collect.settings.skipAudits=is-crawlable
 
       - name: Upload Lighthouse reports
         if: always()

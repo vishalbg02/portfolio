@@ -46,6 +46,10 @@ No environment variables are required. Every integration degrades gracefully whe
 
 All facts live in [`content/profile.ts`](content/profile.ts), validated by a Zod schema ([`lib/content/profile-schema.ts`](lib/content/profile-schema.ts)). Pages, the AI assistant, JSON-LD and the résumé PDF all read from it. Unknown values are `null` with a `TODO(vishal)` comment, and the UI hides them. Never hard-code facts in components.
 
+### Updating the résumé
+
+The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/profile.ts` (shared facts) and `content/resume.ts` (résumé-only wording). Edit, run `pnpm resume --open`, then push. Full guide: [docs/UPDATING-RESUME.md](docs/UPDATING-RESUME.md). SEO and Google indexing checklist: [docs/SEO.md](docs/SEO.md).
+
 ## Design rules (enforced)
 
 - Dark theme only. Tokens are in [`styles/tokens.css`](styles/tokens.css) and mapped in the Tailwind `@theme` ([`app/globals.css`](app/globals.css)). The default Tailwind palette is reset, so only token colors exist as utilities.
@@ -59,6 +63,8 @@ All facts live in [`content/profile.ts`](content/profile.ts), validated by a Zod
 - **ESLint 9, not 10.** `eslint-plugin-react` (pulled in by `eslint-config-next`) crashes on ESLint 10 (`context.getFilename` removed). Revisit when the plugin updates.
 - **Security: CSP.** A static CSP is set in `next.config.ts` headers, with no nonce and no `proxy.ts`, so every page stays statically generated and CDN-cached. Nonces would force dynamic rendering on every request. The trade-off: App Router streams inline flight-data `<script>` tags, so `script-src` includes `'unsafe-inline'`. Next's experimental SRI only hashes external chunks and can't cover those inline scripts, so it was left off. Everything else is locked down: `default-src 'self'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`, `frame-ancestors 'none'`, a tight `connect-src`, plus HSTS, nosniff, Referrer-Policy and Permissions-Policy headers.
 - **Bundle budget.** The menu sheet (Radix Dialog) and the toaster (Sonner) are code-split and load on first use. Heavy features (canvas, palette, terminal, games, chat, diagrams) follow the same rule.
+- **ESM package.** `package.json` has `"type": "module"` so the TypeScript scripts (`pnpm resume`, `snapshot:github`) run as ES modules — `@react-pdf/renderer` pulls in ESM-only sub-packages that CommonJS can't resolve.
+- **Contact form bundle.** The browser validates with a zero-dependency module (`lib/contact/rules.ts`); the server validates with Zod (`lib/contact/schema.ts`). Importing Zod client-side added ~90 KB gzipped; a parity test keeps both in agreement.
 - **Hydration safety.** Time-dependent UI (clock, greeting) renders a fixed-width placeholder on the server and fills in on the client via `useSyncExternalStore`.
 
 ## CI / deploy

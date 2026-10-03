@@ -72,6 +72,8 @@ export const ProfileSchema = z
     location: nonEmpty,
     timezone: nonEmpty,
     status: nonEmpty,
+    /** 2–3 sentence summary for the résumé. Must restate facts that exist elsewhere in this file. */
+    summary: nonEmpty,
     targetRole: z.object({
       title: nonEmpty,
       coreSkills: z.array(nonEmpty).min(1),

@@ -61,7 +61,13 @@ export function Hero() {
             </Magnetic>
             <Magnetic>
               <span className="m-1.5 inline-block sm:m-2">
-                <ButtonLink href={resumeHref} variant="outline">
+                <ButtonLink
+                  href={resumeHref}
+                  variant="outline"
+                  target="_blank"
+                  rel="noopener"
+                  data-track="resume_download"
+                >
                   Résumé
                 </ButtonLink>
               </span>

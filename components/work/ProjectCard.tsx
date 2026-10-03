@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils/cn";
 import { identityBg } from "./identity";
 import { ProjectStatus } from "./ProjectStatus";
 import { Sketch } from "./Sketch";
-import { TrackedLink } from "./TrackedLink";
 
 const MAX_CHIPS = 5;
 const action =
@@ -28,6 +27,7 @@ export function ProjectCard({
 
   return (
     <article
+      data-project={project.slug}
       className={cn(
         "group relative flex h-full flex-col rounded-card border border-border bg-surface p-5",
         "transition-[border-color,transform] duration-200 ease-out",
@@ -77,17 +77,17 @@ export function ProjectCard({
           </Link>
         ) : null}
         {project.live ? (
-          <TrackedLink
+          <a
             href={project.live}
             target="_blank"
             rel="noopener noreferrer"
             className={action}
-            event="project_live_click"
-            props={{ project: project.slug }}
+            data-track="project_live_click"
+            data-track-project={project.slug}
           >
             Live <span aria-hidden="true">↗</span>
             <span className="sr-only"> ({project.name}, opens in a new tab)</span>
-          </TrackedLink>
+          </a>
         ) : null}
         {project.repo ? (
           <a href={project.repo} target="_blank" rel="noopener noreferrer" className={action}>

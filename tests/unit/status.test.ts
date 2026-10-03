@@ -33,7 +33,7 @@ describe("pingUrl / checkProject", () => {
   const respond = (status: number) => ({ status, body: { cancel: async () => {} } }) as unknown as Response;
 
   it("uses HEAD and reports latency", async () => {
-    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => respond(200));
+    const fetchMock = vi.fn(async (...args: [string, RequestInit?]) => (void args, respond(200)));
     vi.stubGlobal("fetch", fetchMock);
     const r = await pingUrl("https://example.com");
     expect(r).toMatchObject({ ok: true, status: 200 });

@@ -65,7 +65,10 @@ export function ShortcutsHost() {
     window.addEventListener("pointermove", warm, { once: true, passive: true });
     window.addEventListener("touchstart", warm, { once: true, passive: true });
     window.addEventListener("keydown", warm, { once: true });
+    // Deterministic "listeners are attached" signal (tests wait on it instead of guessing at timing).
+    document.documentElement.dataset.shortcuts = "ready";
     return () => {
+      delete document.documentElement.dataset.shortcuts;
       window.removeEventListener("keydown", onKey);
       window.removeEventListener(OPEN_PALETTE_EVENT, onOpenPalette);
       window.removeEventListener(OPEN_HELP_EVENT, onOpenHelp);

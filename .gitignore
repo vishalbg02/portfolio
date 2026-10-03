@@ -49,3 +49,6 @@ next-env.d.ts
 
 # local tooling
 /.claude/
+
+# generated résumé preview
+/.resume

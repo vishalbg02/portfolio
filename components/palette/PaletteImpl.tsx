@@ -35,10 +35,16 @@ export default function PaletteImpl({ open, onOpenChange, onCloseAutoFocus }: Pr
         if (action.event) track(action.event);
         window.open(action.href, "_blank", "noopener,noreferrer");
         break;
-      case "download":
+      case "download": {
         if (action.event) track(action.event);
-        window.location.assign(action.href);
+        const a = document.createElement("a");
+        a.href = action.href;
+        a.download = action.filename ?? "";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         break;
+      }
       case "tel":
         window.location.assign(action.href);
         break;

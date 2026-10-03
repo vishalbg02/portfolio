@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { profile } from "@/content/profile";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ProjectCard } from "@/components/work/ProjectCard";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { pageJsonLd } from "@/lib/seo/jsonld";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -14,6 +16,12 @@ export const metadata: Metadata = pageMetadata({
 export default function WorkPage() {
   return (
     <div className="container-page py-12 md:py-20">
+      <JsonLd
+        data={pageJsonLd("Work", "/work", [
+          { name: "Home", path: "/" },
+          { name: "Work", path: "/work" },
+        ])}
+      />
       <SectionHeader prefix="{ }" label="Work" id="work-label" />
       <h1 className="text-3xl font-semibold md:text-4xl">Everything ships.</h1>
       <p className="mt-3 max-w-2xl text-lg text-muted">
