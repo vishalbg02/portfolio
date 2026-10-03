@@ -17,7 +17,7 @@ export const resumeConfig = ResumeConfigSchema.parse({
   updatedAt: "2026-10-03",
 
   header: {
-    subtitle: "Full-Stack Application Developer | Java, Spring Boot, React, Next.js, SQL",
+    subtitle: "Full-Stack Developer | Java, Spring Boot, React, Next.js, Kotlin, SQL",
     location: "Bengaluru, Karnataka",
     email: "primary", // "primary" = vishalbg02@gmail.com · "college" = the university address
   },
