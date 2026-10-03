@@ -80,10 +80,14 @@ test.describe("progress line (mobile)", () => {
     await expect(rail(page)).toBeHidden();
     const bar = page.locator("div.fixed.top-0 > div.origin-left");
     await expect(bar).toHaveCount(1);
-    const scale = () => bar.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
-    expect(await scale()).toBe(0);
+    // measure what is actually painted (bounding box), not the transform value
+    const painted = async () => ((await bar.boundingBox())?.width ?? 0) / 360;
+    expect(await painted()).toBeLessThan(0.02);
+    await page.evaluate(() => window.scrollTo(0, (document.documentElement.scrollHeight - 800) / 2));
+    await expect.poll(painted).toBeGreaterThan(0.35);
+    await expect.poll(painted).toBeLessThan(0.65);
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await expect.poll(scale).toBeGreaterThan(0.95);
+    await expect.poll(painted).toBeGreaterThan(0.95);
   });
 });
 

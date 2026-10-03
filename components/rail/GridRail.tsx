@@ -113,7 +113,11 @@ export default function GridRail({ sections }: { sections: RailSection[] }) {
     <>
       {/* Mobile / tablet: a 2px progress line along the top */}
       <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 lg:hidden">
-        <div ref={bar} className="h-full origin-left scale-x-0 bg-accent will-change-transform" />
+        <div
+          ref={bar}
+          className="h-full origin-left bg-accent will-change-transform"
+          style={{ transform: "scaleX(0)" }}
+        />
       </div>
 
       {/* Desktop: the rail */}
