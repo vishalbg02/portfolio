@@ -31,16 +31,18 @@ No environment variables are required. Every integration degrades gracefully whe
 
 ## Scripts
 
-| Command             | What it does                                                                      |
-| ------------------- | --------------------------------------------------------------------------------- |
-| `pnpm lint`         | ESLint, then the **no-gradient guard**, then Prettier check                       |
-| `pnpm typecheck`    | `next typegen`, then `tsc --noEmit`                                               |
-| `pnpm test`         | Vitest unit tests                                                                 |
-| `pnpm build`        | Production build (all pages static)                                               |
-| `pnpm check:bundle` | Fails if the home route's initial JS is over **170 KB gzipped** (run after build) |
-| `pnpm e2e`          | Playwright e2e + axe against the production build                                 |
-| `pnpm analyze`      | Turbopack bundle analyzer (`next experimental-analyze`)                           |
-| `pnpm verify`       | Everything above, in CI order                                                     |
+| Command                 | What it does                                                                                  |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `pnpm lint`             | ESLint, then the **no-gradient guard**, then Prettier check                                   |
+| `pnpm typecheck`        | `next typegen`, then `tsc --noEmit`                                                           |
+| `pnpm test`             | Vitest unit tests                                                                             |
+| `pnpm build`            | Production build (all pages static)                                                           |
+| `pnpm check:bundle`     | Fails if the home route's initial JS is over **170 KB gzipped** (run after build)             |
+| `pnpm e2e`              | Playwright e2e + axe against the production build                                             |
+| `pnpm embeddings`       | Re-embeds changed content chunks (needs `GEMINI_API_KEY`); commit `generated/embeddings.json` |
+| `pnpm check:embeddings` | Warns if the committed embeddings are stale. Never fails, never calls the API                 |
+| `pnpm analyze`          | Turbopack bundle analyzer (`next experimental-analyze`)                                       |
+| `pnpm verify`           | Everything above, in CI order                                                                 |
 
 ## Content
 
@@ -49,6 +51,16 @@ All facts live in [`content/profile.ts`](content/profile.ts), validated by a Zod
 ### Updating the résumé
 
 The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/profile.ts` (shared facts) and `content/resume.ts` (résumé-only wording). Edit, run `pnpm resume --open`, then push. Full guide: [docs/UPDATING-RESUME.md](docs/UPDATING-RESUME.md). SEO and Google indexing checklist: [docs/SEO.md](docs/SEO.md).
+
+## AI features
+
+- **Ask Vishal** (`/api/chat`): retrieval-augmented Q&A over the profile, case studies and architecture notes. Retrieval is BM25 plus committed Gemini embeddings, fused with reciprocal-rank fusion (`lib/rag`). Answers stream as NDJSON and cite sources as `[n]`.
+- **Job-description matcher** (`/api/match`, on `/resume#match`): the model only extracts requirements. Grading is deterministic and literal against the profile (strong / partial / gap), and years of experience are computed from dates. The result can be copied as Markdown.
+- **Without a key it still works.** No `GEMINI_API_KEY`, an exhausted daily budget, or a model error before the first token all fall back to an offline answer built from the top passages. Questions outside the corpus get a canned refusal with no model call.
+- **Guards** ([`lib/ai/limits.ts`](lib/ai/limits.ts)): chat input ≤ 1,000 characters, job description ≤ 6,000, ≤ 6 history turns, ≤ ~400 / ~1,200 output tokens, 20 s timeout, 20 chat requests per 10 minutes per client, and a global daily cap (`AI_DAILY_LIMIT`, default 400, fails closed). User text is treated as data, never as instructions, and logs hold anonymous counts only.
+- **Model IDs** live only in [`lib/ai/models.ts`](lib/ai/models.ts).
+- **Embeddings** are generated locally and committed. After editing `profile.ts` or a case study, run `pnpm embeddings` and commit `generated/embeddings.json`. CI only warns when they are stale, and the Vercel build never calls the API.
+- Evaluation questions: [tests/ai-evals.md](tests/ai-evals.md). Unit tests blank all API keys, so they are hermetic.
 
 ## Design rules (enforced)
 

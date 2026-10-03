@@ -39,6 +39,9 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Embeddings up to date? (warns only, never calls the API)
+        run: pnpm check:embeddings
+
       - name: Build (no env vars — must degrade gracefully)
         run: pnpm build
 
