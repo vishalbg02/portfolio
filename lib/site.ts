@@ -33,7 +33,7 @@ export const shipped = {
   now: true, // Phase 6
   resume: true, // Phase 4
   recruiter: true, // Phase 6
-  terminal: false, // Phase 7
+  terminal: true, // Phase 7
 } as const;
 
 export const navLinks: ReadonlyArray<{ label: string; href: string }> = [

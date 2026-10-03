@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { countVisiblePosts, draftsVisible } from "@/lib/content/log-meta";
-import { adjacentPosts, extractToc, getAllPosts, parsePost, readingMinutes } from "@/lib/content/log";
+import { adjacentPosts, getAllPosts, parsePost, readingMinutes } from "@/lib/content/log";
 import { buildRss } from "@/lib/content/rss";
 import { postJsonLd } from "@/lib/seo/jsonld";
 

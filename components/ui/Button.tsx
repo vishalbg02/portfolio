@@ -11,7 +11,7 @@ const base =
   "disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  solid: "border-accent bg-accent text-bg hover:border-accent-dim hover:bg-accent-dim hover:text-text",
+  solid: "border-accent bg-accent text-bg hover:brightness-110",
   outline: "border-accent text-accent hover:bg-accent hover:text-bg",
   ghost: "border-border text-text hover:border-border-2 hover:bg-surface-2",
 };
