@@ -185,7 +185,7 @@ const data = {
       detail: "LanSymphony, 20+ teams",
     },
     {
-      place: "1st Runner-Up",
+      place: "2nd Place",
       event: "Innovation Sprint 2026",
       org: "Dept. of CS (PG), CHRIST University × NEOSTATS",
       date: "Jun 2026",
