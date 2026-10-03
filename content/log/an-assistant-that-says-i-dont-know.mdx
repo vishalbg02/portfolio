@@ -1,0 +1,51 @@
+---
+title: "An assistant that says “I don’t know”"
+slug: an-assistant-that-says-i-dont-know
+date: "2026-10-03"
+description: "How the Ask Vishal chat on this site stays grounded: hybrid retrieval, a coverage check before the model is called, and an offline mode that needs no API key."
+tags: [ai, rag, architecture]
+draft: true
+todo:
+  - "Drafted from the repository by Claude. Rewrite in your own voice, add one personal anecdote, then set draft: false."
+---
+
+A portfolio chatbot has one job that matters more than sounding clever: never say something about me that isn't true. This is how the one on this site is built to fail safe.
+
+## The corpus is small on purpose
+
+The assistant answers from three sources only: my typed profile, the four case studies, and the architecture notes behind each diagram. That is about forty short passages. Anything outside them is, by definition, something the site cannot vouch for.
+
+## Retrieval: keywords and meaning together
+
+Each question goes through two rankers:
+
+- **BM25** over a lightly stemmed token index, with a few domain synonyms so “email him” finds the contact passage.
+- **Embedding similarity** against vectors that I generate locally and commit, so the deployed build never calls an API to index content.
+
+The two rankings are merged with reciprocal-rank fusion. Keywords catch exact names like “Spring Boot”; vectors catch paraphrases.
+
+## Decide before you generate
+
+The order of decisions is the interesting part:
+
+```
+1. Does the retrieved evidence cover the question? No  -> canned refusal, no model call.
+2. Is there an API key?                            No  -> offline answer from the top passages.
+3. Is today's budget spent?                        Yes -> offline answer.
+4. Did the model fail before its first token?      Yes -> offline answer.
+5. Otherwise                                           -> streamed, cited answer.
+```
+
+Step one is what keeps it honest. If the question is about Kubernetes and nothing in the corpus mentions Kubernetes, the model is never asked, so it cannot invent an answer.
+
+### Offline is a feature, not an error
+
+With no key, the visitor still gets the two most relevant passages, labelled as an excerpt. The same path covers outages and a spent daily budget.
+
+## Guards that are boring on purpose
+
+Questions are capped at 1,000 characters, history at six turns, output at a few hundred tokens, and each visitor at 20 questions per ten minutes, with a global daily cap on top. User text is treated as data inside the prompt, never as instructions. Logs hold anonymous counts only.
+
+## What I would test next
+
+The unit tests run with every API key blanked, so they are deterministic. The part I still check by hand is tone: whether answers read like a careful colleague describing me, not a brochure.

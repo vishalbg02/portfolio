@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
 import { profile } from "@/content/profile";
 import { resumeConfig } from "@/content/resume";
-import { site } from "@/lib/site";
+import { getAllPosts } from "@/lib/content/log";
+import { shipped, site } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = shipped.log ? await getAllPosts() : [];
   const built = process.env.NEXT_PUBLIC_BUILD_TIME
     ? new Date(process.env.NEXT_PUBLIC_BUILD_TIME)
     : new Date();
@@ -18,6 +20,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     })),
     { url: `${site.url}/resume`, lastModified: resumeUpdated, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${site.url}/recruiter`, lastModified: built, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${site.url}/now`, lastModified: built, changeFrequency: "monthly", priority: 0.5 },
+    ...(shipped.log
+      ? [
+          { url: `${site.url}/log`, lastModified: built, changeFrequency: "weekly" as const, priority: 0.7 },
+          ...posts.map((p) => ({
+            url: `${site.url}/log/${p.frontmatter.slug}`,
+            lastModified: new Date(`${p.frontmatter.updated ?? p.frontmatter.date}T00:00:00Z`),
+            changeFrequency: "monthly" as const,
+            priority: 0.6,
+          })),
+        ]
+      : []),
     // The PDF itself: recruiters often search for "<name> resume pdf".
     { url: `${site.url}/resume.pdf`, lastModified: resumeUpdated, changeFrequency: "monthly", priority: 0.6 },
   ];

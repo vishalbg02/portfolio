@@ -1,0 +1,46 @@
+---
+title: "A strict CSP on a fully static Next.js site"
+slug: a-strict-csp-on-a-static-nextjs-site
+date: "2026-10-01"
+description: "Why this site uses a static Content-Security-Policy with no nonce, what that costs, and which directives stay locked down."
+tags: [security, nextjs, performance]
+draft: true
+todo:
+  - "Drafted from the repository by Claude. Rewrite in your own voice, then set draft: false."
+---
+
+I wanted two things that pull in opposite directions: a strict Content-Security-Policy and pages that are fully static and cached at the edge.
+
+## Why not a nonce
+
+The textbook answer is a per-request nonce. But a nonce has to be generated for every request, which means every page is rendered on demand. For a portfolio whose pages never change between deploys, that trades speed for little.
+
+So the policy is a plain header set in the Next.js config. There is no nonce and no proxy layer, and every page stays static.
+
+## What it costs
+
+The App Router streams small inline scripts to carry data to the client. Without a nonce, `script-src` has to allow `'unsafe-inline'`. Next.js can hash external chunks, but not those inline scripts, so I tried the experimental option and left it off.
+
+I would rather say that plainly in the README than pretend the policy is stricter than it is.
+
+## What stays locked down
+
+Everything else is tight:
+
+```
+default-src 'self'
+object-src 'none'
+base-uri 'self'
+form-action 'self'
+frame-ancestors 'none'
+```
+
+`connect-src` lists only the services the site actually talks to. Alongside the policy go HSTS, `nosniff`, a referrer policy and a permissions policy.
+
+### One function, tested
+
+The policy is built by a small pure function, so unit tests can assert what is and isn't allowed. Preview deployments additionally allow Vercel's feedback widget. Production does not.
+
+## How I know it works
+
+Playwright loads the site in a real browser and fails on console errors, so a blocked resource shows up as a failing test instead of a missing image.

@@ -1,0 +1,40 @@
+---
+title: "One source of truth for the site and the résumé PDF"
+slug: one-source-of-truth-for-site-and-resume
+date: "2026-10-02"
+description: "Why my website, my résumé page and my résumé PDF all read the same typed data, and the PDF text-extraction bug that taught me to test the output."
+tags: [resume, typescript, tooling]
+draft: true
+todo:
+  - "Drafted from the repository by Claude. Rewrite in your own voice, then set draft: false."
+---
+
+My résumé used to live in a PDF and my site in code, and they drifted apart within a week. The fix was to stop having two copies.
+
+## One typed file
+
+Everything factual lives in a single TypeScript file, validated by a schema when the site builds. A typo in a date fails the build instead of shipping. Pages, the AI assistant, structured data for search engines and the résumé all read from it.
+
+Résumé-only wording, such as shorter project bullets, lives in a second small file. Facts that appear on the site are never retyped there.
+
+## One model, two outputs
+
+A single function turns those files into a résumé model. The `/resume` page renders it as HTML and a generated PDF renders the same model. They cannot disagree because there is nothing to disagree about.
+
+Updating the résumé is: edit the file, run `pnpm resume`, push. The command rebuilds the PDF and warns if it spills onto a second page.
+
+## The bug that taught me to test the output
+
+ATS parsers read text out of the PDF, so I extracted the text of my own PDF and read it. Section headings came out as “S U M M A R Y”. The cause was letter-spacing: the PDF library positions each glyph separately, and extraction then sees gaps. The fix was to remove the styling and uppercase the words in code instead.
+
+### Fonts are a separate face, not a weight
+
+The built-in PDF fonts have bold and italic as distinct font names. Asking for a bold weight silently did nothing, and my first versions had no bold at all. I only noticed because I looked at the rendered page rather than trusting the code.
+
+## What I check on every change
+
+- The text extracts in the right order, with whole-word headings.
+- The PDF stays at one page.
+- Quotes are typographic, so “boAt’s” never prints with a straight apostrophe.
+
+None of that is clever. It is just testing the artefact people actually receive.

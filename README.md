@@ -62,6 +62,14 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 - **Embeddings** are generated locally and committed. After editing `profile.ts` or a case study, run `pnpm embeddings` and commit `generated/embeddings.json`. CI only warns when they are stale, and the Vercel build never calls the API.
 - Evaluation questions: [tests/ai-evals.md](tests/ai-evals.md). Unit tests blank all API keys, so they are hermetic.
 
+## Recruiter Mode, Ship Log and /now
+
+- **Recruiter Mode** is a static route, [`/recruiter`](app/recruiter/page.tsx): the essentials on one page (status, experience, shipped projects, skills, awards, contact, résumé download) plus the job-description matcher. The nav toggle links between `/` and `/recruiter`, and the old `/?mode=recruiter` form redirects there (`next.config.ts`). No cookie, no flash.
+- **Ship Log** (`/log`): MDX posts in [`content/log/`](content/log) with Zod-validated frontmatter (`title`, `slug`, `date`, `description`, `tags`, `draft`). Each post gets a table of contents, reading time, Open Graph image, JSON-LD and an RSS entry (`/log/rss.xml`). **Drafts are hidden in production builds** and visible in dev, on Vercel previews, and when `SHOW_DRAFTS=true` (CI sets it so the post template is covered by e2e). The nav, palette and sitemap mention the log only once at least one post is published. The three seeded posts are drafts written from this repo's own facts: rewrite them in your voice, then set `draft: false`.
+- **/now** reads [`content/now.ts`](content/now.ts). Facts come from `profile.ts`; personal extras (`reading`, `learning`, `elsewhere`) are `null` until you fill them in, and null rows are hidden.
+
+To add a post, create `content/log/<slug>.mdx` (the filename must equal the `slug`), then push.
+
 ## Design rules (enforced)
 
 - Dark theme only. Tokens are in [`styles/tokens.css`](styles/tokens.css) and mapped in the Tailwind `@theme` ([`app/globals.css`](app/globals.css)). The default Tailwind palette is reset, so only token colors exist as utilities.

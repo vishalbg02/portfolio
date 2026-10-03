@@ -45,7 +45,7 @@ git push                                           # 3. Vercel rebuilds automati
 
 **New project** — add it to `projects` in `profile.ts` (this also creates its site card and case-study slot), then either list it in `content/resume.ts → projects` with 1–3 bullets, or add it to `omittedProjects` with a reason.
 
-**Change the email printed on the résumé** — `header.email` in `content/resume.ts`: `"college"` or `"primary"`.
+**Change the email printed on the résumé** — `header.email` in `content/resume.ts`: `"primary"` (personal Gmail, the default) or `"college"`.
 
 **Résumé too long?** Shorten a bullet or remove an item in `content/resume.ts`; `pnpm resume` tells you when it fits again.
 

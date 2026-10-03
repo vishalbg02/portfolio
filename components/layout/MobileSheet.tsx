@@ -1,5 +1,6 @@
 "use client";
 
+import { RecruiterToggle } from "./RecruiterToggle";
 import Link from "next/link";
 import { Dialog } from "radix-ui";
 import { navLinks, resumeHref, site } from "@/lib/site";
@@ -41,6 +42,10 @@ export default function MobileSheet({
                 {link.label}
               </Link>
             ))}
+            <RecruiterToggle
+              onNavigate={() => onOpenChange(false)}
+              className="flex items-baseline gap-4 rounded-sm px-2 py-3 text-2xl font-semibold text-text hover:bg-surface"
+            />
           </nav>
           <div className="border-t border-border p-4">
             <a

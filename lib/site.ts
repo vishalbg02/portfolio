@@ -27,10 +27,12 @@ export const site = {
  */
 export const shipped = {
   caseStudies: true, // Phase 3
-  log: false, // Phase 6
-  now: false, // Phase 6
+  // The Ship Log is mentioned (nav, palette, sitemap) only once a visitor could see a post.
+  // next.config.ts counts them at build time; drafts don't count in production.
+  log: Number(process.env.NEXT_PUBLIC_LOG_POSTS ?? 0) > 0, // Phase 6
+  now: true, // Phase 6
   resume: true, // Phase 4
-  recruiter: false, // Phase 6
+  recruiter: true, // Phase 6
   terminal: false, // Phase 7
 } as const;
 
