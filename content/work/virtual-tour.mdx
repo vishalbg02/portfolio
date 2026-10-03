@@ -1,0 +1,60 @@
+---
+slug: virtual-tour
+description: Case study of the CHRIST University Virtual Tour, an immersive 360-degree campus experience built with React, Three.js and TypeScript, deployed on Vercel.
+glance:
+  role: Personal project
+  platform: Web (responsive)
+  status: Live
+todo:
+  - "TODO(vishal): add the project period."
+  - "TODO(vishal): the Why / Trade-off lines are written from the properties of each technology, not from your own notes. Replace with your real reasoning."
+  - "TODO(vishal): replace the illustrative snippet with real code if you want to show it."
+---
+
+## The problem
+
+A way to explore the CHRIST University campus in 360 degrees, from a browser on a laptop or a phone.
+
+## What I built
+
+An immersive 360° web experience in React, Three.js and TypeScript, deployed on Vercel.
+
+- **Interactive hotspots** on the panorama, with multimedia integration.
+- **Smooth navigation controls** for moving around the campus.
+- **Responsive design,** optimised for web and mobile.
+
+## Key decisions
+
+<Decisions>
+  <Decision
+    title="Three.js for the panorama"
+    why="A 360° scene is a 3D problem. Three.js renders it in the browser without a plugin."
+    tradeoff="WebGL scenes are heavier than static pages, so performance on phones needs care."
+  />
+  <Decision
+    title="Hotspots as an interactive layer"
+    why="Hotspots turn a passive panorama into a guided tour and keep multimedia one click away."
+    tradeoff="Each hotspot is content that someone has to place and maintain."
+  />
+  <Decision
+    title="Responsive from the start"
+    why="A tour is only useful if it works wherever it's opened, on a desktop browser or a phone."
+    tradeoff="Mouse and touch controls both have to feel right, which adds interaction testing."
+  />
+</Decisions>
+
+## Architecture
+
+From the React app to the media behind each hotspot. Hover or focus a layer for its job, or press **Run request**.
+
+<Architecture />
+
+## Code in the wild
+
+One illustrative snippet shows how a panorama sphere and a hotspot position fit together. It is not lifted from the project.
+
+<Snippet id="vt-hotspot" />
+
+## Outcome
+
+The tour is live on Vercel, with the source on GitHub.

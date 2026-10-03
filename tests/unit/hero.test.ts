@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { greetingFor } from "@/lib/hero/greeting";
-import { GLYPHS, VBG_COLS, VBG_PAD_Y, VBG_ROWS, buildVbgGrid } from "@/lib/hero/vbg";
 import { DECAY_MS, RIPPLE_MS, TrailField, levelFor } from "@/lib/hero/trail";
 
 describe("greetingFor", () => {
@@ -16,35 +15,6 @@ describe("greetingFor", () => {
     [4, "Up late?"],
   ])("hour %i → %s", (hour, expected) => {
     expect(greetingFor(hour)).toBe(expected);
-  });
-});
-
-describe("VBG grid", () => {
-  const cells = buildVbgGrid();
-
-  it("covers the full grid with unique coordinates", () => {
-    expect(cells).toHaveLength(VBG_COLS * VBG_ROWS);
-    expect(new Set(cells.map((c) => `${c.x},${c.y}`)).size).toBe(cells.length);
-  });
-
-  it("spells VBG across exactly 7 letter rows", () => {
-    const letterRows = new Set(cells.filter((c) => c.letter).map((c) => c.y));
-    expect([...letterRows].sort((a, b) => a - b)).toEqual(
-      [2, 3, 4, 5, 6, 7, 8].map((y) => y - 2 + VBG_PAD_Y),
-    );
-    const litCount = Object.values(GLYPHS).reduce((n, g) => n + g.join("").replaceAll("0", "").length, 0);
-    expect(cells.filter((c) => c.letter)).toHaveLength(litCount);
-  });
-
-  it("uses --grid-4 for letters and only levels 0/1 around them", () => {
-    for (const c of cells) {
-      if (c.letter) expect(c.level).toBe(4);
-      else expect([0, 1]).toContain(c.level);
-    }
-  });
-
-  it("is deterministic (server and client render the same grid)", () => {
-    expect(buildVbgGrid()).toEqual(cells);
   });
 });
 

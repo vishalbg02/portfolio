@@ -1,0 +1,63 @@
+---
+slug: golden-verdict
+description: Case study of Golden Verdict, a production legal and tax compliance SaaS with role-based access, built with Next.js, TypeScript and Firestore.
+glance:
+  role: Freelance developer
+  platform: Web app
+  status: Live in production
+todo:
+  - "TODO(vishal): add the project period."
+  - "TODO(vishal): the Why / Trade-off lines are written from the properties of each technology, not from your own notes. Replace with your real reasoning."
+  - "TODO(vishal): replace the illustrative snippets with real code if you want to show it."
+---
+
+## The problem
+
+Golden Verdict is a legal and tax compliance service for four kinds of user: Customers, Legal Partners, Managers and Administrators. Each of them needs a different view of the same applications, and access has to follow the role.
+
+## What I built
+
+I built it as a freelance project and it runs in production. Next.js, TypeScript, Firebase and Firestore, Tailwind CSS and the Brevo API make up the stack.
+
+- **The service workflow, end to end.** A customer purchases a service, uploads documents and follows the application through a unique request ID, while status updates go out automatically. Firestore transactional operations and a scalable schema sit underneath.
+- **Admin dashboards** for managing 50+ services, users, pricing and workflow assignments.
+- **Invoices and email** generated and sent through the Brevo APIs.
+- **Security and reach:** CSRF protection, secure session handling and SEO-optimised public service pages.
+
+## Key decisions
+
+<Decisions>
+  <Decision
+    title="Firestore transactions for request tracking"
+    why="A purchase touches more than one record: the request, its unique ID and its first status. A transaction makes those writes succeed or fail together."
+    tradeoff="Transactions retry under contention and have size limits, so each one has to stay small and focused."
+  />
+  <Decision
+    title="Role-based access across four roles"
+    why="Every role sees the same applications differently. Keeping the permission rules in one place stops any dashboard from showing more than it should."
+    tradeoff="Every new screen or action has to be mapped to a role up front, which is more design work than one shared dashboard."
+  />
+  <Decision
+    title="Brevo for invoices and email"
+    why="A dedicated API handles invoice generation and email delivery, so the app doesn't have to build either itself."
+    tradeoff="The workflow now depends on a third-party service being available."
+  />
+</Decisions>
+
+## Architecture
+
+Follow a request from the customer to the admin dashboard. Hover or focus a component to see its job, or press **Run request**.
+
+<Architecture />
+
+## Code in the wild
+
+Two short snippets show the shape of the approach. They are illustrative and not lifted from the production repository.
+
+<Snippet id="gv-request-transaction" />
+
+<Snippet id="gv-role-guard" />
+
+## Outcome
+
+Golden Verdict is live in production. It serves four roles with role-based access, and its admin dashboards manage 50+ services.

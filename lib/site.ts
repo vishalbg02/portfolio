@@ -25,7 +25,7 @@ export const site = {
  * Flip a flag in the phase that ships the route.
  */
 export const shipped = {
-  caseStudies: false, // Phase 3
+  caseStudies: true, // Phase 3
   log: false, // Phase 6
   now: false, // Phase 6
   recruiter: false, // Phase 6

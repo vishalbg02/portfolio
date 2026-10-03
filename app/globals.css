@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+@import "../styles/sketches.css";
 
 /*
  * Tailwind theme: reset the default palette so only design tokens exist as utilities.
@@ -157,23 +158,6 @@
   }
 }
 
-/* VBG hero grid: letters dip toward --grid-2 and return to --grid-4 in a wave (col-staggered delay). */
-.vbg-letter {
-  fill: var(--grid-4);
-  animation: vbg-wave 4.2s ease-in-out infinite;
-}
-
-@keyframes vbg-wave {
-  0%,
-  45%,
-  100% {
-    fill: var(--grid-4);
-  }
-  22% {
-    fill: var(--grid-2);
-  }
-}
-
 @utility container-page {
   width: 100%;
   max-width: 1200px;
@@ -199,4 +183,18 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Shiki output: scrollable, tight, surface-colored (the theme inlines its colors). */
+.code-block pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 16px;
+  line-height: 1.6;
+  background-color: var(--surface) !important;
+  font-family: var(--font-mono);
+}
+.code-block code {
+  font-family: inherit;
+  white-space: pre;
 }

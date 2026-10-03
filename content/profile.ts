@@ -81,6 +81,7 @@ const data = {
       tagline: "Legal & tax compliance SaaS",
       type: "Freelance · Production",
       period: null, // TODO(vishal): project period
+      badge: null,
       live: "https://goldenverdict.com",
       repo: null,
       stack: ["Next.js", "TypeScript", "Firebase", "Firestore", "Tailwind CSS", "Brevo API"],
@@ -98,6 +99,7 @@ const data = {
       tagline: "Employee management platform (web + mobile)",
       type: "Internship · Social Agent · Live on Google Play",
       period: null, // TODO(vishal): project period
+      badge: "Live on Google Play",
       live: null, // TODO(vishal): Google Play URL
       repo: null,
       stack: [
@@ -124,6 +126,7 @@ const data = {
       tagline: "Offline, encrypted peer-to-peer communication over LAN",
       type: "Personal · Built live at Windsurf × The AI Collective OpenBuild (2nd place)",
       period: null, // TODO(vishal): project period
+      badge: "2nd place · OpenBuild",
       live: null,
       repo: null, // TODO(vishal): repository URL
       stack: ["Python", "Sockets", "AES-256", "Multi-threading"],
@@ -139,6 +142,7 @@ const data = {
       tagline: "Immersive 360° web experience",
       type: "Personal",
       period: null, // TODO(vishal): project period
+      badge: null,
       live: "https://virtual-tour-opal.vercel.app",
       repo: "https://github.com/vishalbg02/virtual_tour",
       stack: ["React", "Three.js", "TypeScript", "Vercel"],
