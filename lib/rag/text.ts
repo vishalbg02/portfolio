@@ -24,7 +24,8 @@ const JOINS: Array<[RegExp, string]> = [
 ];
 
 export function stem(token: string): string {
-  if (token.length > 5 && token.endsWith("ing")) return token.slice(0, -3);
+  // length > 6 keeps "spring" and "string" whole while "building" → "build"
+  if (token.length > 6 && token.endsWith("ing")) return token.slice(0, -3);
   if (token.length > 4 && token.endsWith("ies")) return token.slice(0, -3) + "y";
   if (token.length > 4 && token.endsWith("ed")) return token.slice(0, -2);
   // keep "nodejs", "nextjs", "threejs" intact

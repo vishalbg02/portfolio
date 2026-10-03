@@ -18,6 +18,7 @@ const ServerEnvSchema = z.object({
   CONTACT_TO_EMAIL: z.email().optional().catch(undefined),
   UPSTASH_REDIS_REST_URL: optional,
   UPSTASH_REDIS_REST_TOKEN: optional,
+  AI_DAILY_LIMIT: z.coerce.number().int().positive().max(100_000).optional().catch(undefined),
   SHOW_RECOGNITION: z
     .enum(["true", "false"])
     .optional()
@@ -32,6 +33,7 @@ export const env = ServerEnvSchema.parse({
   CONTACT_TO_EMAIL: process.env.CONTACT_TO_EMAIL || undefined,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+  AI_DAILY_LIMIT: process.env.AI_DAILY_LIMIT,
   SHOW_RECOGNITION: process.env.SHOW_RECOGNITION,
 });
 

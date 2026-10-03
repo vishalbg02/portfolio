@@ -1,0 +1,21 @@
+/** Hard limits for the AI features. Cost and abuse guards live here, in one place. */
+export const LIMITS = {
+  chatInputChars: 1_000,
+  jdInputChars: 6_000,
+  /** Only this many most-recent messages are ever sent to the model. */
+  historyTurns: 6,
+  /** Assistant messages come back from the client, so cap them too. */
+  historyAssistantChars: 1_200,
+  chatMaxOutputTokens: 400,
+  matchMaxOutputTokens: 1_200,
+  requestTimeoutMs: 20_000,
+  embedTimeoutMs: 4_000,
+  /** Per client (anonymous hash): 20 questions / 10 minutes. */
+  chatRate: { limit: 20, windowSec: 600 },
+  matchRate: { limit: 6, windowSec: 600 },
+  retrievalK: 5,
+  bodyBytes: 24_000,
+} as const;
+
+/** Global requests/day that may reach a paid model (chat + match combined). Override with AI_DAILY_LIMIT. */
+export const DEFAULT_DAILY_LIMIT = 400;

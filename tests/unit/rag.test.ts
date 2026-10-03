@@ -35,6 +35,8 @@ describe("tokenizer", () => {
     expect(stem("services")).toBe("service");
     expect(stem("class")).toBe("class");
     expect(stem("building")).toBe("build");
+    expect(stem("spring")).toBe("spring"); // not "spr"
+    expect(stem("testing")).toBe("test");
   });
   it("expands domain synonyms", () => {
     expect(expandQuery(["email"])).toEqual(expect.arrayContaining(["email", "contact"]));

@@ -15,6 +15,16 @@ export function cosine(a: number[], b: number[]): number {
 }
 
 const RRF_K = 60;
+
+/**
+ * Best-chunk cosine similarity at or above which a question counts as "about Vishal".
+ * Calibrated 2026-10-03 with gemini-embedding-001 @ 768 dims on 11 on-topic and 8 off-topic questions:
+ * on-topic best scores were 0.611–0.753, off-topic 0.505–0.585 (poem, weather, code, injection, trivia).
+ * Re-measure if the embedding model or corpus changes.
+ */
+export const VECTOR_RELEVANT = 0.6;
+/** Below this coverage a question is treated as unrelated: no model call, polite canned answer. */
+export const RELEVANCE_MIN = 0.4;
 /** Keyword hits scoring below this share of the best hit are discarded. */
 const FLOOR = 0.35;
 const KEEP_TOP = 3;
@@ -45,6 +55,11 @@ export class Retriever {
 
   constructor(private readonly chunks: EmbeddedChunk[]) {
     this.bm25 = new Bm25Index(chunks);
+  }
+
+  /** All chunks (used by the job-description matcher, which does its own literal matching). */
+  chunkList(): EmbeddedChunk[] {
+    return this.chunks;
   }
 
   get hasVectors(): boolean {
@@ -84,7 +99,7 @@ export class Retriever {
       return {
         mode: "hybrid",
         // a strong semantic match counts as relevant even when few literal words overlap
-        coverage: Math.max(coverage, topVec >= 0.62 ? 1 : topVec >= 0.5 ? 0.5 : 0),
+        coverage: Math.max(coverage, topVec >= VECTOR_RELEVANT ? 1 : 0),
         results: this.pinEntities(
           query,
           ranked.map(([index, score]) => ({ chunk: this.chunks[index]!, score })),
