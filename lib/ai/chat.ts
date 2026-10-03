@@ -84,6 +84,8 @@ export async function* chatEvents(messages: ChatMessage[]): AsyncGenerator<ChatE
     maxOutputTokens: LIMITS.chatMaxOutputTokens,
     temperature: 0.2,
     abortSignal: AbortSignal.timeout(LIMITS.requestTimeoutMs),
+    // One retry, not the default two: a quota/overload error should reach the offline answer quickly.
+    maxRetries: 1,
     onError: ({ error }) => {
       failure = error;
     },

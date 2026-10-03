@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { profile } from "@/content/profile";
 import { breadcrumbNode, homeJsonLd, pageJsonLd, personNode, projectJsonLd } from "@/lib/seo/jsonld";
 import { HOME_DESCRIPTION, HOME_TITLE, pageMetadata } from "@/lib/seo/metadata";
@@ -26,7 +26,7 @@ describe("JSON-LD", () => {
     });
     expect(p.sameAs).toEqual([profile.contact.linkedin, profile.contact.github]);
     expect(p.alumniOf.name).toContain("CHRIST");
-    expect(p.worksFor).toEqual({ "@type": "Organization", name: "Social Agent (Bricstal Pvt. Ltd.)" });
+    expect(p).not.toHaveProperty("worksFor"); // no current role: the Social Agent internship ended
     const text = JSON.stringify(homeJsonLd());
     expect(text).not.toContain(profile.contact.email);
     expect(text).not.toContain(profile.contact.collegeEmail);
@@ -103,12 +103,17 @@ describe("metadata", () => {
 });
 
 describe("sitemap", () => {
-  const urls = sitemap().map((e) => e.url);
+  let urls: string[] = [];
+  beforeAll(async () => {
+    urls = (await sitemap()).map((e) => e.url);
+  });
   it("lists the home page, work pages, résumé page and PDF with absolute URLs", () => {
     expect(urls).toContain(`${site.url}/`);
     expect(urls).toContain(`${site.url}/work`);
     expect(urls).toContain(`${site.url}/resume`);
     expect(urls).toContain(`${site.url}/resume.pdf`);
+    expect(urls).toContain(`${site.url}/recruiter`);
+    expect(urls).toContain(`${site.url}/now`);
     for (const p of profile.projects) expect(urls).toContain(`${site.url}/work/${p.slug}`);
     expect(urls.every((u) => u.startsWith("https://"))).toBe(true);
     expect(new Set(urls).size).toBe(urls.length);

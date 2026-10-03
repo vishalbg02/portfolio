@@ -24,7 +24,7 @@ type Msg = {
 export const SUGGESTIONS = [
   "What has he built with Spring Boot?",
   "Is he a fit for a full-stack role?",
-  "Tell me about Golden Verdict",
+  "Where is he working now?",
   "How can I contact him?",
 ];
 

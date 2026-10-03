@@ -84,15 +84,13 @@ test.describe("résumé", () => {
 });
 
 test.describe("experience", () => {
-  test("shows each role with its first bullet, a pulsing current node, and expandable details", async ({
-    page,
-  }) => {
+  test("shows each role with its first bullet, and expandable details", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
     const exp = page.locator("#experience");
     await expect(exp.getByRole("heading", { name: "App Developer Intern" })).toBeVisible();
-    await expect(exp.getByText("May 2025 – Present")).toBeVisible();
-    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(1);
+    await expect(exp.getByText("May 2025 – Mar 2026")).toBeVisible();
+    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(0); // no current role
     const second = exp.locator("li", { hasText: "Implemented geolocation- and NFC-based attendance" });
     await expect(second.getByText("Implemented geolocation- and NFC-based attendance")).toBeHidden();
     await exp.getByText("Show details").first().click();

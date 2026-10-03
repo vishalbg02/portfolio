@@ -34,13 +34,47 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     ]),
   });
 
+  // Right now: the question recruiters ask most. Derived, so it can never disagree with the timeline.
+  const currentRole = p.experience.find((e) => e.current);
+  const lastRole = p.experience.find((e) => !e.current);
+  const studying = p.education.filter((e) => /pursuing|expected/i.test(`${e.note} ${e.period}`));
+  chunks.push({
+    id: "status",
+    title: "Where Vishal is right now (current status)",
+    url: "/now",
+    text: join([
+      "Current status, what he is doing now, where he works at the moment, and whether he is employed or available:",
+      currentRole
+        ? `He currently works as ${currentRole.role} at ${currentRole.company} (${currentRole.period}).`
+        : `He is not currently working in a job or internship.${lastRole ? ` His most recent role was ${lastRole.role} at ${lastRole.company}, ${lastRole.period}.` : ""}`,
+      `Availability: ${p.status}.`,
+      studying.length
+        ? `Studies: currently pursuing ${studying.map((e) => `${e.degree} at ${e.school} (${e.period})`).join("; ")}.`
+        : null,
+      `Based in ${p.location}.`,
+    ]),
+  });
+
+  chunks.push({
+    id: "employers",
+    title: "Work history: companies and roles",
+    url: "/#experience",
+    text: join([
+      `Work history of ${p.name}, newest first (companies, employers, internships, roles and dates):`,
+      ...p.experience.map(
+        (e) => `${e.role} at ${e.company}, ${e.period}${e.current ? " (current)" : " (past role)"}.`,
+      ),
+      `Total professional experience so far consists of these internships; ${p.name} is also a student.`,
+    ]),
+  });
+
   p.experience.forEach((e, i) =>
     chunks.push({
       id: `experience-${i}`,
       title: `${e.role} at ${e.company.split(",")[0]} (${e.period})`,
       url: "/#experience",
       text: join([
-        `${e.role} at ${e.company}, ${e.period}${e.current ? " (current role)" : ""}.`,
+        `${e.role} at ${e.company}, ${e.period}${e.current ? " (current role)" : " (past role, ended)"}.`,
         ...e.points,
       ]),
     }),
@@ -113,9 +147,24 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
   });
   chunks.push({
     id: "personal",
-    title: "Languages",
+    title: "Languages and personal facts",
     url: "/resume",
-    text: `Languages spoken: ${p.languages.join(", ")}.`,
+    text: join([
+      `Languages spoken: ${p.languages.join(", ")}.`,
+      `Based in ${p.location}, time zone ${p.timezone} (IST).`,
+      `Motto: "${p.motto}"`,
+    ]),
+  });
+  chunks.push({
+    id: "site",
+    title: "How this portfolio website is built",
+    url: "/",
+    text: [
+      `This portfolio website was designed and built by ${p.name}.`,
+      "It uses Next.js (App Router, static pages), React, TypeScript and Tailwind CSS, and is deployed on Vercel.",
+      "The Ask Vishal assistant answers only from the site's own content using retrieval (keyword search plus embeddings) and a Gemini model; without an API key it falls back to showing relevant passages.",
+      "Other features: a job-description matcher on the résumé page, a one-page Recruiter Mode, a command palette (Ctrl or Cmd + K), live project status badges, a live GitHub contribution calendar, and a downloadable ATS-friendly résumé PDF.",
+    ].join(" "),
   });
 
   return chunks;

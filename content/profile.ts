@@ -57,8 +57,8 @@ const data = {
     {
       role: "App Developer Intern",
       company: "Social Agent (Bricstal Pvt. Ltd.), Bengaluru",
-      period: "May 2025 – Present",
-      current: true,
+      period: "May 2025 – Mar 2026",
+      current: false,
       points: [
         "Built and shipped Talnio, an employee management platform on web (React 19, Tailwind CSS) and mobile (Flutter/Dart) with Firebase Authentication and Cloud Firestore real-time sync — live on Google Play.",
         "Implemented geolocation- and NFC-based attendance with automated PDF/Excel reports powering workforce analytics.",
@@ -102,7 +102,7 @@ const data = {
       name: "Talnio",
       tagline: "Employee management platform (web + mobile)",
       type: "Internship · Social Agent · Live on Google Play",
-      period: "May 2025 – Present", // the internship it was built in
+      period: "May 2025 – Mar 2026", // the internship it was built in
       badge: "Live on Google Play",
       live: null, // TODO(vishal): Google Play URL
       repo: null,

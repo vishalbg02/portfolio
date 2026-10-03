@@ -30,7 +30,7 @@ test.describe("Ask Vishal — inline section (offline mode: the e2e server has n
     await expect(chips).toHaveText([
       "What has he built with Spring Boot?",
       "Is he a fit for a full-stack role?",
-      "Tell me about Golden Verdict",
+      "Where is he working now?",
       "How can I contact him?",
     ]);
   });
@@ -81,8 +81,8 @@ test.describe("Ask Vishal — inline section (offline mode: the e2e server has n
 
   test("New chat clears the conversation and brings the suggestions back", async ({ page }) => {
     const { section, log } = await openInline(page);
-    await section.getByRole("button", { name: "Tell me about Golden Verdict" }).click();
-    await expect(log.getByText(/Golden Verdict/).first()).toBeVisible();
+    await section.getByRole("button", { name: "Where is he working now?" }).click();
+    await expect(log.getByText(/Social Agent/).first()).toBeVisible();
     await section.getByRole("button", { name: "New chat" }).click();
     await expect(section.getByRole("list", { name: "Suggested questions" })).toBeVisible();
   });
