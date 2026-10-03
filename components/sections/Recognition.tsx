@@ -6,7 +6,7 @@ import { features } from "@/lib/env";
 export function Recognition() {
   if (!features.recognition) return null;
   return (
-    <section aria-labelledby="recognition-label" className="container-page py-10 md:py-14">
+    <section id="recognition" aria-labelledby="recognition-label" className="container-page py-10 md:py-14">
       <SectionHeader prefix="::" label="Recognition" id="recognition-label" className="mb-5" />
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {profile.recognition.map((r) => (

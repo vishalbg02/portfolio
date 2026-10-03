@@ -28,7 +28,16 @@ export default defineConfig({
     : {
         command: `pnpm start --port ${PORT}`,
         url: baseURL,
-        reuseExistingServer: !process.env.CI,
+        // A stray server (maybe started with real keys) must not be reused: e2e must never hit paid APIs.
+        reuseExistingServer: false,
         timeout: 60_000,
+        // Hermetic: blank keys override anything in .env.local, so AI/email/GitHub run in their offline modes.
+        env: {
+          GEMINI_API_KEY: "",
+          RESEND_API_KEY: "",
+          GITHUB_TOKEN: "",
+          UPSTASH_REDIS_REST_URL: "",
+          UPSTASH_REDIS_REST_TOKEN: "",
+        },
       },
 });

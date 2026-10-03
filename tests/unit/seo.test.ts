@@ -7,7 +7,12 @@ import { site } from "@/lib/site";
 
 const walk = (v: unknown, fn: (k: string, v: unknown) => void) => {
   if (Array.isArray(v)) v.forEach((x) => walk(x, fn));
-  else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) (fn(k, x), walk(x, fn));
+  else if (v && typeof v === "object") {
+    for (const [k, x] of Object.entries(v)) {
+      fn(k, x);
+      walk(x, fn);
+    }
+  }
 };
 
 describe("JSON-LD", () => {

@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { env, features } from "@/lib/env";
 import { singleLine } from "@/lib/contact/rules";
 import { ContactSchema } from "@/lib/contact/schema";
+import { json, sameOrigin } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
 import { site } from "@/lib/site";
 
@@ -10,20 +10,6 @@ const MAX_BODY_BYTES = 10_000;
 // Resend's shared sender works without a verified domain (mail goes to the account owner).
 // Switch to a verified domain later by setting CONTACT_FROM_EMAIL (see README).
 const FROM = process.env.CONTACT_FROM_EMAIL || "Portfolio contact <onboarding@resend.dev>";
-
-const json = (body: Record<string, unknown>, status = 200, headers?: HeadersInit) =>
-  NextResponse.json(body, { status, headers: { "Cache-Control": "no-store", ...headers } });
-
-function sameOrigin(req: Request): boolean {
-  const origin = req.headers.get("origin");
-  if (!origin) return true; // non-browser clients (curl) have no Origin; rate limiting still applies
-  try {
-    const o = new URL(origin);
-    return o.host === req.headers.get("host") || o.origin === site.url || o.hostname === "localhost";
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return json({ error: "forbidden" }, 403);

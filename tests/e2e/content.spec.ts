@@ -48,6 +48,7 @@ test.describe("résumé", () => {
       "Co-curricular & Leadership",
       "Achievements & Awards",
       "Education",
+      "Does this résumé fit your role?",
     ]);
     const download = page.getByRole("link", { name: "Download PDF" });
     await expect(download).toHaveAttribute("href", "/resume.pdf");
@@ -405,6 +406,6 @@ test.describe("full home page", () => {
     const ids = await page.evaluate(() =>
       [...document.querySelectorAll("main section[id]")].map((s) => s.id),
     );
-    expect(ids).toEqual(["work", "experience", "stack", "github", "contact"]);
+    expect(ids).toEqual(["work", "experience", "stack", "github", "recognition", "ask", "contact"]);
   });
 });
