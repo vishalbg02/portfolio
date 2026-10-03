@@ -53,7 +53,7 @@ export function ChatLauncher() {
           onPointerEnter={() => void loadSheet()}
           onFocus={() => void loadSheet()}
           onClick={show}
-          className="fixed right-4 bottom-4 z-40 inline-flex h-11 items-center gap-2 rounded-pill border border-border-2 bg-surface px-4 font-mono text-sm text-text transition-colors hover:border-accent hover:text-accent"
+          className="fixed right-4 bottom-4 z-40 hidden h-11 items-center gap-2 rounded-pill border border-border-2 bg-surface px-4 font-mono text-sm text-text transition-colors hover:border-accent hover:text-accent md:inline-flex"
         >
           <span aria-hidden="true" className="text-accent">
             ?

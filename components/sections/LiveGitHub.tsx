@@ -28,29 +28,30 @@ export async function LiveGitHub() {
   const days = data.calendar.weeks.flat();
   const asOf =
     data.source === "live" ? new Date(now).toISOString().slice(0, 10) : data.generatedAt.slice(0, 10);
-  const { current, longest } = computeStreaks(days, asOf);
+  const { longest } = computeStreaks(days, asOf);
+  const activeDays = days.filter((d) => d.count > 0).length;
   const unit = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 
   return (
-    <section id="github" aria-labelledby="github-label" className="container-page py-16 md:py-24">
+    <section id="github" aria-labelledby="github-label" className="container-page section-y">
       <SectionHeader prefix=">_" label="Activity" id="github-label" title="Live from GitHub" />
 
       <dl className="grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l">
         <Stat value={data.calendar.total.toLocaleString("en-US")} label="Contributions, last year" />
-        <Stat value={unit(current)} label="Current streak" />
+        <Stat value={activeDays.toLocaleString("en-US")} label="Active days, last year" />
         <Stat value={unit(longest)} label="Longest streak" />
       </dl>
 
       <div className="mt-4 rounded-card border border-border bg-surface p-4 sm:p-5">
         <ContributionCalendar
           weeks={data.calendar.weeks}
-          label={`${data.calendar.total} contributions in the last year. Current streak ${unit(current)}, longest streak ${unit(longest)}.`}
+          label={`${data.calendar.total} contributions in the last year. ${activeDays} active days, longest streak ${unit(longest)}.`}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-muted">
           <span>
             {data.source === "live"
               ? "Live · refreshed hourly"
-              : `Snapshot · ${dateFmt.format(new Date(data.generatedAt))}`}
+              : `Updated ${relativeTime(data.generatedAt, now)}`}
           </span>
           <span aria-hidden="true" className="flex items-center gap-1">
             less

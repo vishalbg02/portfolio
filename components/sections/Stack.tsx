@@ -5,7 +5,7 @@ import { StackExplorer } from "./StackExplorer";
 
 export function Stack() {
   return (
-    <section id="stack" aria-labelledby="stack-label" className="container-page py-16 md:py-24">
+    <section id="stack" aria-labelledby="stack-label" className="container-page section-y">
       <SectionHeader prefix="[ ]" label="Stack" id="stack-label" title="What I build with" />
       <StackExplorer
         groups={buildStackGroups()}

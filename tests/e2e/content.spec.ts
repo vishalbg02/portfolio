@@ -161,9 +161,9 @@ test.describe("live GitHub", () => {
     await gotoHydrated(page, "/");
     const gh = page.locator("#github");
     await expect(gh.getByText("Contributions, last year")).toBeVisible();
-    await expect(gh.getByText("Current streak")).toBeVisible();
+    await expect(gh.getByText("Active days, last year")).toBeVisible();
     await expect(gh.getByText("Longest streak")).toBeVisible();
-    await expect(gh.getByText(/Snapshot ·|Live · refreshed hourly/)).toBeVisible();
+    await expect(gh.getByText(/^(Updated .+|Live · refreshed hourly)$/)).toBeVisible();
     const svg = gh.getByTestId("contribution-calendar");
     await expect(svg.locator("path[data-level]")).toHaveCount(5); // one path per level, not 371 elements
     await gh.scrollIntoViewIfNeeded();
@@ -187,7 +187,7 @@ test.describe("live GitHub", () => {
     await page.goto("/");
     await expect(
       page.locator("#github").getByRole("img", {
-        name: /contributions in the last year\. Current streak \d+ days?, longest streak \d+ days?/,
+        name: /contributions in the last year\. \d+ active days, longest streak \d+ days?/,
       }),
     ).toBeVisible();
   });

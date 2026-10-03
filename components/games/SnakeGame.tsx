@@ -142,6 +142,14 @@ export default function SnakeGame() {
       if (d && phaseRef.current === "playing") {
         e.preventDefault();
         steer(d);
+      } else if (
+        phaseRef.current === "idle" &&
+        !/^(Tab|Escape|Shift|Control|Alt|Meta|F\d+|\/|\?|~|`)$/.test(e.key)
+      ) {
+        // Idle board: any key starts the game (arrow keys also steer once it is running).
+        if (e.target instanceof HTMLElement && e.target.closest("a, input, textarea, select")) return;
+        e.preventDefault();
+        start();
       } else if (e.key === " " || e.key === "Enter") {
         const p = phaseRef.current;
         // Space/Enter on a focused button already activates it; only act when nothing else will.
@@ -198,6 +206,9 @@ export default function SnakeGame() {
           role="img"
           aria-label={`Snake game board. Score ${score}.`}
           className="block aspect-square w-full touch-none rounded-card border border-border"
+          onClick={() => {
+            if (phaseRef.current === "idle") start();
+          }}
           onTouchStart={(e) => {
             const t = e.touches[0];
             if (t) touch.current = { x: t.clientX, y: t.clientY };
@@ -207,7 +218,7 @@ export default function SnakeGame() {
         {phase !== "playing" ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-card bg-bg/85 text-center">
             <p className="font-mono text-sm text-text">
-              {phase === "idle" ? "Snake" : phase === "paused" ? "Paused" : "Game over"}
+              {phase === "idle" ? "Snake · paused" : phase === "paused" ? "Paused" : "Game over"}
             </p>
             <button
               type="button"
@@ -216,7 +227,9 @@ export default function SnakeGame() {
             >
               {phase === "idle" ? "Play" : phase === "paused" ? "Resume" : "Play again"}
             </button>
-            <p className="px-4 font-mono text-[11px] text-muted">Arrows or WASD · swipe · Space pauses</p>
+            <p className="px-4 font-mono text-[11px] text-muted">
+              {phase === "idle" ? "Press any key or tap to start" : "Arrows or WASD · swipe · Space pauses"}
+            </p>
           </div>
         ) : null}
       </div>

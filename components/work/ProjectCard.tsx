@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import { identityBg } from "./identity";
 import { ProjectStatus } from "./ProjectStatus";
 import { Sketch } from "./Sketch";
+import { SketchPlayer } from "./SketchPlayer";
 
 const MAX_CHIPS = 5;
 const action =
@@ -34,7 +35,9 @@ export function ProjectCard({
         "focus-within:border-border-2 hover:-translate-y-0.5 hover:border-border-2",
       )}
     >
-      <Sketch slug={project.slug} />
+      <SketchPlayer>
+        <Sketch slug={project.slug} />
+      </SketchPlayer>
 
       <div className="mt-5">
         <ProjectStatus project={project} />

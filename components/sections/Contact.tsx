@@ -17,7 +17,7 @@ export function Contact() {
   ];
 
   return (
-    <section id="contact" aria-labelledby="contact-label" className="container-page py-16 md:py-24">
+    <section id="contact" aria-labelledby="contact-label" className="container-page section-y">
       <SectionHeader prefix="@" label="Contact" id="contact-label" />
       <h2 className="text-3xl font-semibold md:text-5xl">Let&apos;s build something.</h2>
       <p className="mt-4 max-w-xl text-lg text-muted">
