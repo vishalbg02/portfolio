@@ -357,7 +357,7 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
                 aria-pressed={f.id === flowId}
                 onClick={() => selectFlow(f.id)}
                 className={cn(
-                  "h-7 rounded-pill border px-3 font-mono text-xs transition-colors",
+                  "h-7 rounded-pill border px-3 font-mono text-xs transition-colors pointer-coarse:h-11",
                   f.id === flowId
                     ? "border-accent text-accent"
                     : "border-border text-muted hover:border-border-2 hover:text-text",
@@ -372,7 +372,7 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
           type="button"
           onClick={start}
           disabled={run?.active}
-          className="ml-auto inline-flex h-8 items-center gap-2 rounded-sm border border-accent px-3 font-mono text-sm text-accent transition-colors hover:bg-accent hover:text-bg disabled:pointer-events-none disabled:opacity-50"
+          className="ml-auto inline-flex h-8 items-center gap-2 rounded-sm border border-accent px-3 font-mono text-sm text-accent transition-colors hover:bg-accent hover:text-bg disabled:pointer-events-none disabled:opacity-50 pointer-coarse:h-11"
         >
           {run?.active ? "Running…" : "Run request"} <span aria-hidden="true">▶</span>
         </button>

@@ -41,7 +41,7 @@ export default function ChatSheet({
             </Dialog.Close>
           </div>
           <div className="min-h-0 flex-1">
-            <ChatPanel variant="sheet" autoFocus ask={ask} />
+            <ChatPanel variant="sheet" autoFocus ask={ask} onJump={() => onOpenChange(false)} />
           </div>
         </Dialog.Content>
       </Dialog.Portal>

@@ -1,3 +1,4 @@
+import { LetsBuildBanner } from "@/components/sections/LetsBuildBanner";
 import { ContactForm } from "@/components/sections/ContactForm";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -19,7 +20,8 @@ export function Contact() {
   return (
     <section id="contact" aria-labelledby="contact-label" className="container-page section-y">
       <SectionHeader prefix="@" label="Contact" id="contact-label" />
-      <h2 className="text-3xl font-semibold md:text-5xl">Let&apos;s build something.</h2>
+      <LetsBuildBanner />
+      <h2 className="mt-8 text-3xl font-semibold md:text-5xl">Let&apos;s build something.</h2>
       <p className="mt-4 max-w-xl text-lg text-muted">
         Hiring for SDE or full-stack roles, or looking for a hackathon teammate? Reach me however is easiest.
       </p>

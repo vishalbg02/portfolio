@@ -27,6 +27,8 @@ const EVENTS = [
   "demo_launch",
   "demo_step",
   "project_ask",
+  "proof_jump",
+  "stack_skill_select",
 ];
 
 function* files(dir: string): Generator<string> {

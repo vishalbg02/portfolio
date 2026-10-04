@@ -36,7 +36,7 @@ export function MobileMenu() {
           setRequested(true);
           setOpen(true);
         }}
-        className="inline-flex size-10 items-center justify-center rounded-sm border border-border text-text hover:border-border-2 md:hidden"
+        className="inline-flex size-11 items-center justify-center rounded-sm border border-border text-text hover:border-border-2 md:hidden"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" fill="none">
           <path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" strokeWidth="1.5" />

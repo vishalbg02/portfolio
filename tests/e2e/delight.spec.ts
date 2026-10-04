@@ -29,8 +29,8 @@ test.describe("terminal", () => {
 
     await input.fill("status");
     await input.press("Enter");
-    await expect(log).toContainText("Not in a full-time job or internship right now");
-    await expect(log).toContainText("Social Agent");
+    await expect(log).toContainText("Not working anywhere right now");
+    await expect(log).toContainText("Golden Verdict");
 
     expect(await axe(page)).toEqual([]);
     await page.keyboard.press("Escape");

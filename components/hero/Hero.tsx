@@ -90,7 +90,7 @@ export function Hero() {
       <div className="relative z-10 pb-6 text-center">
         <a
           href="#work"
-          className="inline-flex items-center gap-1.5 rounded-sm px-2 py-1 font-mono text-xs text-muted transition-colors hover:text-text"
+          className="tap-slop inline-flex items-center gap-1.5 rounded-sm px-2 py-1 font-mono text-xs text-muted transition-colors hover:text-text"
         >
           scroll{" "}
           <span aria-hidden="true" className="animate-nudge">

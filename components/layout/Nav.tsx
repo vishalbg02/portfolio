@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { navLinks, resumeHref } from "@/lib/site";
 import { buttonClass } from "@/components/ui/Button";
+import { BootLine } from "./BootLine";
 import { NavShell } from "./NavShell";
 import { MobileMenu } from "./MobileMenu";
 import { PaletteButton } from "./PaletteButton";
@@ -8,7 +9,7 @@ import { RecruiterToggle } from "./RecruiterToggle";
 
 export function Wordmark() {
   return (
-    <Link href="/" className="group inline-flex items-center gap-1 font-mono text-sm text-text">
+    <Link href="/" className="group tap-slop inline-flex items-center gap-1 font-mono text-sm text-text">
       <span className="text-muted transition-colors group-hover:text-text">~/</span>
       <span>vishalbg</span>
       <span aria-hidden="true" className="ml-0.5 inline-block h-4 w-2 animate-blink bg-accent" />
@@ -21,7 +22,10 @@ export function Nav() {
   return (
     <NavShell>
       <div className="container-page flex h-full items-center justify-between gap-4">
-        <Wordmark />
+        <div className="relative">
+          <Wordmark />
+          <BootLine />
+        </div>
         <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link

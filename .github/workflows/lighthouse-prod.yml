@@ -1,0 +1,78 @@
+name: Lighthouse (production)
+
+# After each production deploy, run Lighthouse CI (mobile, 3 runs) against the live site and write the
+# representative run's scores to generated/lighthouse.json. The footer "This site" strip reads that file
+# on the next build, so the numbers shown are real CI output, never typed in. No file, no strip.
+#
+# Loop guard: the commit this workflow makes says "[skip ci]" (GitHub and Vercel skip it), and the job
+# also exits early when the deployment it was triggered by IS such a commit.
+on:
+  deployment_status:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lighthouse-prod
+  cancel-in-progress: false
+
+jobs:
+  lighthouse:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Skip if this deploy is our own scores commit
+        id: guard
+        run: |
+          sha="${{ github.event.deployment.sha || github.sha }}"
+          subject="$(git log -1 --format=%s "$sha" 2>/dev/null || true)"
+          case "$subject" in
+            "chore(lighthouse)"*) echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Own commit, nothing to do." ;;
+            *) echo "skip=false" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - uses: pnpm/action-setup@v4
+        if: steps.guard.outputs.skip == 'false'
+
+      - uses: actions/setup-node@v5
+        if: steps.guard.outputs.skip == 'false'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        if: steps.guard.outputs.skip == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Lighthouse CI against production (mobile, 3 runs)
+        if: steps.guard.outputs.skip == 'false'
+        # Assertions are enforced on previews; here we only measure, so a dip is recorded honestly, not hidden.
+        run: pnpm exec lhci collect --url=https://vishalbg.vercel.app/ --numberOfRuns=3 --settings.chromeFlags="--no-sandbox"
+
+      - name: Write generated/lighthouse.json
+        if: steps.guard.outputs.skip == 'false'
+        run: |
+          pnpm exec lhci upload --target=filesystem --outputDir=.lighthouseci-out
+          pnpm tsx scripts/write-lighthouse.mts --dir .lighthouseci-out \
+            --commit "${{ github.event.deployment.sha || github.sha }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Commit the scores
+        if: steps.guard.outputs.skip == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add generated/lighthouse.json
+          if git diff --cached --quiet; then echo "No change."; exit 0; fi
+          git commit -m "chore(lighthouse): update scores [skip ci]"
+          for i in 1 2 3; do git pull --rebase origin main && git push origin main && exit 0; sleep 3; done
+          exit 1

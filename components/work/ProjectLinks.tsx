@@ -3,7 +3,7 @@ import type { Project } from "@/lib/content/profile-schema";
 import { shipped } from "@/lib/site";
 
 const action =
-  "relative z-10 inline-flex items-center gap-1 rounded-sm font-mono text-sm text-link underline-offset-4 hover:underline";
+  "relative z-10 inline-flex items-center gap-1 rounded-sm font-mono text-sm text-link underline-offset-4 hover:underline pointer-coarse:min-h-11";
 
 /** Case study / live site / Google Play / code links for a project. Shared by cards and the showcase. */
 export function ProjectLinks({ project, className }: { project: Project; className?: string }) {

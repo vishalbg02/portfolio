@@ -20,7 +20,7 @@ describe("profile (single source of truth)", () => {
     expect(profile.contact.calLink).toBeNull();
     expect(projectBySlug("talnio")?.live).toBeNull();
     expect(projectBySlug("lansymphony")?.repo).toBeNull();
-    expect(projectBySlug("golden-verdict")?.period).toBe("Jan 2026 – Present"); // from his LinkedIn
+    expect(projectBySlug("golden-verdict")?.period).toBe("Jan 2026 – Jun 2026"); // he confirmed it ended in Jun 2026
     expect(projectBySlug("virtual-tour")?.period).toBe("Jan 2025"); // from his résumé
   });
 

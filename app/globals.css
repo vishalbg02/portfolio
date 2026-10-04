@@ -172,6 +172,17 @@
   }
 }
 
+/* Grows a small link's touch target to 44 px without changing its layout (an invisible ::after). */
+@utility tap-slop {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: min(0px, calc((100% - 44px) / 2));
+    inset-block: min(0px, calc((100% - 44px) / 2));
+  }
+}
+
 @utility container-page {
   width: 100%;
   max-width: 1200px;

@@ -1,5 +1,7 @@
 import { profile } from "@/content/profile";
 import { site } from "@/lib/site";
+import { Reveal } from "@/components/ui/Reveal";
+import { LighthouseStrip } from "./LighthouseStrip";
 import { LocalTime } from "./LocalTime";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -28,6 +30,30 @@ export function Footer() {
   return (
     <footer className="mt-8 border-t border-border md:mt-12">
       <div className="container-page flex flex-col gap-8 py-10 text-sm text-muted">
+        {/* A tiny snake crosses the grid row once when the footer scrolls into view, then stops. */}
+        <Reveal threshold={0.6} className="snake-row -mb-2">
+          <svg aria-hidden="true" width="100%" height="11" className="block">
+            <defs>
+              <pattern id="footer-grid" width="11" height="11" patternUnits="userSpaceOnUse">
+                <rect width="8" height="8" rx="2" fill="var(--grid-0)" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="11" fill="url(#footer-grid)" />
+            <g className="snake">
+              {[
+                "var(--grid-1)",
+                "var(--grid-1)",
+                "var(--grid-2)",
+                "var(--grid-2)",
+                "var(--grid-3)",
+                "var(--grid-4)",
+              ].map((c, i) => (
+                <rect key={i} x={i * 11} width="8" height="8" rx="2" fill={c} />
+              ))}
+            </g>
+          </svg>
+        </Reveal>
+
         <p className="font-mono text-text">
           <span className="text-accent">$</span> exit <span className="text-muted">·</span> thanks for
           visiting{" "}
@@ -57,6 +83,8 @@ export function Footer() {
           </p>
         </div>
 
+        <LighthouseStrip />
+
         <div className="flex flex-col gap-2 border-t border-border pt-6 font-mono text-xs md:flex-row md:items-center md:justify-between">
           <p>Built with Next.js · Deployed on Vercel</p>
           <p className="flex flex-wrap items-center gap-x-2">
@@ -75,7 +103,12 @@ export function Footer() {
               </>
             ) : null}
             <span aria-hidden="true">·</span>
-            <a href={site.repo} className="hover:text-text" target="_blank" rel="noopener noreferrer">
+            <a
+              href={site.repo}
+              className="tap-slop hover:text-text"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View source ↗
             </a>
           </p>

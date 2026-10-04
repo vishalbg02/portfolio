@@ -268,7 +268,7 @@ export function ShowcaseShell({ items, children }: { items: ShowcaseItem[]; chil
               aria-label={`Show ${it.name}`}
               aria-current={i === active ? "true" : undefined}
               onClick={() => goTo(i)}
-              className="flex size-8 items-center justify-center"
+              className="flex size-11 items-center justify-center"
             >
               <span
                 aria-hidden="true"

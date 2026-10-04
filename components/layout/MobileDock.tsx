@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { openChat } from "@/components/chat/ChatLauncher";
 import { track } from "@/lib/analytics";
+import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils/cn";
 
 type Id = "work" | "ask" | "resume" | "contact";
@@ -100,7 +101,10 @@ export function MobileDock() {
     active === id ? (
       <span aria-hidden="true" className="absolute top-1.5 size-1 rounded-pill bg-accent" />
     ) : null;
-  const tap = (id: Id) => track("dock_tap", { item: id });
+  const tap = (id: Id) => {
+    haptic();
+    track("dock_tap", { item: id });
+  };
 
   return (
     <nav

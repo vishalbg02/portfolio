@@ -90,7 +90,7 @@ test.describe("experience", () => {
     const exp = page.locator("#experience");
     await expect(exp.getByRole("heading", { name: "Full-Stack & App Developer Intern" })).toBeVisible();
     await expect(exp.getByText("Jun 2025 – Mar 2026")).toBeVisible();
-    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(1); // one open branch: the ongoing freelance role
+    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(0); // no open branch: nothing is current
     const hidden = exp.getByText("Implemented geolocation- and NFC-based attendance");
     await expect(hidden).toBeHidden();
     const details = exp.locator("details", { hasText: "Implemented geolocation- and NFC-based attendance" });
@@ -125,7 +125,7 @@ test.describe("stack", () => {
     await gotoHydrated(page, "/");
     const stack = page.locator("#stack");
     await stack.getByRole("button", { name: "Firebase" }).hover();
-    await expect(stack.getByText("used in")).toBeVisible();
+    await expect(stack.locator("[aria-live=polite]").getByText(/used in/)).toBeVisible();
     await expect(stack.getByRole("link", { name: "Golden Verdict" })).toBeVisible();
     await expect(stack.getByRole("link", { name: "Talnio" })).toBeVisible();
     await expect(page.locator("[data-project='golden-verdict']")).toHaveAttribute("data-stack-hit", "true");
