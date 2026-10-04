@@ -222,3 +222,25 @@ test.describe("no console errors and no CSP violations in any new flow", () => {
     }
   });
 });
+
+test.describe("what loads before the first paint", () => {
+  test.use({ viewport: { width: 412, height: 823 }, hasTouch: true, isMobile: true });
+
+  test("a phone does not fetch the Work posters or the desktop stage image up front, and gets a poster when its card is near", async ({
+    page,
+  }) => {
+    // Lighthouse counts every byte requested before the first paint. Two clip posters and the desktop stage's first
+    // image were 72 KB of that, for cards a screen or more below the hero.
+    const media: string[] = [];
+    page.on("request", (r) => /\/media\//.test(r.url()) && media.push(new URL(r.url()).pathname));
+    await mockStatus(page);
+    await gotoReady(page, "/");
+    await page.waitForTimeout(1500);
+    expect(media.filter((u) => /poster|gv-menu/.test(u))).toEqual([]);
+    const gv = page.locator(".scene[data-project='golden-verdict'] video");
+    await expect(gv).toHaveAttribute("data-poster", /gv-scroll-poster/);
+    await page.locator(".work-scenes").scrollIntoViewIfNeeded();
+    await expect(gv).toHaveAttribute("poster", /gv-scroll-poster/);
+    await expect(gv).not.toHaveAttribute("data-poster", /./);
+  });
+});

@@ -36,18 +36,18 @@ Details live next to the code: [README](../README.md), [GRID-AGENT](GRID-AGENT.m
 
 ## Numbers
 
-|                                                                                    | V2               | V3                                               |
-| ---------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------ |
-| Home initial JS (gzip, budget 170 KB)                                              | 162.2 KB         | **161.2 KB**                                     |
-| Home CSS (gzip)                                                                    | 14.3 KB          | 18.1 KB                                          |
-| Unit tests                                                                         | 515              | **913**                                          |
-| End-to-end tests (Playwright)                                                      | 296              | **467**                                          |
-| Production Lighthouse, mobile (performance / accessibility / best practices / SEO) | 0.97 / 1 / 1 / 1 | **0.95** / 1 / 1 / 1 (commit `4c20156`)          |
-| Static pages                                                                       | all              | all (a CI step now fails if one becomes dynamic) |
+|                                                                                    | V2               | V3                                                   |
+| ---------------------------------------------------------------------------------- | ---------------- | ---------------------------------------------------- |
+| Home initial JS (gzip, budget 170 KB)                                              | 162.2 KB         | **161.2 KB**                                         |
+| Home CSS (gzip)                                                                    | 14.3 KB          | 18.1 KB                                              |
+| Unit tests                                                                         | 515              | **913**                                              |
+| End-to-end tests (Playwright)                                                      | 296              | **468**                                              |
+| Production Lighthouse, mobile (performance / accessibility / best practices / SEO) | 0.97 / 1 / 1 / 1 | 0.94 at Phase 6, fixed in Phase 7 (below), 1 / 1 / 1 |
+| Static pages                                                                       | all              | all (a CI step now fails if one becomes dynamic)     |
 
 Every V3 feature is a lazy chunk, so the home page carries about the same JavaScript as it did before V3.
 
-**Be aware:** performance is at the 0.95 line, down from 0.97. Lighthouse's simulated LCP counts every byte requested before the first paint, and V3 added HTML (the new sections), CSS (+4 KB) and a few small always-mounted scripts. One Phase 6 preview run scored 0.94 and passed on a re-run. `.github/workflows/lighthouse-prod.yml` records the real number after each deploy (shown in the footer). If it drops below 0.95, the next saving is to load the always-mounted hosts (`ShortcutsHost`, `TourHost`, `CompanyLinkHost`, `RouteWipe`, `CursorHost`) in one chunk after the page is idle, about 9 KB gzip.
+**Lighthouse, and what fixed it.** Phase 6 measured 0.94 in production (0.95 at Phase 5, 0.97 at the end of V2), under the 0.95 floor. Lighthouse's simulated LCP counts every byte requested before the first paint, and a trace of the home page showed 72 KB of images in that window for things far below the hero: two video posters (a `poster` attribute is fetched at once, even with `preload="none"`) and the desktop stage's first image, which was marked eager on phones where it is not even shown. Phase 7 sets the posters from the Work controller when a card is about to be seen (`data-poster`, `components/work/stage/ShowcaseController.tsx`), drops the eager flag, and a test (`phase7-qa.spec.ts`, "what loads before the first paint") keeps them out. On a local run that took the mobile performance score from 0.90 to 0.94 to 0.97 and the transfer from 446 to 372 KiB; `.github/workflows/lighthouse-prod.yml` records the production number after each deploy (shown in the footer). If it ever slips again, the next saving is loading the always-mounted hosts (`ShortcutsHost`, `TourHost`, `CompanyLinkHost`, `RouteWipe`, `CursorHost`) in one chunk after the page is idle, about 9 KB gzip.
 
 Quality gates that hold on every PR: no gradients, one accent colour, no horizontal overflow at 360 / 390 / 768 / 1280 / 1440 / 1920 px, zero serious or critical axe violations (WCAG 2.2 AA) on the new states, no console errors or CSP violations in any new flow, CLS under 0.05, reduced-motion variants for everything that moves.
 

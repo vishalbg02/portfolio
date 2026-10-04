@@ -308,6 +308,22 @@ export function ShowcaseController({
     );
     nearIo.observe(el);
 
+    // A clip's poster is fetched only when its card is about to be seen (see MediaClip): a screen ahead on the page,
+    // a swipe or two along the deck. Until then the box is the frame's own colour at the right size.
+    const posterIo = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const v = e.target as HTMLVideoElement;
+          if (!e.isIntersecting || !v.dataset.poster) continue;
+          v.poster = v.dataset.poster;
+          delete v.dataset.poster;
+          posterIo.unobserve(v);
+        }
+      },
+      { rootMargin: "300px 500px" },
+    );
+    el.querySelectorAll<HTMLVideoElement>("video[data-poster]").forEach((v) => posterIo.observe(v));
+
     // Deck: the card in the middle of the snap row is the active one.
     const deckIo = new IntersectionObserver(
       (entries) => {
@@ -336,6 +352,7 @@ export function ShowcaseController({
       el.removeEventListener("keydown", onKey);
       window.removeEventListener(WORK_GO_EVENT, onWorkGo);
       nearIo.disconnect();
+      posterIo.disconnect();
       deckIo.disconnect();
       listen(false);
       cancelAnimationFrame(raf);

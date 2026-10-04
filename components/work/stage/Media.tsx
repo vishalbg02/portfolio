@@ -45,8 +45,10 @@ export function MediaStill({
 }
 
 /**
- * A muted, looping clip. Nothing is downloaded until it plays (preload="none"); the poster is always
- * there. The controller plays it when its card is on screen, never under reduced motion, and the
+ * A muted, looping clip. Nothing is downloaded until it plays (preload="none"). The poster is a `poster`
+ * attribute the controller sets when the card is about to be seen: a poster in the markup is fetched at once,
+ * even for a card far down a page or off to the side of the deck, and it would be the heaviest thing a visitor
+ * downloads before the first paint. It plays when its card is on screen, never under reduced motion, and the
  * Pause / Play button satisfies "pause, stop, hide" for anything that moves by itself.
  */
 export function MediaClip({ asset, className }: { asset: MediaClip; className?: string }) {
@@ -59,7 +61,7 @@ export function MediaClip({ asset, className }: { asset: MediaClip; className?: 
         loop
         playsInline
         preload="none"
-        poster={c.poster.fallback}
+        data-poster={c.poster.fallback}
         aria-label={asset.alt}
         width={asset.width}
         height={asset.height}
