@@ -113,7 +113,7 @@ test.describe("/privacy", () => {
     await page.locator("footer").getByRole("link", { name: "Privacy" }).click();
     await expect(page).toHaveURL(/\/privacy$/);
     await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
-    for (const h of ["Analytics", "Contact form", "Ask Vishal (AI assistant)", "Abuse protection"]) {
+    for (const h of ["Analytics", "Contact form", "GRID (AI assistant)", "Abuse protection"]) {
       await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
     }
     // no feature that is not live yet may be described

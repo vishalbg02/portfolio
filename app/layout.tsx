@@ -6,8 +6,9 @@ import { Footer } from "@/components/layout/Footer";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { ClickTracker } from "@/components/analytics/ClickTracker";
 import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
-import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { DelightHost } from "@/components/delight/DelightHost";
+import { GridHost } from "@/components/grid/GridHost";
+import { Omnibar } from "@/components/grid/Omnibar";
 import { ProofHost } from "@/components/ProofHost";
 import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
 import { ToastHost } from "@/components/ui/ToastHost";
@@ -36,7 +37,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-IN" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+      <body className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-20">
         <SkipLink />
         <Nav />
         <main id="main" tabIndex={-1} className="flex-1 focus:outline-none">
@@ -44,7 +45,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <Footer />
         <MobileDock />
-        <ChatLauncher />
+        <GridHost />
+        <Omnibar />
         <ShortcutsHost />
         <DelightHost />
         <ProofHost />

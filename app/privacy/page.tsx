@@ -30,7 +30,7 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
     title: "Analytics",
     body: [
       "Page views and web-performance numbers are measured with Vercel Web Analytics and Speed Insights. They do not use cookies and do not identify you.",
-      "A few named events are counted (for example “résumé downloaded” or “command palette opened”). They carry no message text, no names and no contact details.",
+      "A few named events are counted (for example “résumé downloaded”, “Omnibar opened” or “GRID question asked”; for GRID also which tool it used, such as “show project”, and which mode you chose). They carry no message text, no names and no contact details.",
     ],
   },
   {
@@ -43,10 +43,10 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
   },
   {
     id: "ai",
-    title: "Ask Vishal (AI assistant)",
+    title: "GRID (AI assistant)",
     body: [
-      "When the AI is online, your question and the last few messages of the conversation are sent to Google's Gemini API to write the answer. When it is offline, nothing leaves this site's server and the answer comes straight from the site's own content.",
-      "The site does not store your questions. Server logs hold anonymous counts only. The job-description matcher works the same way: the text you paste is processed to extract requirements and is not saved.",
+      "When the AI is online, your question and the last few messages of the conversation are sent to Google's Gemini API to write the answer. If Gemini is unavailable, the same text goes to Groq instead. When the AI is offline, nothing leaves this site's server and the answer comes straight from the site's own content.",
+      "The site's servers do not store your questions. Server logs hold anonymous counts only. The conversation is kept in your own browser (local storage) so it is still there when you come back; “New chat” clears it. The job-description matcher works the same way: the text you paste is processed to extract requirements and is not saved.",
     ],
   },
   {
@@ -60,7 +60,7 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
     id: "device",
     title: "On your device",
     body: [
-      "A few small conveniences use your browser's local storage or session storage: your best score in the games, whether you have already tried the hero terminal, and whether the intro line has played. They never leave your browser and you can clear them any time.",
+      "A few small conveniences use your browser's local storage or session storage: your GRID conversation and the width of the chat panel, your best score in the games, whether you have already tried the hero terminal, and whether the intro line has played. They never leave your browser and you can clear them any time.",
     ],
   },
   {

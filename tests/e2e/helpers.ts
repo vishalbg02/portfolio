@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
 
 /** Waits for finite CSS animations/transitions (e.g. fade-ins) to finish so axe sees final colors. */
 export async function settleAnimations(page: Page) {
@@ -20,12 +20,14 @@ export async function gotoHydrated(page: Page, url: string) {
 }
 
 /**
- * Navigates and waits until global keyboard shortcuts are live. Pressing Ctrl+K before React has
- * hydrated is a silent no-op, which made palette tests flaky on slow CI runners.
+ * Navigates and waits until the global listeners are live (`?` help, the Omnibar's ⌘K and `/`, GRID's host).
+ * Pressing Ctrl+K before React has hydrated is a silent no-op, which made these tests flaky on slow CI runners.
  */
 export async function gotoReady(page: Page, url: string) {
   await page.goto(url);
-  await page.locator('html[data-shortcuts="ready"]').waitFor({ state: "attached" });
+  await page
+    .locator('html[data-shortcuts="ready"][data-omnibar="ready"][data-grid="ready"]')
+    .waitFor({ state: "attached" });
 }
 
 /**
@@ -39,4 +41,16 @@ export async function loadIslands(page: Page) {
     await expect(island.locator(".skel")).toHaveCount(0);
   }
   await page.evaluate("window.scrollTo(0, 0)");
+}
+
+/**
+ * Gives a test its own client address. The server rate-limits questions per client (20 per 10 minutes), and every
+ * e2e request comes from localhost, so without this a long run of GRID tests would use up one shared allowance.
+ * Call it from a `beforeEach`.
+ */
+export async function ownClient(context: BrowserContext) {
+  const n = Math.floor(Math.random() * 0xffffff);
+  await context.setExtraHTTPHeaders({
+    "x-forwarded-for": `10.${(n >> 16) & 255}.${(n >> 8) & 255}.${n & 255}`,
+  });
 }

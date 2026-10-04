@@ -66,6 +66,45 @@ function Row({ item }: { item: MatchItem }) {
   );
 }
 
+/** The result of a match: summary, counts, each requirement with its evidence, and a Markdown copy button. Shared with GRID's chat. */
+export function MatchResultView({ result }: { result: MatchResult }) {
+  return (
+    <section aria-label="Match result" className="space-y-4">
+      <div className="rounded-sm border border-border bg-bg p-4">
+        <p className="text-text">{result.summary}</p>
+        <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted">
+          <span className="text-accent">{result.counts.strong} strong</span>
+          <span className="text-warning">{result.counts.partial} partial</span>
+          <span>{result.counts.gap} gap</span>
+          <span>· {result.mode === "ai" ? "AI-assisted extraction" : "keyword extraction"}</span>
+        </p>
+      </div>
+      {result.results.length > 0 ? (
+        <ul className="divide-y divide-border rounded-sm border border-border">
+          {result.results.map((r) => (
+            <Row key={r.requirement} item={r} />
+          ))}
+        </ul>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={async () => {
+            if (await copyText(toMarkdown(result, window.location.origin))) toast.success("Markdown copied");
+            else toast.error("Couldn't copy");
+          }}
+        >
+          Copy as Markdown
+        </Button>
+        <p className="text-xs text-muted">
+          Gaps are shown as gaps. Matching uses only what&apos;s written on this site.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /**
  * Paste a job description → which requirements Vishal's portfolio supports, with evidence. Honest by
  * construction: grading is literal evidence matching on the server, so gaps are shown as gaps.
@@ -156,42 +195,7 @@ export function MatchTool() {
             {error}
           </p>
         ) : null}
-        {result ? (
-          <section aria-label="Match result" className="space-y-4">
-            <div className="rounded-sm border border-border bg-bg p-4">
-              <p className="text-text">{result.summary}</p>
-              <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted">
-                <span className="text-accent">{result.counts.strong} strong</span>
-                <span className="text-warning">{result.counts.partial} partial</span>
-                <span>{result.counts.gap} gap</span>
-                <span>· {result.mode === "ai" ? "AI-assisted extraction" : "keyword extraction"}</span>
-              </p>
-            </div>
-            {result.results.length > 0 ? (
-              <ul className="divide-y divide-border rounded-sm border border-border">
-                {result.results.map((r) => (
-                  <Row key={r.requirement} item={r} />
-                ))}
-              </ul>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  if (await copyText(toMarkdown(result, window.location.origin)))
-                    toast.success("Markdown copied");
-                  else toast.error("Couldn't copy");
-                }}
-              >
-                Copy as Markdown
-              </Button>
-              <p className="text-xs text-muted">
-                Gaps are shown as gaps. Matching uses only what&apos;s written on this site.
-              </p>
-            </div>
-          </section>
-        ) : null}
+        {result ? <MatchResultView result={result} /> : null}
       </div>
     </div>
   );

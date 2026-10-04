@@ -160,7 +160,13 @@ export function Experience() {
 
   return (
     <section id="experience" aria-labelledby="exp-label" className="container-page section-y">
-      <SectionHeader prefix="//" label="Experience" id="exp-label" title="Where I've shipped" />
+      <SectionHeader
+        prefix="//"
+        label="Experience"
+        id="exp-label"
+        title="Where I've shipped"
+        ask="Walk me through his experience."
+      />
 
       <p className="mb-5 overflow-x-auto font-mono text-sm whitespace-nowrap text-muted" aria-hidden="true">
         <span className="text-accent">$</span> git log --graph --oneline career

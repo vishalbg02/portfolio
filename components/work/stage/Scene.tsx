@@ -2,6 +2,7 @@ import { ViewTransition, type CSSProperties } from "react";
 import { Chip } from "@/components/ui/Chip";
 import type { Project } from "@/lib/content/profile-schema";
 import type { MediaRef, Scene as SceneData } from "@/lib/content/scene-schema";
+import { kindOf } from "@/lib/content/kind";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "../identity";
 import { ProjectLinks } from "../ProjectLinks";
@@ -11,17 +12,6 @@ import { Illustration } from "./illustrations/Illustration";
 import { MediaClip, MediaStill, resolveMedia } from "./Media";
 
 const MAX_CHIPS = 6;
-
-/** "Internship · Social Agent · Live on Google Play" → "Internship · Social Agent": as many leading parts as fit one line. */
-export function kindOf(type: string, max = 34): string {
-  const parts = type.split(" · ");
-  let out = parts[0]!;
-  for (const part of parts.slice(1)) {
-    if (`${out} · ${part}`.length > max) break;
-    out += ` · ${part}`;
-  }
-  return out.length > max ? parts[0]!.slice(0, max) : out;
-}
 
 /** One media reference as content (a still, a clip or a drawn illustration), sized by its frame. */
 function Content({ media, priority = false }: { media: MediaRef; priority?: boolean }) {

@@ -21,7 +21,8 @@ No environment variables are required. Every integration degrades gracefully whe
 
 | Variable                                             | Enables                                | Fallback when missing               |
 | ---------------------------------------------------- | -------------------------------------- | ----------------------------------- |
-| `GEMINI_API_KEY`                                     | Ask Vishal (AI) + JD matcher           | Friendly "offline" state            |
+| `GEMINI_API_KEY`                                     | GRID (AI) + JD matcher (first route)   | Next route, else "offline" answers  |
+| `GROQ_API_KEY`                                       | Backup AI route (gpt-oss-120b / 20b)   | Skipped                             |
 | `GITHUB_TOKEN`                                       | Live calendar, activity, year switcher | Committed snapshots in `generated/` |
 | `RESEND_API_KEY`, `CONTACT_TO_EMAIL`                 | Contact form delivery (see below)      | `mailto:` + copy-email              |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared rate limits / daily AI cap      | Per-instance in-memory limiter      |
@@ -58,9 +59,10 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 
 ## AI features
 
-- **Ask Vishal** (`/api/chat`): retrieval-augmented Q&A over the profile, case studies and architecture notes. Retrieval is BM25 plus committed Gemini embeddings, fused with reciprocal-rank fusion (`lib/rag`). Answers stream as NDJSON and cite sources as `[n]`.
+- **GRID** (`/api/chat`): retrieval-augmented Q&A over the profile, case studies and architecture notes, with tools: it can show a project, a diagram, a walkthrough, skill evidence or a job match, and take you somewhere. Retrieval is BM25 plus committed Gemini embeddings, fused with reciprocal-rank fusion (`lib/rag`). Answers stream as NDJSON and cite sources as `[n]`.
 - **Job-description matcher** (`/api/match`, on `/resume#match`): the model only extracts requirements. Grading is deterministic and literal against the profile (strong / partial / gap), and years of experience are computed from dates. The result can be copied as Markdown.
-- **Without a key it still works.** No `GEMINI_API_KEY`, an exhausted daily budget, or a model error before the first token all fall back to an offline answer built from the top passages. Questions outside the corpus get a canned refusal with no model call.
+- **Routes, in order:** Gemini, then Groq `openai/gpt-oss-120b`, then Groq `openai/gpt-oss-20b` (each Groq model has its own rate-limit bucket). A route that fails before showing anything (quota, outage, 8 s of silence) hands over to the next, and is skipped for a minute afterwards so later questions do not wait on it. Either key alone is enough.
+- **Without a key it still works.** No key, an exhausted daily budget, or every route failing before the first token all fall back to an offline answer built from the top passages. Questions outside the corpus get a canned refusal with no model call.
 - **Guards** ([`lib/ai/limits.ts`](lib/ai/limits.ts)): chat input ≤ 1,000 characters, job description ≤ 6,000, ≤ 6 history turns, ≤ ~400 / ~1,200 output tokens, 20 s timeout, 20 chat requests per 10 minutes per client, and a global daily cap (`AI_DAILY_LIMIT`, default 400, fails closed). User text is treated as data, never as instructions, and logs hold anonymous counts only.
 - **Model IDs** live only in [`lib/ai/models.ts`](lib/ai/models.ts).
 - **Embeddings** are generated locally and committed. After editing `profile.ts` or a case study, run `pnpm embeddings` and commit `generated/embeddings.json`. CI only warns when they are stale, and the Vercel build never calls the API.
@@ -74,7 +76,7 @@ Everything is derived from `content/profile.ts` or the MDX, never typed into a c
 - **Experience as a git history** (`components/sections/Experience.tsx`, `lib/content/history.ts`): roles are branches laid out from their dates, commit ids are a hash of the text, education is tagged on main.
 - **Activity calendar with milestones and a year switcher** (`ActivityPanel`, `lib/content/milestones.ts`, `/api/github/calendar?year=`): awards and role starts pinned on their month. Past years use `generated/github-years.json` until `GITHUB_TOKEN` is set.
 - **Case studies**: two-column layout with a sticky rail, a diagram that runs once at 60 % visible, `ProductDemo` walkthroughs (Golden Verdict, Talnio, LanSymphony) and the Virtual Tour loaded in a sandboxed iframe only after a click (the one origin in the CSP `frame-src`, kept in `lib/security/embeds.ts`).
-- **Ask Vishal**: "Ask about this project" scopes retrieval to that project, and cited sources jump to the section and flash it (`#proof=<id>`).
+- **GRID**: "Ask about this project" scopes retrieval to that project, and cited sources jump to the section and flash it (`#proof=<id>`).
 - **Stack connection map**, **LET'S BUILD banner**, footer snake, boot line, count-ups, haptics and the opt-in shake easter egg.
 - **Footer Lighthouse strip**: reads `generated/lighthouse.json`, which only `.github/workflows/lighthouse-prod.yml` writes (3-run mobile Lighthouse CI against production after each deploy, committed with `[skip ci]`). Scores are truncated, never rounded up. No file, no strip.
 

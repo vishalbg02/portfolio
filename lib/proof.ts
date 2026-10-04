@@ -1,5 +1,5 @@
 /**
- * "Jump to proof": a cited source in Ask Vishal takes you to the thing it cites and flashes it.
+ * "Jump to proof": a cited source in GRID takes you to the thing it cites and flashes it.
  * Same page → smooth-scroll + a 2 px green outline for 1.5 s. Another page → navigate with
  * `#proof=<id>`, which the ProofHost on arrival turns into the same scroll + flash.
  */

@@ -1,4 +1,4 @@
-import { openChat } from "@/components/chat/ChatLauncher";
+import { openChat } from "@/lib/grid/events";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { openCosmoStrike } from "@/lib/delight";

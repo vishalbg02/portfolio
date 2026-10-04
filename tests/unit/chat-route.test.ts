@@ -122,12 +122,25 @@ describe("/api/chat — cheap paths that never call the model", () => {
 
   it("without an API key it answers from the site's own content, with citations", async () => {
     const { route } = await load();
-    const events = await readEvents(await route.POST(ask("How can I contact him?", "5.5.5.5")));
+    const events = await readEvents(await route.POST(ask("What awards has he won?", "5.5.5.5")));
     const meta = metaOf(events);
     expect(meta).toMatchObject({ mode: "offline", reason: "no_key" });
-    expect(meta.sources[0]!.url).toBe("/#contact");
-    expect(textOf(events)).toContain("vishalbg02@gmail.com");
+    expect(meta.sources.length).toBeGreaterThan(0);
+    expect(textOf(events)).toContain("Gamecraft");
     expect(textOf(events)).toMatch(/offline/i);
+    expect(events.some((e) => e.t === "followups")).toBe(true);
+  });
+
+  it("an obvious command is answered by the router, with a card and no model call (even with a key)", async () => {
+    const model = streamingModel(["SHOULD NOT BE CALLED"]);
+    const { route, provider } = await load();
+    provider.setProviderForTests(mockProvider(model));
+    const events = await readEvents(await route.POST(ask("How can I contact him?", "5.5.5.6")));
+    expect(metaOf(events)).toMatchObject({ mode: "router" });
+    expect(metaOf(events).sources[0]!.url).toBe("/#contact");
+    expect(textOf(events)).toContain("vishalbg02@gmail.com");
+    expect(events.find((e) => e.t === "part")).toMatchObject({ part: { kind: "contact" } });
+    expect(model.doStreamCalls).toHaveLength(0);
   });
 });
 

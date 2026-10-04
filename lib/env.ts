@@ -13,6 +13,7 @@ const optional = z
 
 const ServerEnvSchema = z.object({
   GEMINI_API_KEY: optional,
+  GROQ_API_KEY: optional,
   GITHUB_TOKEN: optional,
   RESEND_API_KEY: optional,
   CONTACT_TO_EMAIL: z.email().optional().catch(undefined),
@@ -28,6 +29,7 @@ const ServerEnvSchema = z.object({
 
 export const env = ServerEnvSchema.parse({
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
   GITHUB_TOKEN: process.env.GITHUB_TOKEN,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   CONTACT_TO_EMAIL: process.env.CONTACT_TO_EMAIL || undefined,
@@ -38,7 +40,7 @@ export const env = ServerEnvSchema.parse({
 });
 
 export const features = {
-  ai: Boolean(env.GEMINI_API_KEY),
+  ai: Boolean(env.GEMINI_API_KEY || env.GROQ_API_KEY),
   github: Boolean(env.GITHUB_TOKEN),
   email: Boolean(env.RESEND_API_KEY && env.CONTACT_TO_EMAIL),
   upstash: Boolean(env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN),

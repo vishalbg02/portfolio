@@ -22,7 +22,12 @@ export default function WorkPage() {
           { name: "Work", path: "/work" },
         ])}
       />
-      <SectionHeader prefix="{ }" label="Work" id="work-label" />
+      <SectionHeader
+        prefix="{ }"
+        label="Work"
+        id="work-label"
+        ask="Which of his projects should I look at first, and why?"
+      />
       <h1 className="text-3xl font-semibold md:text-4xl">Everything ships.</h1>
       <p className="mt-3 max-w-2xl text-lg text-muted">
         Four products, each built and put in front of real users. Open a case study for the architecture and

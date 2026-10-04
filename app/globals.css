@@ -9,6 +9,7 @@
 @import "../styles/case.css";
 @import "../styles/fx.css";
 @import "../styles/islands.css";
+@import "../styles/grid.css";
 
 /*
  * Tailwind theme: reset the default palette so only design tokens exist as utilities.

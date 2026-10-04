@@ -3,13 +3,13 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 
-const ChatPanel = dynamic(() => import("./ChatPanel").then((m) => m.ChatPanel), { ssr: false });
+const GridChat = dynamic(() => import("./GridChat").then((m) => m.GridChat), { ssr: false });
 
 /**
- * Mounts the chat panel only when its section is about to scroll into view, so none of the chat
- * code counts toward the initial bundle. The placeholder has the panel's height (no layout shift).
+ * The inline chat in the Ask section. It mounts only when the section is about to scroll into view, so none of the
+ * chat code counts toward the initial bundle; the placeholder has the chat's height (no layout shift).
  */
-export function LazyChat() {
+export function LazyGridChat() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -34,15 +34,15 @@ export function LazyChat() {
   }, [visible]);
 
   return (
-    <div ref={ref} className="min-h-[360px]">
+    <div ref={ref} className="min-h-[420px]">
       {visible ? (
-        <ChatPanel />
+        <GridChat variant="inline" />
       ) : (
         <div
           className="rounded-card border border-border bg-surface px-4 py-6 font-mono text-sm text-muted"
           role="status"
         >
-          Loading the assistant…
+          Loading GRID…
         </div>
       )}
     </div>

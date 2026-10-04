@@ -43,7 +43,13 @@ export async function LiveGitHub() {
 
   return (
     <section id="github" aria-labelledby="github-label" className="container-page section-y">
-      <SectionHeader prefix=">_" label="Activity" id="github-label" title="Live from GitHub" />
+      <SectionHeader
+        prefix=">_"
+        label="Activity"
+        id="github-label"
+        title="Live from GitHub"
+        ask="What does his GitHub activity show?"
+      />
 
       <ActivityLoader
         summary={summary}

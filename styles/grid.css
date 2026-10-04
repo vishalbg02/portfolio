@@ -1,0 +1,160 @@
+/*
+ * GRID: the face, the Omnibar, the chat. Flat only: squares, hairlines, opacity, no gradients.
+ * The face lights different squares per state (so reduced motion still shows the state) and animates them.
+ */
+
+/* ── the face ───────────────────────────────────────────────────────────────────────────────────── */
+.gf rect {
+  fill: var(--grid-1);
+  opacity: 0.55;
+  transition: fill 160ms linear;
+}
+.gf[data-state="idle"] rect[data-on~="idle"],
+.gf[data-state="listening"] rect[data-on~="listening"],
+.gf[data-state="thinking"] rect[data-on~="thinking"],
+.gf[data-state="speaking"] rect[data-on~="speaking"],
+.gf[data-state="acting"] rect[data-on~="acting"] {
+  fill: var(--grid-4);
+  opacity: 1;
+}
+.gf .trav {
+  display: none;
+}
+.gf[data-state="acting"] .trav {
+  display: block;
+  fill: var(--grid-4);
+  opacity: 1;
+  animation: gf-travel 1.28s steps(1, end) infinite;
+}
+.gf[data-state="idle"] rect {
+  animation: gf-breathe 4.4s ease-in-out calc(var(--d) * 220ms) infinite;
+}
+.gf[data-state="thinking"] rect {
+  animation: gf-wave 1.1s ease-in-out calc(var(--d) * 90ms) infinite;
+}
+.gf[data-state="speaking"] rect[data-row="3"],
+.gf[data-state="speaking"] rect[data-row="4"] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gf-eq 0.46s ease-in-out calc(var(--c) * 70ms) infinite alternate;
+}
+@keyframes gf-breathe {
+  50% {
+    opacity: 0.85;
+  }
+}
+@keyframes gf-wave {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  45% {
+    opacity: 1;
+  }
+}
+@keyframes gf-eq {
+  from {
+    transform: scaleY(0.45);
+  }
+}
+/* one square around the edge of the 5 × 5 grid: 16 positions */
+@keyframes gf-travel {
+  0% {
+    transform: translate(0, 0);
+  }
+  6.25% {
+    transform: translate(6px, 0);
+  }
+  12.5% {
+    transform: translate(12px, 0);
+  }
+  18.75% {
+    transform: translate(18px, 0);
+  }
+  25% {
+    transform: translate(24px, 0);
+  }
+  31.25% {
+    transform: translate(24px, 6px);
+  }
+  37.5% {
+    transform: translate(24px, 12px);
+  }
+  43.75% {
+    transform: translate(24px, 18px);
+  }
+  50% {
+    transform: translate(24px, 24px);
+  }
+  56.25% {
+    transform: translate(18px, 24px);
+  }
+  62.5% {
+    transform: translate(12px, 24px);
+  }
+  68.75% {
+    transform: translate(6px, 24px);
+  }
+  75% {
+    transform: translate(0, 24px);
+  }
+  81.25% {
+    transform: translate(0, 18px);
+  }
+  87.5% {
+    transform: translate(0, 12px);
+  }
+  93.75% {
+    transform: translate(0, 6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gf rect,
+  .gf .trav {
+    animation: none !important;
+  }
+  .gf[data-state="acting"] .trav {
+    transform: translate(12px, 18px);
+  }
+}
+
+/* JS-only affordances (links to #ask that open the chat, the Omnibar) stay hidden until GRID is ready,
+   so nothing is clickable that would do nothing. The space is reserved, so nothing shifts when they appear. */
+.needs-grid {
+  visibility: hidden;
+}
+html[data-grid="ready"] .needs-grid {
+  visibility: visible;
+}
+
+/* ── Omnibar ────────────────────────────────────────────────────────────────────────────────────── */
+/* the chat panel is open: it has its own input, so the bar steps aside */
+html[data-grid-panel="open"] .omnibar {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .omni-hint {
+    animation: omni-in 240ms ease-out;
+  }
+}
+@keyframes omni-in {
+  from {
+    transform: translateY(4px);
+  }
+}
+
+/* ── docked panel: the page makes room instead of being covered ──────────────────────────────────── */
+html[data-grid-dock="open"] body {
+  padding-right: var(--grid-w);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .grid-sheet[data-state="open"] {
+    animation: grid-sheet-in 200ms ease-out;
+  }
+}
+@keyframes grid-sheet-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
