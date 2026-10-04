@@ -6,14 +6,16 @@ type Variant = "solid" | "outline" | "ghost";
 type Size = "sm" | "md";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-sm border font-medium whitespace-nowrap select-none " +
+  "btn-fill inline-flex items-center justify-center gap-2 rounded-sm border font-medium whitespace-nowrap select-none " +
   "transition-[background-color,border-color,color,transform] duration-150 ease-out " +
   "disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  solid: "border-accent bg-accent text-bg hover:brightness-110",
-  outline: "border-accent text-accent hover:bg-accent hover:text-bg",
-  ghost: "border-border text-text hover:border-border-2 hover:bg-surface-2",
+  solid: "border-accent bg-accent text-bg [--fill:var(--grid-4)] motion-reduce:hover:brightness-110",
+  outline:
+    "btn-fill-flip border-accent text-accent [--fill:var(--accent)] motion-reduce:hover:bg-accent motion-reduce:hover:text-bg",
+  ghost:
+    "border-border text-text [--fill:var(--surface-2)] hover:border-border-2 motion-reduce:hover:bg-surface-2",
 };
 
 const sizes: Record<Size, string> = {

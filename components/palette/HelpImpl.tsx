@@ -10,6 +10,7 @@ import { shortcutList } from "@/lib/shortcuts";
 import { commandHelp } from "@/lib/terminal/commands";
 import { Kbd } from "./Kbd";
 import { useIsMac } from "./useIsMac";
+import { useRevealRef } from "@/lib/fx/use-reveal";
 
 type Props = {
   open: boolean;
@@ -71,11 +72,14 @@ function ShakeToggle() {
 /** `?` overlay listing keyboard shortcuts, terminal commands and the phone dock. Lazy-loaded. */
 export default function HelpImpl({ open, onOpenChange, onCloseAutoFocus }: Props) {
   const isMac = useIsMac();
+  const revealRef = useRevealRef<HTMLDivElement>();
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[70] bg-bg/80" />
         <Dialog.Content
+          ref={revealRef}
           aria-describedby={undefined}
           onCloseAutoFocus={onCloseAutoFocus}
           className="fixed top-[8vh] left-1/2 z-[71] max-h-[84vh] w-[min(460px,calc(100vw-24px))] -translate-x-1/2 overflow-y-auto rounded-card border border-border bg-surface p-5 focus:outline-none"

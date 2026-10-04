@@ -29,6 +29,7 @@ export function Gallery({ project }: { project: Project }) {
               <button
                 type="button"
                 data-gallery-open={i}
+                data-cursor="open"
                 aria-label={`View larger: ${it.alt}`}
                 className="group block w-full overflow-hidden rounded-card border border-border bg-surface text-left transition-colors hover:border-border-2"
               >

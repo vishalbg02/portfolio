@@ -16,6 +16,7 @@ export function Stack() {
       <StackLoader
         groups={buildStackGroups()}
         projects={profile.projects.map((p) => ({ slug: p.slug, name: p.name }))}
+        note={profile.skillsNote}
       />
     </section>
   );

@@ -37,6 +37,7 @@ const EVENTS = [
   "project_ask",
   "proof_jump",
   "stack_skill_select",
+  "city_3d_on",
 ];
 
 function* files(dir: string): Generator<string> {
@@ -54,7 +55,7 @@ const sources = ["app", "components", "lib"]
 describe("analytics audit", () => {
   it("the type lists exactly the specified events", () => {
     const type = readFileSync("lib/analytics.ts", "utf8");
-    const declared = [...type.matchAll(/\| "([a-z_]+)"/g)].map((m) => m[1]);
+    const declared = [...type.matchAll(/\| "([a-z0-9_]+)"/g)].map((m) => m[1]);
     expect(declared.sort()).toEqual([...EVENTS].sort());
   });
 
@@ -65,7 +66,7 @@ describe("analytics audit", () => {
 
   it("no track() call or data-track-* attribute carries email, phone or free text (event names like easter-egg ids are fine)", () => {
     for (const { f, text } of sources) {
-      for (const m of text.matchAll(/track\("[a-z_]+",\s*\{([^}]*)\}/g)) {
+      for (const m of text.matchAll(/track\("[a-z0-9_]+",\s*\{([^}]*)\}/g)) {
         expect(m[1], `${f}: ${m[0]}`).not.toMatch(/\b(email|phone|message|text|value|query|question)\s*:/i);
       }
       expect(text, f).not.toMatch(/data-track-(email|phone|message|name)/);

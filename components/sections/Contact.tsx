@@ -1,9 +1,11 @@
+import { ContactQR } from "@/components/sections/ContactQR";
 import { LetsBuildBanner } from "@/components/sections/LetsBuildBanner";
 import { ContactFormLoader } from "@/components/sections/ContactFormLoader";
 import { LiveContactButton } from "@/components/live/LiveContactButton";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { profile } from "@/content/profile";
+import { VCARD_FILENAME, VCARD_PATH } from "@/lib/contact/vcard";
 import { buttonClass } from "@/components/ui/Button";
 
 const link = buttonClass("ghost", "md", "w-full justify-between");
@@ -11,11 +13,14 @@ const link = buttonClass("ghost", "md", "w-full justify-between");
 export function Contact() {
   const { contact } = profile;
   const links = [
-    { label: "Call", href: contact.phoneHref, external: false },
-    { label: "WhatsApp", href: contact.whatsapp, external: true },
-    { label: "LinkedIn", href: contact.linkedin, external: true },
-    { label: "GitHub", href: contact.github, external: true },
-    ...(contact.calLink ? [{ label: "Book a 15-min call", href: contact.calLink, external: true }] : []),
+    { label: "Call", href: contact.phoneHref, external: false, wide: false },
+    { label: "WhatsApp", href: contact.whatsapp, external: true, wide: false },
+    { label: "LinkedIn", href: contact.linkedin, external: true, wide: false },
+    { label: "GitHub", href: contact.github, external: true, wide: false },
+    ...(contact.calLink
+      ? [{ label: "Book a 15-min call", href: contact.calLink, external: true, wide: true }]
+      : []),
+    { label: "Save contact", href: VCARD_PATH, external: false, wide: true, download: VCARD_FILENAME },
   ];
 
   return (
@@ -34,18 +39,20 @@ export function Contact() {
           <CopyButton label="Phone" noun="Phone" text={contact.phone} event="copy_phone" />
           <ul className="grid grid-cols-2 gap-3 pt-1">
             {links.map((l) => (
-              <li key={l.label} className="last:odd:col-span-2">
+              <li key={l.label} className={l.wide ? "max-sm:col-span-2" : undefined}>
                 <a
                   href={l.href}
                   className={link}
                   {...(l.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  {...("download" in l ? { download: l.download } : {})}
                 >
                   {l.label}
-                  <span aria-hidden="true">{l.external ? "↗" : "→"}</span>
+                  <span aria-hidden="true">{"download" in l ? "↓" : l.external ? "↗" : "→"}</span>
                 </a>
               </li>
             ))}
           </ul>
+          <ContactQR />
         </div>
         <ContactFormLoader toEmail={contact.email} />
       </div>

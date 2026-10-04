@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type Ke
 import { cn } from "@/lib/utils/cn";
 import dynamic from "next/dynamic";
 import { GridChat } from "./GridChat";
+import { useRevealRef } from "@/lib/fx/use-reveal";
 
 const LiveChat = dynamic(() => import("@/components/live/LiveChat"), { ssr: false });
 
@@ -145,10 +146,13 @@ export default function GridSheet({
     </>
   );
 
+  const revealRef = useRevealRef<HTMLDivElement>();
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} modal={!wide}>
       <Dialog.Portal>
         <Dialog.Content
+          ref={revealRef}
           aria-describedby={undefined}
           data-grid-sheet=""
           data-docked={docked}

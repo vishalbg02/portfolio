@@ -3,7 +3,7 @@ export const card = "rounded-card border border-border bg-bg";
 export const chip =
   "inline-flex min-h-8 items-center rounded-pill border border-border-2 px-3 font-mono text-xs text-text transition-colors hover:border-accent hover:text-accent pointer-coarse:min-h-11";
 export const primary =
-  "inline-flex min-h-9 items-center justify-center rounded-sm border border-accent bg-accent px-3.5 font-mono text-xs font-medium text-bg transition-[filter] hover:brightness-110 disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11";
+  "inline-flex min-h-9 items-center justify-center rounded-sm border border-accent bg-accent px-3.5 font-mono text-xs font-medium text-bg btn-fill [--fill:var(--grid-4)] motion-reduce:hover:brightness-110 disabled:pointer-events-none disabled:opacity-50 pointer-coarse:min-h-11";
 export const quiet =
   "inline-flex min-h-9 items-center justify-center rounded-sm border border-border px-3.5 font-mono text-xs text-text transition-colors hover:border-border-2 hover:bg-surface-2 pointer-coarse:min-h-11";
 export const field =

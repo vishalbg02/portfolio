@@ -29,6 +29,7 @@ export function CopyButton({
   return (
     <button
       type="button"
+      data-cursor="copy"
       onClick={async () => {
         haptic();
         if (await copyText(text)) {
