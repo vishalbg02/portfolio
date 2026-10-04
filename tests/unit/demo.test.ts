@@ -1,56 +1,106 @@
 import { describe, expect, it } from "vitest";
-import { demoReducer, initialDemo, type DemoAction, type DemoState } from "@/lib/demo/reducer";
+import { DEMO_QUESTIONS, buildDemoScenes } from "@/lib/ai/agent/demo";
+import {
+  clipAnswer,
+  frameAt,
+  sceneDuration,
+  TIMING,
+  TOOL_DONE,
+  TOOL_WORKING,
+  type DemoScene,
+} from "@/lib/grid/demo";
+import { TOOL_NAMES } from "@/lib/ai/protocol";
 
-const dims = { steps: 4, roles: 4 };
-const run = (actions: DemoAction[], from: DemoState = initialDemo) =>
-  actions.reduce((s, a) => demoReducer(s, a, dims), from);
+const scene: DemoScene = {
+  q: "Show me Talnio",
+  text: "Here is Talnio: a platform. [1]",
+  sources: [{ n: 1, title: "Talnio — case study", url: "/work/talnio" }],
+  parts: [],
+  tool: "show_project",
+};
 
-describe("demo reducer", () => {
-  it("auto-play starts once and walks to the last step, then stops (never loops)", () => {
-    let s = run([{ type: "autoStart" }]);
-    expect(s.auto).toBe("playing");
-    s = run([{ type: "autoTick" }, { type: "autoTick" }, { type: "autoTick" }], s);
-    expect(s.step).toBe(3);
-    expect(s.auto).toBe("playing");
-    s = run([{ type: "autoTick" }], s);
-    expect(s).toMatchObject({ step: 3, auto: "done" });
-    expect(run([{ type: "autoTick" }, { type: "autoStart" }], s)).toEqual(s); // done stays done
-  });
-  it("any human input stops auto-play for good", () => {
-    for (const a of [
-      { type: "next" },
-      { type: "prev" },
-      { type: "goto", step: 2 },
-      { type: "role", role: 1 },
-    ] as DemoAction[]) {
-      const s = run([{ type: "autoStart" }, a]);
-      expect(s.auto, a.type).toBe("stopped");
-      expect(s.touched).toBe(true);
-      expect(run([{ type: "autoStart" }, { type: "autoTick" }], s)).toEqual(s);
+describe("the Ask section's demo scenes", () => {
+  it("are the router's real answers to the demo questions, in order, none dropped", async () => {
+    const scenes = await buildDemoScenes();
+    expect(scenes.map((s) => s.q)).toEqual([...DEMO_QUESTIONS]);
+    for (const s of scenes) {
+      expect(s.text.length, s.q).toBeGreaterThan(10);
+      expect(s.parts.length, s.q).toBeGreaterThan(0);
+      expect(s.tool, s.q).not.toBeNull();
+      // every citation in the text has its source, so nothing in the demo is unlinked
+      for (const n of [...s.text.matchAll(/\[(\d+)\]/g)].map((m) => Number(m[1])))
+        expect(s.sources[n - 1], `${s.q}: [${n}]`).toBeDefined();
     }
   });
-  it("does not start over a visitor who already used it", () => {
-    expect(run([{ type: "next" }, { type: "autoStart" }]).auto).toBe("stopped");
+
+  it("never reaches the network or the live presence store at build time, and stays small", async () => {
+    const scenes = await buildDemoScenes();
+    expect(scenes.some((s) => s.parts.some((p) => p.kind === "live" || p.kind === "stats"))).toBe(false);
+    expect(JSON.stringify(scenes).length).toBeLessThan(5_000);
   });
-  it("clamps steps and roles", () => {
-    expect(run([{ type: "prev" }]).step).toBe(0);
-    expect(run([{ type: "goto", step: 99 }]).step).toBe(3);
-    expect(run([{ type: "role", role: 99 }]).role).toBe(3);
-    expect(run([{ type: "role", role: -2 }]).role).toBe(0);
+
+  it("have a working line and a done line for every tool they use", async () => {
+    for (const s of await buildDemoScenes()) {
+      expect(TOOL_WORKING[s.tool!], s.q).toBeTruthy();
+      expect(TOOL_DONE[s.tool!], s.q).toBeTruthy();
+    }
+    // every tool has both lines, so the chat never falls back to a generic "Working"
+    expect(Object.keys(TOOL_WORKING).sort()).toEqual([...TOOL_NAMES].sort());
+    expect(Object.keys(TOOL_DONE).sort()).toEqual([...TOOL_NAMES].sort());
   });
-  it("a single-step demo has nothing to auto-play", () => {
-    expect(demoReducer(initialDemo, { type: "autoStart" }, { steps: 1, roles: 0 }).auto).toBe("idle");
+});
+
+describe("the demo's timeline", () => {
+  it("types, sends, thinks, works, answers and settles, in that order", () => {
+    expect(frameAt(scene, 0)).toMatchObject({ phase: "type", typed: 0, cards: false });
+    const typed = frameAt(scene, TIMING.typeStart + TIMING.perChar * 5);
+    expect(typed).toMatchObject({ phase: "type", typed: 5 });
+    const typeEnd = TIMING.typeStart + TIMING.perChar * scene.q.length;
+    expect(frameAt(scene, typeEnd + 10)).toMatchObject({ phase: "type", typed: scene.q.length });
+    const think = typeEnd + TIMING.sendPause;
+    expect(frameAt(scene, think + 10).phase).toBe("think");
+    const tool = think + TIMING.think;
+    expect(frameAt(scene, tool + 10).phase).toBe("tool");
+    const answer = tool + TIMING.tool;
+    expect(frameAt(scene, answer + 100)).toMatchObject({ phase: "answer", cards: true });
+    expect(frameAt(scene, sceneDuration(scene) - 1)).toMatchObject({
+      phase: "hold",
+      typed: scene.q.length,
+      shown: scene.text.length,
+      cards: true,
+    });
   });
-  it("replay restarts from step 1 and plays once more", () => {
-    const s = run([{ type: "goto", step: 3 }, { type: "replay" }]);
-    expect(s).toMatchObject({ step: 0, auto: "playing" });
+
+  it("skips the working line when the scene has no tool", () => {
+    const plain = { ...scene, tool: null };
+    expect(sceneDuration(plain)).toBe(sceneDuration(scene) - TIMING.tool);
+    const phases = new Set<string>();
+    for (let t = 0; t < sceneDuration(plain); t += 20) phases.add(frameAt(plain, t).phase);
+    expect(phases.has("tool")).toBe(false);
   });
-  it("changing role keeps the step", () => {
-    expect(
-      run([
-        { type: "goto", step: 2 },
-        { type: "role", role: 3 },
-      ]),
-    ).toMatchObject({ step: 2, role: 3 });
+
+  it("only ever moves forward", () => {
+    let last = frameAt(scene, 0);
+    for (let t = 0; t <= sceneDuration(scene); t += 25) {
+      const f = frameAt(scene, t);
+      expect(f.typed).toBeGreaterThanOrEqual(last.typed);
+      expect(f.shown).toBeGreaterThanOrEqual(last.shown);
+      last = f;
+    }
+  });
+
+  it("the settled frame (paused, reduced motion) is the same at any time past the end", () => {
+    expect(frameAt(scene, sceneDuration(scene))).toEqual(frameAt(scene, sceneDuration(scene) + 60_000));
+  });
+});
+
+describe("clipAnswer", () => {
+  it("never leaves half a citation on screen", () => {
+    expect(clipAnswer("Here is Talnio. [1]", 16).trimEnd()).toBe("Here is Talnio.");
+    expect(clipAnswer("Here is Talnio. [1]", 17)).toBe("Here is Talnio.");
+    expect(clipAnswer("Here is Talnio. [12]", 18)).toBe("Here is Talnio.");
+    expect(clipAnswer("Here is Talnio. [1]", 19)).toBe("Here is Talnio. [1]");
+    expect(clipAnswer("abc", 99)).toBe("abc");
+    expect(clipAnswer("abc", -4)).toBe("");
   });
 });
