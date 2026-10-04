@@ -11,10 +11,19 @@ test.describe("hero", () => {
     await expect(page.getByText("Full-stack developer turning ideas into products")).toBeVisible();
     await expect(page.getByRole("link", { name: "View work" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Résumé" }).first()).toBeVisible();
-    const consoleCard = page.locator("section[aria-labelledby='hero-title']").getByRole("list");
+    const rows = page.locator("section[aria-labelledby='hero-title'] details > summary");
+    await expect(rows).toHaveCount(4);
     for (const name of ["Golden Verdict", "Talnio", "LanSymphony", "CHRIST University Virtual Tour"]) {
-      await expect(consoleCard.getByText(name)).toBeVisible();
+      await expect(rows.filter({ hasText: name })).toBeVisible();
     }
+    // rows expand natively (<details>), no JavaScript needed, and the case-study link is inside
+    await rows.filter({ hasText: "Golden Verdict" }).click();
+    await expect(
+      page
+        .locator("section[aria-labelledby='hero-title']")
+        .getByRole("link", { name: /Case study/ })
+        .first(),
+    ).toHaveAttribute("href", "/work/golden-verdict");
     await context.close();
   });
 

@@ -8,10 +8,12 @@ export default function ChatSheet({
   open,
   onOpenChange,
   onClosed,
+  ask,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onClosed: () => void;
+  ask?: { text: string; id: number };
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -39,7 +41,7 @@ export default function ChatSheet({
             </Dialog.Close>
           </div>
           <div className="min-h-0 flex-1">
-            <ChatPanel variant="sheet" autoFocus />
+            <ChatPanel variant="sheet" autoFocus ask={ask} />
           </div>
         </Dialog.Content>
       </Dialog.Portal>

@@ -108,3 +108,73 @@ describe("tab completion", () => {
     expect(commonPrefix([])).toBe("");
   });
 });
+
+import { applyTab, historyStep } from "@/lib/terminal/input";
+
+describe("hero-terminal commands", () => {
+  it("ship --all lists every project; ship with no flag does too", () => {
+    for (const q of ["ship --all", "ship"]) {
+      const t = text(q);
+      for (const p of profile.projects) expect(t).toContain(p.name);
+    }
+  });
+
+  it("ask <question> carries the question (trimmed, capped); bare ask just opens the assistant", () => {
+    expect(run('ask "Where is he working now?"').action).toEqual({
+      type: "ask",
+      question: "Where is he working now?",
+    });
+    expect(run("ask is he available for hire").action).toEqual({
+      type: "ask",
+      question: "is he available for hire",
+    });
+    expect(run("ask").action).toEqual({ type: "ask" });
+    const long = run(`ask ${"x".repeat(1500)}`).action as { question: string };
+    expect(long.question).toHaveLength(1000);
+  });
+
+  it("help mentions the commands the hero terminal advertises", () => {
+    const t = text("help");
+    for (const c of [
+      "ship --all",
+      "open <name>",
+      "resume",
+      "contact",
+      "ask <question>",
+      "recruiter",
+      "clear",
+    ]) {
+      expect(t).toContain(c);
+    }
+  });
+
+  it("unknown commands get a friendly hint", () => {
+    expect(text("shiip --al")).toMatch(/command not found/);
+    expect(text("shiip --al")).toMatch(/Did you mean "ship"|Type help/);
+  });
+});
+
+describe("input helpers", () => {
+  it("walks history up and down and returns to an empty line", () => {
+    const h = ["a", "b", "c"];
+    let s = historyStep(h, null, "up");
+    expect(s).toEqual({ cursor: 2, value: "c" });
+    s = historyStep(h, s.cursor, "up");
+    expect(s.value).toBe("b");
+    s = historyStep(h, 0, "up");
+    expect(s).toEqual({ cursor: 0, value: "a" }); // clamps at the oldest
+    s = historyStep(h, 2, "down");
+    expect(s).toEqual({ cursor: null, value: "" });
+    expect(historyStep([], null, "up")).toEqual({ cursor: null, value: "" });
+  });
+
+  it("Tab completes a single candidate with a space and lists several", () => {
+    expect(applyTab("pro", ["projects"])).toEqual({ value: "projects ", listed: [] });
+    expect(applyTab("c", ["contact", "certs", "clear"])).toEqual({
+      value: "c",
+      listed: ["contact", "certs", "clear"],
+    });
+    expect(applyTab("open ta", ["talnio"])).toEqual({ value: "open talnio ", listed: [] });
+    expect(applyTab("zzz", [])).toEqual({ value: "zzz", listed: [] });
+  });
+});

@@ -5,6 +5,10 @@ import { useEffect, useRef, useState } from "react";
 
 export const OPEN_CHAT_EVENT = "app:open-chat";
 
+/** Open the chat sheet, optionally sending a first question (used by `ask <question>` in the terminals). */
+export const openChat = (question?: string) =>
+  window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: { question } }));
+
 const loadSheet = () => import("./ChatSheet");
 const ChatSheet = dynamic(loadSheet, { ssr: false });
 
@@ -17,6 +21,7 @@ export function ChatLauncher() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [inlineVisible, setInlineVisible] = useState(false);
+  const [ask, setAsk] = useState<{ text: string; id: number } | undefined>();
   const trigger = useRef<HTMLButtonElement>(null);
 
   const show = () => {
@@ -25,7 +30,9 @@ export function ChatLauncher() {
   };
 
   useEffect(() => {
-    const onOpen = () => {
+    const onOpen = (e: Event) => {
+      const q = (e as CustomEvent<{ question?: string }>).detail?.question?.trim();
+      if (q) setAsk({ text: q, id: Date.now() });
       setMounted(true);
       setOpen(true);
     };
@@ -62,7 +69,7 @@ export function ChatLauncher() {
         </button>
       ) : null}
       {mounted ? (
-        <ChatSheet open={open} onOpenChange={setOpen} onClosed={() => trigger.current?.focus()} />
+        <ChatSheet open={open} onOpenChange={setOpen} onClosed={() => trigger.current?.focus()} ask={ask} />
       ) : null}
     </>
   );

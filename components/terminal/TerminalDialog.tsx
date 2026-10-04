@@ -4,19 +4,10 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/analytics";
-import { copyText } from "@/lib/clipboard";
-import { openCosmoStrike } from "@/lib/delight";
-import { toast } from "@/lib/toast";
-import {
-  COMMAND_NAMES,
-  commonPrefix,
-  complete,
-  run,
-  type Line,
-  type TerminalAction,
-} from "@/lib/terminal/commands";
-import { OPEN_CHAT_EVENT } from "@/components/chat/ChatLauncher";
+import { COMMAND_NAMES, complete, run, type Line, type TerminalAction } from "@/lib/terminal/commands";
+import { applyTab, historyStep } from "@/lib/terminal/input";
 import { cn } from "@/lib/utils/cn";
+import { performAction } from "./perform";
 
 type Entry = { id: number; command: string | null; lines: Line[] };
 
@@ -52,49 +43,13 @@ export default function TerminalDialog({
     endRef.current?.scrollIntoView({ block: "end" });
   }, [entries]);
 
-  const perform = (action: TerminalAction) => {
-    switch (action.type) {
-      case "clear":
-        setEntries([]);
-        break;
-      case "exit":
-        onOpenChange(false);
-        break;
-      case "navigate":
-        onOpenChange(false);
-        router.push(action.href);
-        break;
-      case "external":
-        window.open(action.href, "_blank", "noopener,noreferrer");
-        break;
-      case "download": {
-        const a = document.createElement("a");
-        a.href = action.href;
-        a.download = action.filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        track("resume_download");
-        break;
-      }
-      case "copy":
-        void copyText(action.text).then((ok) => {
-          if (ok) {
-            toast.success(`${action.label} copied`);
-            track(action.label === "Email" ? "copy_email" : "copy_phone");
-          } else toast.error(`Couldn't copy — ${action.text}`);
-        });
-        break;
-      case "game":
-        onOpenChange(false);
-        window.setTimeout(openCosmoStrike, 150);
-        break;
-      case "ask":
-        onOpenChange(false);
-        window.setTimeout(() => window.dispatchEvent(new Event(OPEN_CHAT_EVENT)), 150);
-        break;
-    }
-  };
+  const perform = (action: TerminalAction) =>
+    performAction(action, {
+      navigate: (href) => router.push(href),
+      clear: () => setEntries([]),
+      exit: () => onOpenChange(false),
+      beforeOverlay: () => onOpenChange(false),
+    });
 
   const submit = () => {
     const command = value;
@@ -115,24 +70,17 @@ export default function TerminalDialog({
       submit();
     } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
-      const h = history.current;
-      if (h.length === 0) return;
-      const cur = cursor.current ?? h.length;
-      const next = Math.min(h.length, Math.max(0, cur + (e.key === "ArrowUp" ? -1 : 1)));
-      cursor.current = next === h.length ? null : next;
-      setValue(next === h.length ? "" : h[next]!);
+      const step = historyStep(history.current, cursor.current, e.key === "ArrowUp" ? "up" : "down");
+      cursor.current = step.cursor;
+      setValue(step.value);
     } else if (e.key === "Tab") {
       e.preventDefault();
-      const options = complete(value);
-      if (options.length === 0) return;
-      const words = value.split(/\s+/);
-      const prefix = commonPrefix(options);
-      words[words.length - 1] = prefix;
-      setValue(words.join(" ") + (options.length === 1 ? " " : ""));
-      if (options.length > 1) {
+      const { value: next, listed } = applyTab(value, complete(value));
+      setValue(next);
+      if (listed.length > 0) {
         setEntries((en) => [
           ...en,
-          { id: nextId.current++, command: value, lines: [{ text: options.join("  "), tone: "muted" }] },
+          { id: nextId.current++, command: value, lines: [{ text: listed.join("  "), tone: "muted" }] },
         ]);
       }
     } else if (e.ctrlKey && e.key.toLowerCase() === "l") {

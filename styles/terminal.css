@@ -1,0 +1,62 @@
+/*
+ * Hero terminal: the command is "typed" and the rows appear one after another with CSS only, so it works
+ * without JavaScript, never flashes on hydration, and reserves its final height from the first paint.
+ * Reduced motion shows the finished state immediately.
+ */
+.term-type {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  width: 0;
+  animation: term-type 600ms steps(10, end) 350ms forwards;
+}
+@keyframes term-type {
+  to {
+    width: 10ch;
+  }
+}
+
+.term-row,
+.term-late {
+  opacity: 0;
+  animation: term-in 280ms ease-out forwards;
+}
+.term-row {
+  animation-delay: calc(1050ms + var(--i, 0) * 150ms);
+}
+.term-late {
+  animation-delay: 1750ms;
+}
+@keyframes term-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.term-chev {
+  transition: transform 160ms ease-out;
+}
+details[open] > summary .term-chev {
+  transform: rotate(90deg);
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-type {
+    width: 10ch;
+    animation: none;
+  }
+  .term-row,
+  .term-late {
+    opacity: 1;
+    animation: none;
+  }
+}

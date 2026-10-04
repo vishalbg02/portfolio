@@ -1,13 +1,17 @@
-import Link from "next/link";
-import { profile } from "@/content/profile";
-import { shipped } from "@/lib/site";
+import { Chip } from "@/components/ui/Chip";
 import { identityBg } from "@/components/work/identity";
+import { ProjectLinks } from "@/components/work/ProjectLinks";
 import { StaticBadge, StatusBadge } from "@/components/work/StatusBadge";
+import { profile } from "@/content/profile";
+import { FocusOnClick } from "./FocusOnClick";
+import { HeroPrompt } from "./HeroPrompt";
+import { StatusCheck } from "./StatusCheck";
 
 /**
- * Hero visual: a terminal-style "ship console" listing the four products with live status.
- * Server-rendered rows (readable without JS); only the status badges are client islands.
- * It answers the recruiter's question — "are his products actually live?" — above the fold.
+ * Hero visual: a terminal. `ship --all` is typed (CSS), then the four products appear one after another,
+ * each ✓ landing when its real status ping resolves. Rows are native <details> (exclusive group): they expand
+ * in place with the summary, stack and links, with or without JavaScript. The prompt at the bottom is real.
+ * Everything above the prompt is server-rendered, so the final list is there even with JS off.
  */
 export function ShipConsole() {
   return (
@@ -21,62 +25,67 @@ export function ShipConsole() {
         <span className="text-xs text-muted">~/vishalbg — ship</span>
       </div>
 
-      <div className="px-4 py-4">
-        <p className="text-text">
-          <span className="text-accent">$</span> ship --all
-        </p>
+      <FocusOnClick targetId="hero-term-input">
+        <div className="px-4 py-4">
+          <p className="text-text">
+            <span aria-hidden="true" className="text-accent">
+              $
+            </span>{" "}
+            <span className="term-type">ship --all</span>
+          </p>
 
-        <ul className="mt-3 divide-y divide-border">
-          {profile.projects.map((p, i) => {
-            const body = (
-              <>
-                <span aria-hidden="true" className="mt-0.5 text-accent">
-                  ✓
-                </span>
-                {/* Narrow: status sits under the name. Wider: side by side (stacks again in the tighter lg column). */}
-                <span className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3 lg:flex-col xl:flex-row">
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 text-text">
-                      <span
-                        aria-hidden="true"
-                        className={`size-2 shrink-0 rounded-pill ${identityBg[p.slug]}`}
-                      />
-                      <span className="truncate">{p.name}</span>
-                    </span>
-                    <span className="mt-0.5 block truncate pl-4 text-xs text-muted">{p.tagline}</span>
-                  </span>
-                  <span className="shrink-0 pl-4 sm:pt-px sm:pl-0 lg:pl-4 xl:pl-0">
-                    {p.live ? (
-                      <StatusBadge slug={p.slug} bare />
-                    ) : p.badge ? (
-                      <StaticBadge label={p.badge} className="border-0 px-0" />
-                    ) : null}
-                  </span>
-                </span>
-              </>
-            );
-            return (
-              <li key={p.slug} className="animate-fade-in" style={{ animationDelay: `${150 + i * 140}ms` }}>
-                {shipped.caseStudies ? (
-                  <Link
-                    href={`/work/${p.slug}`}
-                    className="-mx-2 flex items-start gap-3 rounded-sm px-2 py-2.5 transition-colors hover:bg-surface"
+          <ul className="mt-3 divide-y divide-border">
+            {profile.projects.map((p, i) => (
+              <li key={p.slug} className="term-row" style={{ ["--i" as string]: i }}>
+                <details name="ship-rows">
+                  <summary
+                    data-track="hero_row_expand"
+                    data-track-project={p.slug}
+                    className="-mx-2 flex cursor-pointer list-none items-start gap-3 rounded-sm px-2 py-2.5 transition-colors hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent"
                   >
-                    {body}
-                  </Link>
-                ) : (
-                  <div className="flex items-start gap-3 py-2.5">{body}</div>
-                )}
+                    <StatusCheck slug={p.slug} pinged={Boolean(p.live)} />
+                    <span className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3 lg:flex-col xl:flex-row">
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-2 text-text">
+                          <span
+                            aria-hidden="true"
+                            className={`size-2 shrink-0 rounded-pill ${identityBg[p.slug]}`}
+                          />
+                          <span className="truncate">{p.name}</span>
+                        </span>
+                        <span className="mt-0.5 block truncate pl-4 text-xs text-muted">{p.tagline}</span>
+                      </span>
+                      <span className="shrink-0 pl-4 sm:pt-px sm:pl-0 lg:pl-4 xl:pl-0">
+                        {p.live ? (
+                          <StatusBadge slug={p.slug} bare />
+                        ) : p.badge ? (
+                          <StaticBadge label={p.badge} className="border-0 px-0" />
+                        ) : null}
+                      </span>
+                    </span>
+                    <span aria-hidden="true" className="term-chev mt-0.5 shrink-0 text-muted">
+                      ▸
+                    </span>
+                  </summary>
+                  <div className="space-y-3 pb-3 pl-6 text-xs">
+                    <p className="line-clamp-2 text-muted">{p.summary}</p>
+                    <ul className="flex flex-wrap gap-1.5" aria-label={`${p.name} stack`}>
+                      {p.stack.slice(0, 4).map((s) => (
+                        <li key={s}>
+                          <Chip>{s}</Chip>
+                        </li>
+                      ))}
+                    </ul>
+                    <ProjectLinks project={p} className="flex flex-wrap items-center gap-x-4 gap-y-1.5" />
+                  </div>
+                </details>
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
 
-        <p className="mt-3 text-text">
-          <span className="text-accent">$</span>{" "}
-          <span aria-hidden="true" className="inline-block h-4 w-2 translate-y-0.5 animate-blink bg-accent" />
-        </p>
-      </div>
+          <HeroPrompt />
+        </div>
+      </FocusOnClick>
 
       <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-2.5 text-xs text-muted">
         <span className="truncate">{profile.motto}</span>
