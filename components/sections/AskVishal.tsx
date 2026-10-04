@@ -80,6 +80,7 @@ export async function AskVishal() {
                     href="/#ask"
                     data-grid-open=""
                     data-grid-question={c.question}
+                    data-cursor="ask"
                     className="group block h-full rounded-card border border-border bg-surface px-3.5 py-3 transition-colors hover:border-accent pointer-coarse:min-h-11"
                   >
                     <span className="flex items-center justify-between gap-2 text-sm font-medium text-text">

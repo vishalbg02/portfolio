@@ -239,7 +239,7 @@ function Board() {
             <button
               type="button"
               onClick={() => begin(phase !== "paused")}
-              className="h-9 rounded-sm border border-accent bg-accent px-4 text-sm font-medium text-bg hover:brightness-110"
+              className="btn-fill h-9 rounded-sm border border-accent bg-accent px-4 text-sm font-medium text-bg [--fill:var(--grid-4)] motion-reduce:hover:brightness-110"
             >
               {phase === "ready" ? "Start" : phase === "paused" ? "Resume" : "Play again"}
             </button>

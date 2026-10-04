@@ -133,12 +133,12 @@ test.describe("stack as a connection map", () => {
     await gotoHydrated(page, "/");
     const stack = page.locator("#stack");
     await stack.scrollIntoViewIfNeeded();
-    await expect(stack.locator(".stack-line")).toHaveCount(0);
+    await expect(stack.locator(".stack-line")).toHaveCount(0); // faint wires only, none lit
     await stack.getByRole("button", { name: "Firebase" }).hover();
     // Firebase is used by Golden Verdict and Talnio
     await expect(stack.locator(".stack-line")).toHaveCount(2);
     await expect(stack.locator("[data-marker='golden-verdict']")).toHaveAttribute("aria-pressed", "false");
-    expect(await stack.locator(".stack-line line").first().getAttribute("stroke-width")).toBe("1");
+    expect(await stack.locator(".stack-line path").first().getAttribute("stroke-width")).toBe("1");
     const accent = await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),
     );

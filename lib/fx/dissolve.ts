@@ -88,3 +88,56 @@ export async function dissolve(
     layer.remove();
   }
 }
+
+export type RevealOptions = DissolveOptions & {
+  /** Cover the whole viewport (a route change) instead of the host's box (a dialog). */
+  fixed?: boolean;
+};
+
+/**
+ * Half of the dissolve, for a thing that has just appeared (a new page, a dialog): squares cover it at once and
+ * flip off in a diagonal wave, so it looks as if the previous state dissolved into the new one. Nothing is
+ * animated that the content depends on, the squares never take pointer events, and reduced motion is a no-op.
+ */
+export async function reveal(
+  host: HTMLElement,
+  { cell = 64, ms = 300, fixed = false }: RevealOptions = {},
+): Promise<void> {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || typeof host.animate !== "function")
+    return;
+  const w = fixed ? window.innerWidth : host.getBoundingClientRect().width;
+  const h = fixed ? window.innerHeight : host.getBoundingClientRect().height;
+  const { cols, rows } = gridFor(w, h, cell);
+
+  const layer = document.createElement("div");
+  layer.setAttribute("aria-hidden", "true");
+  layer.dataset.pixelReveal = "";
+  layer.style.cssText = `position:${fixed ? "fixed" : "absolute"};inset:0;z-index:${fixed ? 90 : 40};pointer-events:none;overflow:hidden;display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr);`;
+  const cells = Array.from({ length: cols * rows }, (_, i) => {
+    const s = document.createElement("span");
+    s.style.background = i % 7 === 0 ? LEVELS[Math.floor(noise(i, 3) * LEVELS.length)]! : "var(--bg)";
+    layer.appendChild(s);
+    return s;
+  });
+  host.appendChild(layer);
+
+  const part = ms * 0.4; // one square
+  const spread = ms * 0.6; // the wave from the top left to the bottom right
+  try {
+    await Promise.all(
+      cells.map((s, i) => {
+        const wave = ((i % cols) / cols + Math.floor(i / cols) / rows) / 2;
+        return s.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: part,
+          delay: (wave * 0.7 + noise(i, 4) * 0.3) * spread,
+          easing: "steps(3, end)",
+          fill: "forwards",
+        }).finished;
+      }),
+    );
+  } catch {
+    /* interrupted: the layer is removed below, the content was never touched */
+  } finally {
+    layer.remove();
+  }
+}

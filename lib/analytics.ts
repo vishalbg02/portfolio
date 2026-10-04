@@ -32,7 +32,8 @@ export type AnalyticsEvent =
   | "demo_step"
   | "project_ask"
   | "proof_jump"
-  | "stack_skill_select";
+  | "stack_skill_select"
+  | "city_3d_on";
 
 export function track(event: AnalyticsEvent, props?: Record<string, string | number | boolean>) {
   if (typeof window === "undefined") return;

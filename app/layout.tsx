@@ -7,6 +7,8 @@ import { SkipLink } from "@/components/layout/SkipLink";
 import { ClickTracker } from "@/components/analytics/ClickTracker";
 import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
 import { DelightHost } from "@/components/delight/DelightHost";
+import { CursorHost } from "@/components/delight/CursorHost";
+import { RouteWipe } from "@/components/delight/RouteWipe";
 import { GridHost } from "@/components/grid/GridHost";
 import { Omnibar } from "@/components/grid/Omnibar";
 import { ProofHost } from "@/components/ProofHost";
@@ -49,6 +51,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Omnibar />
         <ShortcutsHost />
         <DelightHost />
+        <RouteWipe />
+        <CursorHost />
         <ProofHost />
         <ToastHost />
         <ClickTracker />

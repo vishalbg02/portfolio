@@ -149,7 +149,7 @@ export function Scene({
 
       <div className="scene-media">
         {/* A phone card's media: one clip or still, tap to open full screen. */}
-        <div className="scene-hero stage-grid">
+        <div className="scene-hero stage-grid" data-cursor="open">
           <Framed scene={scene} project={project} openable={openable}>
             <Content media={scene.hero} />
           </Framed>

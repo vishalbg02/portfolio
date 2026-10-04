@@ -15,7 +15,7 @@ export function LiveContactButton() {
       <button
         type="button"
         data-live-open=""
-        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-4 font-medium text-bg transition-[filter] hover:brightness-110"
+        className="btn-fill inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-sm border border-accent bg-accent px-4 font-medium text-bg [--fill:var(--grid-4)] motion-reduce:hover:brightness-110"
       >
         Message Vishal
         <span aria-hidden="true">→</span>

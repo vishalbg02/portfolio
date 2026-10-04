@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { profile } from "@/content/profile";
 import { branchName, buildGraph, commitId, educationTag, type GraphRow } from "@/lib/content/history";
+import { monogram } from "@/lib/content/monogram";
 import { GraphReveal } from "./GraphReveal";
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
@@ -108,8 +109,20 @@ export function Experience() {
           </>,
         )}
         <div className="git-body py-4 md:py-5">
-          <h3 className="text-lg font-semibold text-text">{job.role}</h3>
-          <p className="text-muted">{job.company}</p>
+          <div className="flex items-start gap-3">
+            <span
+              aria-hidden="true"
+              data-monogram={monogram(job.company)}
+              className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-sm border font-mono text-xs font-medium text-text"
+              style={{ borderColor: color }}
+            >
+              {monogram(job.company)}
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-text">{job.role}</h3>
+              <p className="text-muted">{job.company}</p>
+            </div>
+          </div>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-xs text-muted">
             <span>{job.period}</span>
             {job.current ? <span className="text-accent">current</span> : null}

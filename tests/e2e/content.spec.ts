@@ -149,14 +149,24 @@ test.describe("stack", () => {
     await expect(three).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("skills no project used are plain text, not links to nowhere", async ({ page }) => {
+  test("a skill no project used says so plainly, points to where it was learned, and still opens GRID's evidence", async ({
+    page,
+  }) => {
     await mockStatus(page);
     await page.goto("/");
     await loadIslands(page);
     const stack = page.locator("#stack");
-    await expect(stack.getByText("Java", { exact: true })).toBeVisible();
-    await expect(stack.getByRole("button", { name: "Java" })).toHaveCount(0);
-    await expect(stack.getByRole("button", { name: "React Native" })).toHaveCount(0);
+    const java = stack.getByRole("button", { name: "Java", exact: true });
+    await expect(java).toBeVisible();
+    await expect(stack.locator("[data-layer=base] path").first()).toBeAttached(); // wires exist for the skills that have projects
+    await java.click();
+    const live = stack.locator("[aria-live=polite]");
+    await expect(live).toContainText("no project on this site used it");
+    await expect(live).toContainText("CHRIST");
+    await expect(stack.locator(".stack-line")).toHaveCount(0); // nothing is drawn that no case study backs up
+    await live.getByRole("button", { name: "Ask GRID where" }).click();
+    const dialog = page.getByRole("dialog", { name: /GRID/ });
+    await expect(dialog.getByText("Where did he use Java?")).toBeVisible();
     await expect(stack.getByRole("heading", { level: 3 })).toHaveCount(6);
   });
 });

@@ -35,3 +35,100 @@
     animation: none;
   }
 }
+
+/*
+ * Button hover: a flat fill sweeps left to right in five steps (not a fade). The fill is a ::before behind the label
+ * (the colour is the --fill variable), and an outline button's text turns dark a beat after the fill starts so it is
+ * never dark on dark. Reduced motion: no sweep, the plain hover colours (the motion-reduce: classes in Button.tsx).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .btn-fill {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .btn-fill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--fill);
+    clip-path: inset(0 100% 0 0);
+  }
+  .btn-fill:hover::before,
+  .btn-fill:focus-visible::before {
+    animation: btn-fill 200ms steps(5, end) forwards;
+  }
+  .btn-fill-flip:hover,
+  .btn-fill-flip:focus-visible {
+    color: var(--bg);
+    transition-delay: 90ms;
+  }
+}
+@keyframes btn-fill {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ── the context cursor ───────────────────────────────────────────────────────────────────────── */
+.ctx-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  min-width: 8px;
+  height: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bg);
+  transition:
+    opacity 120ms linear,
+    min-width 120ms steps(3, end),
+    height 120ms steps(3, end),
+    background-color 120ms linear;
+}
+.ctx-cursor[data-hidden="true"] {
+  visibility: hidden;
+}
+.ctx-cursor[data-label]:not([data-label=""]) {
+  min-width: 36px;
+  height: 22px;
+  padding: 0 7px;
+  background: var(--accent);
+}
+.ctx-cursor > span {
+  white-space: nowrap;
+}
+/* over a labelled element the native cursor steps aside (and only there) */
+html[data-cursor-active] [data-cursor],
+html[data-cursor-active] [data-cursor] * {
+  cursor: none;
+}
+
+/* ── the Stack map: a lit wire draws in from the skill to the project (still under reduced motion) ── */
+@media (prefers-reduced-motion: no-preference) {
+  .stack-wire {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: stack-draw 320ms steps(8, end) forwards;
+  }
+}
+@keyframes stack-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* the 3D city is shorter than the calendar's reserved height: once it is showing, let the block be as tall as it is */
+.island-activity:has([data-testid="city"]) {
+  min-height: 0;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { track } from "@/lib/analytics";
@@ -13,10 +14,17 @@ import type { ContributionCalendar as Calendar } from "@/lib/github/types";
 import { cn } from "@/lib/utils/cn";
 import { relativeTime } from "@/lib/utils/relative-time";
 import { CountUp } from "@/components/ui/CountUp";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { ContributionCalendar } from "./ContributionCalendar";
 
 type View = { calendar: Calendar; asOf: string; updated: string; scrollTo: "start" | "end" };
 type Loaded = Record<string, View | "loading" | "error">;
+
+// The 3D city is its own chunk, fetched the first time the 3D view is switched on.
+const CommitCity = dynamic(() => import("./CommitCity"), {
+  ssr: false,
+  loading: () => <Skeleton label="Loading the 3D city" className="h-[360px]" />,
+});
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const monthName = (key: string) => `${MONTHS[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`;
@@ -52,6 +60,7 @@ export function ActivityPanel({
   const [key, setKey] = useState("last");
   const [loaded, setLoaded] = useState<Loaded>({ last: initial });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mode, setMode] = useState<"2d" | "3d">("2d");
   const inflight = useRef(new Set<string>());
 
   const select = useCallback(
@@ -115,6 +124,8 @@ export function ActivityPanel({
     () => [...bands, ...pins].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)),
     [bands, pins],
   );
+
+  const calendarLabel = `${view.calendar.total} contributions, ${period}. ${activeDays} active days, longest streak ${unit(longest)}.${peaks[0] ? ` Busiest day ${longDate(peaks[0].date)} with ${peaks[0].count} contributions.` : ""}${inView.length ? ` ${inView.length} marks: roles, awards and peak days.` : ""}`;
 
   const tabs = [
     { key: "last", label: "Last 12 months" },
@@ -216,16 +227,49 @@ export function ActivityPanel({
         className="mt-4 rounded-card border border-border bg-surface p-4 sm:p-5"
         aria-busy={status === "loading"}
       >
+        <div
+          role="group"
+          aria-label="Calendar view"
+          className="mb-3 inline-flex rounded-pill border border-border p-0.5"
+        >
+          {(
+            [
+              ["2d", "2D calendar"],
+              ["3d", "3D city"],
+            ] as const
+          ).map(([m, text]) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={mode === m}
+              onClick={() => {
+                if (m === "3d" && mode !== "3d") track("city_3d_on");
+                setMode(m);
+              }}
+              className={cn(
+                "min-h-7 rounded-pill px-3 font-mono text-xs transition-colors pointer-coarse:min-h-10",
+                mode === m ? "bg-surface-2 text-text" : "text-muted hover:text-text",
+              )}
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+
         <div className={cn("transition-opacity", status ? "opacity-50" : "")}>
-          <ContributionCalendar
-            key={shownKey}
-            weeks={weeks}
-            pins={pins}
-            bands={bands}
-            scrollTo={view.scrollTo}
-            selectedId={selectedId}
-            label={`${view.calendar.total} contributions, ${period}. ${activeDays} active days, longest streak ${unit(longest)}.${peaks[0] ? ` Busiest day ${longDate(peaks[0].date)} with ${peaks[0].count} contributions.` : ""}${inView.length ? ` ${inView.length} marks: roles, awards and peak days.` : ""}`}
-          />
+          {mode === "3d" ? (
+            <CommitCity key={shownKey} weeks={weeks} pins={pins} label={calendarLabel} />
+          ) : (
+            <ContributionCalendar
+              key={shownKey}
+              weeks={weeks}
+              pins={pins}
+              bands={bands}
+              scrollTo={view.scrollTo}
+              selectedId={selectedId}
+              label={calendarLabel}
+            />
+          )}
         </div>
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-muted">
@@ -248,7 +292,7 @@ export function ActivityPanel({
           </span>
         </div>
 
-        {inView.length ? (
+        {inView.length && mode === "2d" ? (
           <div className="mt-4 border-t border-border pt-4 md:hidden">
             <h3 className="mb-2 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
               On this calendar

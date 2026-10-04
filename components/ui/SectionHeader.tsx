@@ -37,6 +37,7 @@ export function SectionHeader({
             href="/#ask"
             data-grid-open=""
             data-grid-question={ask}
+            data-cursor="ask"
             aria-label={`Ask about this: ${label}`}
             className="needs-grid inline-flex items-center gap-1.5 rounded-sm text-[11px] tracking-normal text-muted normal-case transition-colors hover:text-accent pointer-coarse:min-h-11"
           >

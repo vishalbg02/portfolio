@@ -73,6 +73,17 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 - **Embeddings** are generated locally and committed. After editing `profile.ts` or a case study, run `pnpm embeddings` and commit `generated/embeddings.json`. CI only warns when they are stale, and the Vercel build never calls the API.
 - Evaluation questions: [tests/ai-evals.md](tests/ai-evals.md). Unit tests blank all API keys, so they are hermetic.
 
+## What V3 added to the page (Phase 5)
+
+Everything here is a lazy chunk, keyboard-operable, flat-coloured (no gradients) and has a reduced-motion variant. Details: [docs/SIGNATURE.md](docs/SIGNATURE.md).
+
+- **3D Commit City** (`components/sections/CommitCity.tsx`, `lib/city/iso.ts`): the Activity calendar's second view. A canvas draws each day as a flat-shaded isometric block (height = contributions), awards as taller towers in the project's colour with staggered labels (numbered pins below 900 px). Drag, buttons, arrow keys; Ctrl + scroll zooms (a plain scroll is never trapped); tap a tower to fly there and read its story. Redraws only when something changes. The projection, painter's order, shading and hit test are unit-tested.
+- **Pixel dissolve** (`lib/fx/dissolve.ts`): new pages and dialogs dissolve in from contribution squares (`RouteWipe`, `useRevealRef`); buttons fill left to right in five steps (`styles/fx.css`).
+- **Context cursor** (`components/delight/ContextCursor.tsx`): a small grid-snapped square on fine pointers that names what you are over (`data-cursor="open | play | drag | copy | ask"`). Never mounted for touch or reduced motion.
+- **Stack map** (`components/sections/StackExplorer.tsx`): skills by area on the left, projects on the right, a faint wire for every real connection that lights and draws in when you pick one; an accordion with project dots on phones. Every skill can ask GRID where it was used; a skill no project used says so and points to where it was learned.
+- **Contact**: a static vCard (`/vishal-b-g.vcf`, from `content/profile.ts` only) with a Save contact link, and a build-time QR code for it on desktops (`lib/contact/qr.ts`; a test decodes it back).
+- **Experience**: a code-drawn monogram square per employer.
+
 ## What V2 added (and where it comes from)
 
 Everything is derived from `content/profile.ts` or the MDX, never typed into a component:

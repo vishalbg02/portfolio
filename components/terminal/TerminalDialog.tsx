@@ -8,6 +8,7 @@ import { COMMAND_NAMES, complete, run, type Line, type TerminalAction } from "@/
 import { applyTab, historyStep } from "@/lib/terminal/input";
 import { cn } from "@/lib/utils/cn";
 import { performAction } from "./perform";
+import { useRevealRef } from "@/lib/fx/use-reveal";
 
 type Entry = { id: number; command: string | null; lines: Line[] };
 
@@ -89,11 +90,14 @@ export default function TerminalDialog({
     }
   };
 
+  const revealRef = useRevealRef<HTMLDivElement>();
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[70] bg-bg/80" />
         <Dialog.Content
+          ref={revealRef}
           aria-describedby={undefined}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
