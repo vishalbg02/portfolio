@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { track } from "@/lib/analytics";
 import type { Milestone } from "@/lib/content/milestones";
+import type { RoleSpan } from "@/lib/content/roles";
 import { monthTotals } from "@/lib/github/calendar";
-import { pinsFor } from "@/lib/github/pins";
+import { buildMarks, longDate, shortDate, type Mark } from "@/lib/github/marks";
+import { busiest, peakDays } from "@/lib/github/peaks";
 import { computeStreaks } from "@/lib/github/streaks";
 import type { ContributionCalendar as Calendar } from "@/lib/github/types";
 import { cn } from "@/lib/utils/cn";
@@ -15,6 +17,11 @@ import { ContributionCalendar } from "./ContributionCalendar";
 
 type View = { calendar: Calendar; asOf: string; updated: string; scrollTo: "start" | "end" };
 type Loaded = Record<string, View | "loading" | "error">;
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const monthName = (key: string) => `${MONTHS[Number(key.slice(5, 7)) - 1]} ${key.slice(0, 4)}`;
+const addDays = (iso: string, n: number) =>
+  new Date(Date.parse(`${iso}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 
 const unit = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 
@@ -35,10 +42,12 @@ export function ActivityPanel({
   initial,
   years,
   milestones,
+  spans,
 }: {
   initial: View;
   years: number[];
   milestones: Milestone[];
+  spans: RoleSpan[];
 }) {
   const [key, setKey] = useState("last");
   const [loaded, setLoaded] = useState<Loaded>({ last: initial });
@@ -95,7 +104,17 @@ export function ActivityPanel({
   const longest = useMemo(() => computeStreaks(days, view.asOf).longest, [days, view.asOf]);
   const activeDays = days.filter((d) => d.count > 0).length;
   const period = shownKey === "last" ? "last year" : shownKey;
-  const inView = useMemo(() => pinsFor(weeks, milestones).map((p) => p.milestone), [weeks, milestones]);
+  const peaks = useMemo(() => peakDays(days, 3), [days]);
+  const { pins, bands } = useMemo(
+    () => buildMarks({ weeks, milestones, spans, peaks }),
+    [weeks, milestones, spans, peaks],
+  );
+  const high = useMemo(() => busiest(days), [days]);
+  // Everything marked on this calendar, oldest first: the phone's tappable list.
+  const inView = useMemo(
+    () => [...bands, ...pins].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)),
+    [bands, pins],
+  );
 
   const tabs = [
     { key: "last", label: "Last 12 months" },
@@ -136,6 +155,63 @@ export function ActivityPanel({
         />
       </dl>
 
+      {peaks[0] || high.week || high.month ? (
+        <dl
+          aria-label="Highlights"
+          className="mt-3 grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l"
+        >
+          {peaks[0] ? (
+            <div className="min-w-0 p-4 sm:p-5">
+              <dt className="font-mono text-[11px] tracking-[0.12em] text-accent uppercase">▲ Busiest day</dt>
+              <dd className="mt-1.5">
+                <button
+                  type="button"
+                  data-testid="busiest-day"
+                  onClick={() => {
+                    track("milestone_open", { kind: "peak" });
+                    setSelectedId(`peak-${peaks[0]!.date}`);
+                  }}
+                  className="-m-1 min-h-11 rounded-sm p-1 text-left transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-link"
+                >
+                  <span className="text-lg font-semibold text-text tabular-nums">
+                    {peaks[0].count} contributions
+                  </span>
+                  <span className="mt-0.5 block font-mono text-xs text-muted">
+                    {longDate(peaks[0].date)} · show on the calendar
+                  </span>
+                </button>
+              </dd>
+            </div>
+          ) : null}
+          {high.week ? (
+            <div className="min-w-0 p-4 sm:p-5">
+              <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">Best week</dt>
+              <dd className="mt-1.5">
+                <span className="text-lg font-semibold text-text tabular-nums">
+                  {high.week.total} contributions
+                </span>
+                <span className="mt-0.5 block font-mono text-xs text-muted">
+                  {shortDate(high.week.start)} – {shortDate(addDays(high.week.start, 6))}
+                </span>
+              </dd>
+            </div>
+          ) : null}
+          {high.month ? (
+            <div className="min-w-0 p-4 sm:p-5">
+              <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
+                Most active month
+              </dt>
+              <dd className="mt-1.5">
+                <span className="text-lg font-semibold text-text tabular-nums">
+                  {high.month.total} contributions
+                </span>
+                <span className="mt-0.5 block font-mono text-xs text-muted">{monthName(high.month.key)}</span>
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : null}
+
       <div
         className="mt-4 rounded-card border border-border bg-surface p-4 sm:p-5"
         aria-busy={status === "loading"}
@@ -144,10 +220,11 @@ export function ActivityPanel({
           <ContributionCalendar
             key={shownKey}
             weeks={weeks}
-            milestones={milestones}
+            pins={pins}
+            bands={bands}
             scrollTo={view.scrollTo}
             selectedId={selectedId}
-            label={`${view.calendar.total} contributions, ${period}. ${activeDays} active days, longest streak ${unit(longest)}.${inView.length ? ` ${inView.length} milestones pinned.` : ""}`}
+            label={`${view.calendar.total} contributions, ${period}. ${activeDays} active days, longest streak ${unit(longest)}.${peaks[0] ? ` Busiest day ${longDate(peaks[0].date)} with ${peaks[0].count} contributions.` : ""}${inView.length ? ` ${inView.length} marks: roles, awards and peak days.` : ""}`}
           />
         </div>
 
@@ -173,7 +250,9 @@ export function ActivityPanel({
 
         {inView.length ? (
           <div className="mt-4 border-t border-border pt-4 md:hidden">
-            <h3 className="mb-2 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">Milestones</h3>
+            <h3 className="mb-2 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
+              On this calendar
+            </h3>
             <ul className="space-y-1.5">
               {inView.map((m) => {
                 const open = selectedId === m.id;
@@ -188,10 +267,7 @@ export function ActivityPanel({
                       }}
                       className="flex min-h-11 w-full items-center gap-3 rounded-sm text-left text-sm text-text"
                     >
-                      <span
-                        aria-hidden="true"
-                        className={`size-2.5 shrink-0 rotate-45 ${m.kind === "award" ? "bg-text" : "bg-accent"}`}
-                      />
+                      <MarkGlyph kind={m.kind} />
                       <span className="min-w-0 flex-1">{m.title}</span>
                       <span className="shrink-0 font-mono text-xs text-muted">{m.when}</span>
                     </button>
@@ -225,4 +301,16 @@ export function ActivityPanel({
       </div>
     </>
   );
+}
+
+function MarkGlyph({ kind }: { kind: Mark["kind"] }) {
+  if (kind === "peak")
+    return (
+      <span
+        aria-hidden="true"
+        className="h-2.5 w-3 shrink-0 bg-accent [clip-path:polygon(50%_0,100%_100%,0_100%)]"
+      />
+    );
+  if (kind === "role") return <span aria-hidden="true" className="h-1.5 w-3 shrink-0 rounded-sm bg-grid-2" />;
+  return <span aria-hidden="true" className="size-2.5 shrink-0 rotate-45 bg-text" />;
 }

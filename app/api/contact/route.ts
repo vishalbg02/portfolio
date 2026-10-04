@@ -1,10 +1,9 @@
 import { Resend } from "resend";
 import { env, features } from "@/lib/env";
-import { singleLine } from "@/lib/contact/rules";
 import { ContactSchema } from "@/lib/contact/schema";
 import { json, sameOrigin } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
-import { site } from "@/lib/site";
+import { canAutoReply, ownerEmail, visitorEmail } from "@/lib/email/templates";
 
 const MAX_BODY_BYTES = 10_000;
 // Resend's shared sender works without a verified domain (mail goes to the account owner).
@@ -43,17 +42,28 @@ export async function POST(req: Request) {
 
   if (!features.email) return json({ error: "not_configured", fallback: "mailto" }, 503);
 
-  const { name, email, org, message } = parsed.data;
+  const submission = parsed.data;
   try {
     const resend = new Resend(env.RESEND_API_KEY);
+    const mail = ownerEmail(submission);
     const { error } = await resend.emails.send({
       from: FROM,
       to: env.CONTACT_TO_EMAIL!,
-      replyTo: email,
-      subject: `Portfolio message from ${singleLine(name)}${org ? ` (${singleLine(org)})` : ""}`,
-      text: `${message}\n\n—\n${singleLine(name)}\n${email}${org ? `\n${singleLine(org)}` : ""}\n\nSent from ${site.url}`,
+      replyTo: submission.email,
+      subject: mail.subject,
+      html: mail.html,
+      text: mail.text,
     });
     if (error) throw new Error(error.message);
+
+    // The visitor's confirmation needs a sender on a verified domain; with the shared sender it is skipped.
+    if (canAutoReply(process.env.CONTACT_FROM_EMAIL)) {
+      const copy = visitorEmail(submission);
+      const sent = await resend.emails
+        .send({ from: FROM, to: submission.email, replyTo: env.CONTACT_TO_EMAIL!, ...copy })
+        .catch((e: unknown) => ({ error: { message: (e as Error).message } }));
+      if (sent.error) console.error("[contact] confirmation not sent:", sent.error.message); // never fails the request
+    }
     return json({ ok: true });
   } catch (err) {
     console.error("[contact] send failed:", (err as Error).message);

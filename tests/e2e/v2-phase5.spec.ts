@@ -484,6 +484,7 @@ test.describe("touch polish", () => {
         const r = el.getBoundingClientRect();
         if (cs.visibility === "hidden" || cs.display === "none" || r.width === 0) continue;
         if (el.closest(".sr-only") || el.closest("[data-testid=contribution-calendar]")) continue;
+        if (el.hasAttribute("data-mark")) continue; // pins and role bands: the list below is the touch path
         if (el.hasAttribute("data-milestone")) continue; // 24 px pins; the milestone list below is the touch path
         if (r.height < 44 || r.width < 44)
           out.push(

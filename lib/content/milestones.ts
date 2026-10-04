@@ -2,7 +2,7 @@ import { profile } from "@/content/profile";
 import type { Profile } from "@/lib/content/profile-schema";
 import { monthIndex } from "./history";
 
-export type MilestoneKind = "award" | "launch" | "role";
+export type MilestoneKind = "award" | "launch";
 
 export type Milestone = {
   id: string;
@@ -33,12 +33,12 @@ const ym = (idx: number) => `${Math.floor(idx / 12)}-${String((idx % 12) + 1).pa
 const ordinal = (place: string) => place.replace(/\s*place$/i, "");
 
 /**
- * Pins for the activity calendar, derived from content/profile.ts so they can't contradict the
- * rest of the site: every award and every role start whose date is known to the month. Anything
+ * Award pins for the activity calendar, derived from content/profile.ts so they can't contradict the
+ * rest of the site: every award whose date is known to the month (roles are drawn as bands: lib/content/roles.ts). Anything
  * dated only to the year (GATEWAYS 2026) is left out rather than guessed.
  * TODO(vishal): add a launch milestone (e.g. Talnio on Google Play) once you know the month.
  */
-export function milestones(p: Pick<Profile, "recognition" | "experience"> = profile): Milestone[] {
+export function milestones(p: Pick<Profile, "recognition"> = profile): Milestone[] {
   const out: Milestone[] = [];
 
   for (const r of p.recognition) {
@@ -53,23 +53,6 @@ export function milestones(p: Pick<Profile, "recognition" | "experience"> = prof
       story: r.detail ? `${r.org}. ${r.detail[0]!.toUpperCase()}${r.detail.slice(1)}.` : `${r.org}.`,
       kind: "award",
       href: proofFor(r.event),
-    });
-  }
-
-  for (const e of p.experience) {
-    const idx = monthIndex(e.period.split(/\s*[–—-]\s*/)[0] ?? "");
-    if (idx === null) continue;
-    const company = e.company.split(/[(,]/)[0]!.trim();
-    const noun = e.kind === "freelance" ? "freelance role" : e.kind === "internship" ? "internship" : "role";
-    out.push({
-      id: `role-${ym(idx)}-${company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-      date: ym(idx),
-      when: e.period.split(/\s*[–—-]\s*/)[0]!,
-      short: `Started at ${company}`,
-      title: `Started at ${company}`,
-      story: `${e.role}, ${noun}${e.current ? " (ongoing)" : ""}.`,
-      kind: "role",
-      href: proofFor(e.company),
     });
   }
 

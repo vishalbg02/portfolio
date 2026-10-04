@@ -3,6 +3,7 @@ import { profile } from "@/content/profile";
 import { getGithubData } from "@/lib/github/data";
 import { activityYears } from "@/lib/github/years";
 import { milestones } from "@/lib/content/milestones";
+import { roleSpans } from "@/lib/content/roles";
 import { features } from "@/lib/env";
 import { nowMs } from "@/lib/utils/now";
 import { relativeTime } from "@/lib/utils/relative-time";
@@ -21,9 +22,16 @@ export async function LiveGitHub() {
   const now = nowMs();
   const asOf =
     data.source === "live" ? new Date(now).toISOString().slice(0, 10) : data.generatedAt.slice(0, 10);
-  // Award pins can be switched off with SHOW_RECOGNITION=false; roles stay.
+  // Award pins can be switched off with SHOW_RECOGNITION=false; role bands and peak days stay.
   const pins = milestones().filter((m) => features.recognition || m.kind !== "award");
-  const years = activityYears(now, Math.min(...pins.map((m) => Number(m.date.slice(0, 4)))));
+  const spans = roleSpans();
+  const years = activityYears(
+    now,
+    Math.min(
+      ...pins.map((m) => Number(m.date.slice(0, 4))),
+      ...spans.map((s) => Number(s.start.slice(0, 4))),
+    ),
+  );
 
   return (
     <section id="github" aria-labelledby="github-label" className="container-page section-y">
@@ -41,6 +49,7 @@ export async function LiveGitHub() {
         }}
         years={years}
         milestones={pins}
+        spans={spans}
       />
 
       {profile.leadership.map((l) => (

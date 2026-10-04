@@ -207,7 +207,9 @@ test.describe("recognition", () => {
     await expect(page.locator("#recognition")).toHaveCount(0);
     const gh = page.locator("#github");
     await expect(gh.getByText(/GATEWAYS 2026/)).toBeVisible();
-    await expect(gh.locator("[data-milestone]")).toHaveCount(3); // Jan 2026 role, Feb and Jun 2026 awards
+    await expect(gh.locator("[data-kind=award]")).toHaveCount(2); // Feb and Jun 2026
+    await expect(gh.locator("[data-kind=peak]")).toHaveCount(3); // the three busiest days
+    await expect(gh.locator("[data-band]")).toHaveCount(2); // Social Agent and Golden Verdict as role bands
   });
 });
 

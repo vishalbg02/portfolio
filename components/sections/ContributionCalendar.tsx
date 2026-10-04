@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { track } from "@/lib/analytics";
-import type { Milestone } from "@/lib/content/milestones";
 import { describeDay, monthLabels } from "@/lib/github/calendar";
-import { assignTiers, dayRow, pinsFor } from "@/lib/github/pins";
+import type { Mark } from "@/lib/github/marks";
+import { assignTiers, dayRow } from "@/lib/github/pins";
 import type { ContributionDay, ContributionLevel } from "@/lib/github/types";
+import { cn } from "@/lib/utils/cn";
 
 export const CELL = 11;
 export const GAP = 3;
@@ -14,33 +15,38 @@ export const PITCH = CELL + GAP;
 export const LEFT = 30;
 const MONTH_ROW = 18;
 const TIER = 24; // pin buttons are 24px targets, so tiers are 24px apart
+const BAND_H = 20;
+const BAND_GAP = 4;
 const FILL = ["fill-grid-0", "fill-grid-1", "fill-grid-2", "fill-grid-3", "fill-grid-4"] as const;
 const R = 2;
-const POPOVER_W = 272;
+const POPOVER_W = 280;
 
 /** One rounded square as a path segment (so a whole intensity level is a single DOM element). */
 const cell = (x: number, y: number) =>
   `M${x + R} ${y}h${CELL - 2 * R}a${R} ${R} 0 0 1 ${R} ${R}v${CELL - 2 * R}a${R} ${R} 0 0 1 -${R} ${R}h-${CELL - 2 * R}a${R} ${R} 0 0 1 -${R} -${R}v-${CELL - 2 * R}a${R} ${R} 0 0 1 ${R} -${R}z`;
 
-const labelWidth = (m: Milestone) => 28 + Math.min(m.short.length * 6.7, 190);
+const labelWidth = (m: Mark) => 28 + Math.min(m.short.length * 6.7, 230);
 
 /**
- * Native 53×7 contribution calendar (SVG, not an image). Drawn as five <path>s — one per level —
- * instead of 371 <rect>s, which keeps the DOM small. Tooltip per day on hover or tap, found by
- * pointer coordinates. Milestones are pinned on their month: an outlined cell, a leader line and a
- * marker in a label row above (hover, focus or tap for the story). Fills the card on wide screens;
- * scrolls (with month snap) on narrow ones.
+ * Native 53×7 contribution calendar (SVG, not an image), annotated with three kinds of marks:
+ *  - roles as bands above the months (where he worked, overlapping roles stacked),
+ *  - awards as white diamonds pinned on their month,
+ *  - peak days as green markers on the exact busiest cells (the day that had the most contributions).
+ * Hover, focus or tap a mark for its story. Drawn as five <path>s (one per level) instead of 371 <rect>s.
+ * Fills the card on wide screens; scrolls (with month snap) on narrow ones.
  */
 export function ContributionCalendar({
   weeks,
   label,
-  milestones = [],
+  pins = [],
+  bands = [],
   scrollTo = "end",
   selectedId = null,
 }: {
   weeks: ContributionDay[][];
   label: string;
-  milestones?: Milestone[];
+  pins?: Mark[];
+  bands?: Mark[];
   scrollTo?: "start" | "end";
   selectedId?: string | null;
 }) {
@@ -55,21 +61,24 @@ export function ContributionCalendar({
   const width = LEFT + weeks.length * PITCH;
   const months = monthLabels(weeks);
 
-  const pins = useMemo(() => {
-    const base = pinsFor(weeks, milestones);
-    return assignTiers(
-      base,
-      (p) => LEFT + p.week * PITCH + CELL / 2 - 12,
-      (p) => labelWidth(p.milestone),
-    );
-  }, [weeks, milestones]);
-
-  const tiers = pins.reduce((n, p) => Math.max(n, p.tier + 1), 0);
+  const tiered = useMemo(
+    () =>
+      assignTiers(
+        pins.map((p) => ({ ...p, week: p.week! })),
+        (p) => LEFT + p.week * PITCH + CELL / 2 - 12,
+        (p) => labelWidth(p),
+      ),
+    [pins],
+  );
+  const tiers = tiered.reduce((n, p) => Math.max(n, p.tier + 1), 0);
   const pinH = tiers ? tiers * TIER + 8 : 0;
-  const top = pinH + MONTH_ROW;
+  const lanes = bands.reduce((n, b) => Math.max(n, (b.lane ?? 0) + 1), 0);
+  const bandsH = lanes ? lanes * (BAND_H + BAND_GAP) + 4 : 0;
+  const top = pinH + bandsH + MONTH_ROW;
   const height = top + 7 * PITCH;
-  const px = (p: (typeof pins)[number]) => LEFT + p.week * PITCH + CELL / 2;
-  const markerY = (p: (typeof pins)[number]) => pinH - 4 - TIER / 2 - p.tier * TIER;
+  const px = (p: (typeof tiered)[number]) => LEFT + p.week * PITCH + CELL / 2;
+  const markerY = (p: (typeof tiered)[number]) => pinH - 4 - TIER / 2 - p.tier * TIER;
+  const all = useMemo(() => [...pins, ...bands], [pins, bands]);
 
   const paths = useMemo(() => {
     const byLevel: string[][] = [[], [], [], [], []];
@@ -97,13 +106,6 @@ export function ContributionCalendar({
     if (el) el.scrollLeft = scrollTo === "end" ? el.scrollWidth : 0;
   }, [scrollTo, weeks]);
 
-  // A milestone picked from the list below scrolls the calendar to its pin.
-  useEffect(() => {
-    const pin = pins.find((p) => p.milestone.id === selectedId);
-    if (pin) scrollToX(px(pin), true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
-
   const show = (e: React.PointerEvent<SVGSVGElement>) => {
     const svg = svgRef.current;
     const box = outer.current?.getBoundingClientRect();
@@ -120,12 +122,12 @@ export function ContributionCalendar({
     setTip({ text: describeDay(day), x: e.clientX - box.left, y: e.clientY - box.top });
   };
 
-  const open = (id: string, button: HTMLElement, stick: boolean) => {
+  const open = (id: string, button: HTMLElement, stick: boolean, count = true) => {
     const box = outer.current?.getBoundingClientRect();
     if (!box) return;
     const r = button.getBoundingClientRect();
     sticky.current = stick;
-    if (stick) track("milestone_open", { kind: milestoneKind(id) });
+    if (stick && count) track("milestone_open", { kind: all.find((m) => m.id === id)?.kind ?? "unknown" });
     setTip(null);
     setPop({
       left: Math.min(Math.max(r.left - box.left + r.width / 2 - 24, 0), Math.max(0, box.width - POPOVER_W)),
@@ -138,7 +140,7 @@ export function ContributionCalendar({
     sticky.current = false;
     setOpenId(null);
   };
-  // Hover close is delayed so the pointer can travel from the pin to its card.
+  // Hover close is delayed so the pointer can travel from the mark to its card.
   const closeTimer = useRef<number | null>(null);
   function cancelClose() {
     if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
@@ -150,10 +152,24 @@ export function ContributionCalendar({
       if (!sticky.current) setOpenId(null);
     }, 160);
   }
-  const milestoneKind = (id: string) => pins.find((p) => p.milestone.id === id)?.milestone.kind ?? "unknown";
-  const openMilestone = pins.find((p) => p.milestone.id === openId)?.milestone;
+  const openMark = all.find((m) => m.id === openId);
 
-  // Click outside closes a pinned popover.
+  // A mark picked from the list or the highlights scrolls the calendar to it (and, on wide screens, opens its card).
+  useEffect(() => {
+    if (!selectedId) return;
+    const pin = tiered.find((p) => p.id === selectedId);
+    const band = bands.find((b) => b.id === selectedId);
+    if (pin) scrollToX(px(pin), true);
+    else if (band) scrollToX(LEFT + ((band.from ?? 0) + (band.to ?? 0) / 1) * (PITCH / 2), true);
+    const t = window.setTimeout(() => {
+      const btn = outer.current?.querySelector<HTMLElement>(`[data-mark="${selectedId}"]`);
+      if (btn && window.matchMedia("(min-width: 768px)").matches) open(selectedId, btn, true, false);
+    }, 450);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
+
+  // Click outside closes a pinned card.
   useEffect(() => {
     if (!openId) return;
     const away = (e: PointerEvent) => {
@@ -164,6 +180,21 @@ export function ContributionCalendar({
     document.addEventListener("pointerdown", away);
     return () => document.removeEventListener("pointerdown", away);
   }, [openId]);
+
+  const hoverProps = (m: Mark) => ({
+    onPointerEnter: (e: React.PointerEvent<HTMLElement>) => {
+      if (e.pointerType !== "mouse" || sticky.current) return;
+      cancelClose();
+      open(m.id, e.currentTarget, false);
+    },
+    onPointerLeave: (e: React.PointerEvent<HTMLElement>) =>
+      e.pointerType === "mouse" && !sticky.current && scheduleClose(),
+    onFocus: (e: React.FocusEvent<HTMLElement>) => open(m.id, e.currentTarget, false),
+    onClick: (e: React.MouseEvent<HTMLElement>) =>
+      openId === m.id && sticky.current ? close() : open(m.id, e.currentTarget, true),
+  });
+
+  const kindLabel = (k: Mark["kind"]) => (k === "award" ? "Award" : k === "peak" ? "Peak day" : "Role");
 
   return (
     <div
@@ -188,14 +219,14 @@ export function ContributionCalendar({
             onPointerDown={show}
             onPointerLeave={() => setTip(null)}
           >
-            {pins.map((p) => (
+            {tiered.map((p) => (
               <line
-                key={`l-${p.milestone.id}`}
+                key={`l-${p.id}`}
                 x1={px(p)}
                 x2={px(p)}
                 y1={markerY(p)}
-                y2={top + p.day * PITCH}
-                stroke="var(--border-2)"
+                y2={top + p.day! * PITCH}
+                stroke={p.kind === "peak" ? "var(--accent)" : "var(--border-2)"}
                 strokeWidth={1}
               />
             ))}
@@ -203,7 +234,7 @@ export function ContributionCalendar({
               <text
                 key={m.week}
                 x={LEFT + m.week * PITCH}
-                y={pinH + 11}
+                y={pinH + bandsH + 11}
                 fontSize="10"
                 fill="var(--muted)"
                 stroke="var(--surface)"
@@ -236,17 +267,17 @@ export function ContributionCalendar({
                 strokeWidth={level === 0 ? 0.5 : 0}
               />
             ))}
-            {pins.map((p) => (
+            {tiered.map((p) => (
               <rect
-                key={`c-${p.milestone.id}`}
-                data-pin-cell={p.milestone.id}
+                key={`c-${p.id}`}
+                data-pin-cell={p.id}
                 x={LEFT + p.week * PITCH - 1}
-                y={top + p.day * PITCH - 1}
+                y={top + p.day! * PITCH - 1}
                 width={CELL + 2}
                 height={CELL + 2}
                 rx={3}
                 fill="none"
-                stroke="var(--text)"
+                stroke={p.kind === "peak" ? "var(--accent)" : "var(--text)"}
                 strokeWidth={2}
               />
             ))}
@@ -262,12 +293,49 @@ export function ContributionCalendar({
             />
           ))}
 
-          {pins.map((p) => {
-            const m = p.milestone;
-            const selected = selectedId === m.id || openId === m.id;
+          {/* Roles: bands above the months, spanning the weeks he worked there. */}
+          {bands.map((b) => {
+            const left = LEFT + b.from! * PITCH;
+            const w = (b.to! - b.from! + 1) * PITCH - GAP;
+            const selected = selectedId === b.id || openId === b.id;
+            return (
+              <button
+                key={b.id}
+                type="button"
+                data-mark={b.id}
+                data-band={b.id}
+                aria-expanded={openId === b.id}
+                aria-label={`${b.title}, ${b.when}`}
+                {...hoverProps(b)}
+                className={cn(
+                  "absolute flex items-center overflow-hidden border bg-grid-1/70 px-2 text-left font-mono text-[10px] text-text transition-colors hover:bg-grid-1 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-link",
+                  b.cutLeft ? "rounded-l-none border-l-0" : "rounded-l-sm",
+                  b.cutRight ? "rounded-r-none border-r-0" : "rounded-r-sm",
+                  selected ? "border-text" : "border-grid-2",
+                )}
+                style={{
+                  left: `${(left / width) * 100}%`,
+                  width: `${(w / width) * 100}%`,
+                  top: `${((pinH + 4 + (b.lane ?? 0) * (BAND_H + BAND_GAP)) / height) * 100}%`,
+                  height: `${(BAND_H / height) * 100}%`,
+                  minHeight: 0,
+                }}
+              >
+                <span aria-hidden="true" className="truncate">
+                  {b.cutLeft ? "‹ " : ""}
+                  {b.short}
+                  {b.cutRight ? " ›" : ""}
+                </span>
+              </button>
+            );
+          })}
+
+          {/* Awards (diamonds) and peak days (green triangles): a 24 px target and a label in the row above. */}
+          {tiered.map((p) => {
+            const selected = selectedId === p.id || openId === p.id;
             return (
               <div
-                key={m.id}
+                key={p.id}
                 className="absolute flex items-center"
                 style={{
                   left: `${((px(p) - 12) / width) * 100}%`,
@@ -277,31 +345,32 @@ export function ContributionCalendar({
               >
                 <button
                   type="button"
-                  data-milestone={m.id}
-                  aria-expanded={openId === m.id}
-                  aria-label={`${m.title}, ${m.when}`}
-                  onPointerEnter={(e) => {
-                    if (e.pointerType !== "mouse" || sticky.current) return;
-                    cancelClose();
-                    open(m.id, e.currentTarget, false);
-                  }}
-                  onPointerLeave={(e) => e.pointerType === "mouse" && !sticky.current && scheduleClose()}
-                  onFocus={(e) => open(m.id, e.currentTarget, false)}
-                  onClick={(e) =>
-                    openId === m.id && sticky.current ? close() : open(m.id, e.currentTarget, true)
-                  }
+                  data-mark={p.id}
+                  data-milestone={p.id}
+                  data-kind={p.kind}
+                  aria-expanded={openId === p.id}
+                  aria-label={`${p.title}, ${p.when}`}
+                  {...hoverProps(p)}
                   className="grid size-6 shrink-0 place-items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-link"
                 >
                   <span
                     aria-hidden="true"
-                    className={`size-2.5 rotate-45 ${m.kind === "award" ? "bg-text" : "bg-accent"} ${selected ? "ring-2 ring-link ring-offset-2 ring-offset-surface" : ""}`}
+                    className={cn(
+                      p.kind === "peak"
+                        ? "h-2.5 w-3 bg-accent [clip-path:polygon(50%_0,100%_100%,0_100%)]"
+                        : "size-2.5 rotate-45 bg-text",
+                      selected && "ring-2 ring-link ring-offset-2 ring-offset-surface",
+                    )}
                   />
                 </button>
                 <span
                   aria-hidden="true"
-                  className="ml-0.5 hidden max-w-[190px] truncate bg-surface px-1 font-mono text-[11px] text-muted md:block"
+                  className={cn(
+                    "ml-0.5 hidden max-w-[230px] truncate bg-surface px-1 font-mono text-[11px] md:block",
+                    p.kind === "peak" ? "text-accent" : "text-muted",
+                  )}
                 >
-                  {m.short}
+                  {p.short}
                 </span>
               </div>
             );
@@ -309,25 +378,29 @@ export function ContributionCalendar({
         </div>
       </div>
 
-      {openMilestone && pop ? (
+      {openMark && pop ? (
         <div
           role="group"
-          aria-label={openMilestone.title}
+          aria-label={openMark.title}
           data-testid="milestone-popover"
           onPointerEnter={cancelClose}
           className="absolute z-20 rounded-card border border-border-2 bg-bg p-3.5 shadow-none"
           style={{ left: pop.left, top: pop.top, width: POPOVER_W }}
           onPointerLeave={(e) => e.pointerType === "mouse" && !sticky.current && scheduleClose()}
         >
-          <p className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
-            {openMilestone.kind === "award" ? "Award" : openMilestone.kind === "launch" ? "Launch" : "Role"} ·{" "}
-            {openMilestone.when}
+          <p
+            className={cn(
+              "font-mono text-[11px] tracking-[0.12em] uppercase",
+              openMark.kind === "peak" ? "text-accent" : "text-muted",
+            )}
+          >
+            {kindLabel(openMark.kind)} · {openMark.when}
           </p>
-          <p className="mt-1 text-sm font-medium text-text">{openMilestone.title}</p>
-          <p className="mt-1.5 text-sm text-muted">{openMilestone.story}</p>
-          {openMilestone.href ? (
+          <p className="mt-1 text-sm font-medium text-text">{openMark.title}</p>
+          <p className="mt-1.5 text-sm text-muted">{openMark.story}</p>
+          {openMark.href ? (
             <Link
-              href={openMilestone.href}
+              href={openMark.href}
               className="mt-2.5 inline-block font-mono text-xs text-link underline-offset-4 hover:underline"
             >
               See the proof →
