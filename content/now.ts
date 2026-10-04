@@ -10,14 +10,14 @@ const mca = profile.education[0];
 const ws = workStatus(profile);
 
 export const now = {
-  updatedAt: "2026-10-03",
+  updatedAt: "2026-10-05",
   // Shown only while a role is marked current in profile.ts (the Social Agent internship ended Mar 2026).
   working: ws.currentRole
     ? `${ws.freelance ? "Freelance " : ""}${ws.currentRole.role} at ${ws.currentRole.company.split(",")[0]} (${ws.currentRole.period}).`
     : null,
   studying: mca ? `${mca.degree} at ${mca.school}, ${mca.period}.` : null,
   building:
-    "This portfolio: a static Next.js site with an assistant that answers only from its own content, a résumé matcher, and a Ship Log.",
+    "This portfolio, version 3: a static Next.js site with GRID (an assistant that answers only from its own content and can take you places, draft a message or tailor his résumé), a live chat that reaches his phone, a Work showcase of real captures, and a Ship Log.",
   lookingFor: `${profile.status}. ${profile.workPreferences.locations}; ${profile.workPreferences.modes.join(", ").toLowerCase()} all fine. ${profile.workPreferences.startDate}.`,
   reading: null as string | null, // TODO(vishal): a book or paper you're reading
   learning: "Pushing through the MCA programme at CHRIST, one semester at a time.",

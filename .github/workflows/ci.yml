@@ -51,6 +51,9 @@ jobs:
       - name: Bundle budget (home initial JS ≤ 170 KB gz)
         run: pnpm check:bundle
 
+      - name: Every page is static (only /api/* is dynamic)
+        run: pnpm check:static
+
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 

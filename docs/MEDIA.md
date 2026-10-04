@@ -35,6 +35,8 @@ It needs a browser (Playwright Chromium, already installed for e2e), the network
 3. `pnpm media --only=<slug>`, look at the result, commit `public/media`.
 4. `pnpm test` checks every file exists, clips fit the budget, and alt text is present.
 
+The Open Graph card of each case study (`app/work/[slug]/opengraph-image.tsx`) uses the project's hero still too: `lib/seo/og-media.ts` reads the committed 1× file at build time and embeds it as a JPEG data URL. A project whose hero is a code-drawn illustration (LanSymphony) keeps the illustration-free text card.
+
 The frames around the captures (browser chrome, phone bezel) are drawn in code, flat, never baked into the images.
 
 > The captured pages carry their own styling (Golden Verdict's site has gradients). The "no gradients" rule is about **this site's** CSS, SVG and canvas, and `pnpm check:gradients` scans code, not photographs of other products.
