@@ -97,6 +97,9 @@ export function ShowcaseShell({ items, children }: { items: ShowcaseItem[]; chil
     const cards = [...deck.children] as HTMLElement[];
     const io = new IntersectionObserver(
       (entries) => {
+        // On the first client render `desktop` is still false (the server snapshot), so this observer can
+        // fire for a hidden card before the layout flips; never let it pick a project on a desktop.
+        if (window.matchMedia(DESKTOP).matches) return;
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           const i = cards.indexOf(e.target as HTMLElement);
