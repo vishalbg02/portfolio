@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-04T07:49:29.212Z",
+  "generatedAt": "2026-10-04T08:41:21.832Z",
   "url": "https://vishalbg.vercel.app/",
-  "commit": "29413ab",
-  "runUrl": "https://github.com/vishalbg02/portfolio/actions/runs/37186901799",
+  "commit": "7af4e5b",
+  "runUrl": "https://github.com/vishalbg02/portfolio/actions/runs/37189674663",
   "formFactor": "mobile",
   "runs": 3,
   "scores": {
-    "performance": 0.99,
+    "performance": 0.94,
     "accessibility": 1,
     "bestPractices": 1,
     "seo": 1
