@@ -65,6 +65,32 @@ describe("media manifest (content/media.ts)", () => {
   });
 });
 
+describe("width-based sets (what keeps a phone from downloading the 2× file)", () => {
+  it("name the same files as the density sets, with each file's real width", () => {
+    for (const still of media.filter((m) => m.kind === "still")) {
+      const s = stillSources(still);
+      expect(s.avifSetW).toBe(`${s.avif1x} ${still.width}w, ${s.avif2x} ${still.width * 2}w`);
+      expect(s.webpSetW).toBe(`${s.webp1x} ${still.width}w, ${s.webp2x} ${still.width * 2}w`);
+    }
+  });
+
+  it("the 2× file really is twice as wide as the 1× file (so the width descriptors tell the truth)", async () => {
+    const sharp = (await import("sharp")).default;
+    for (const still of media.filter((m) => m.kind === "still").slice(0, 4)) {
+      const s = stillSources(still);
+      const one = await sharp(join(PUBLIC, s.webp1x)).metadata();
+      const two = await sharp(join(PUBLIC, s.webp2x)).metadata();
+      expect(one.width, still.id).toBe(still.width);
+      expect(two.width, still.id).toBe(still.width * 2);
+    }
+  });
+
+  it("the Work pictures say how wide they are shown, so a 380 px frame never takes the 1920 px file", async () => {
+    const { STAGE_SIZES } = await import("@/components/work/stage/Media");
+    expect(STAGE_SIZES).toBe("(min-width: 1024px) min(58vw, 760px), min(92vw, 520px)");
+  });
+});
+
 describe("media files on disk (public/media)", () => {
   it("every asset has all of its files", () => {
     const missing = media.flatMap((a) => filesFor(a).filter((f) => !existsSync(join(PUBLIC, f))));

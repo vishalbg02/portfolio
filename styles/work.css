@@ -375,6 +375,9 @@
     border-radius: 12px;
     background: var(--surface);
     scroll-snap-align: center;
+    /* A card that is far off to the side is not rendered, so its picture is not fetched before the page has painted. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto min(92vw, 520px) auto 560px;
   }
   .scene-media {
     order: -1;

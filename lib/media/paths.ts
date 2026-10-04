@@ -14,9 +14,15 @@ export type StillSources = {
   webp2x: string;
   /** What <img src> falls back to (WebP 1×). */
   fallback: string;
-  /** srcSet strings for <source type=…> */
+  /** srcSet strings for <source type=…> (1×/2× density descriptors) */
   avifSet: string;
   webpSet: string;
+  /**
+   * The same files with width descriptors (`960w, 1920w`), for places that say how wide the picture really is (`sizes`),
+   * so a 380 px frame on a 1.75× phone takes the 960 px file, not the 1920 px one.
+   */
+  avifSetW: string;
+  webpSetW: string;
   width: number;
   height: number;
 };
@@ -32,6 +38,8 @@ export function stillSources(a: Pick<MediaStill, "id" | "slug" | "width" | "heig
     fallback: f("1x", "webp"),
     avifSet: `${f("1x", "avif")} 1x, ${f("2x", "avif")} 2x`,
     webpSet: `${f("1x", "webp")} 1x, ${f("2x", "webp")} 2x`,
+    avifSetW: `${f("1x", "avif")} ${a.width}w, ${f("2x", "avif")} ${a.width * 2}w`,
+    webpSetW: `${f("1x", "webp")} ${a.width}w, ${f("2x", "webp")} ${a.width * 2}w`,
     width: a.width,
     height: a.height,
   };
