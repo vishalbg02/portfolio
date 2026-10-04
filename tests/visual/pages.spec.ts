@@ -40,6 +40,14 @@ async function prepare(page: Page, path: string) {
   await page.goto(path);
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
+  // Relative times ("13 minutes ago") are computed when the page is built, so they differ between the
+  // baseline run and the compare run and can wrap onto another line. Pin their text; the block is masked anyway.
+  await page.evaluate(() => {
+    for (const el of document.querySelectorAll("#github time, #github [role=status]"))
+      el.textContent = "xx ago";
+  });
+  // A stray pointer over the project list would switch the active project (hover previews it).
+  await page.mouse.move(0, 0);
 }
 
 for (const { name, path } of PAGES) {
