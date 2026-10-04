@@ -210,7 +210,7 @@ const data = {
 
   // Stated by Vishal (2026-10-04): the skills below that no project or role shows were learned in his degrees.
   skillsNote:
-    "Skills on this list that are not used in a project or internship were learned during his BCA and MCA at CHRIST (Deemed to be University), Bengaluru.",
+    "Skills named on this site that no project or internship shows were learned during his BCA and MCA at CHRIST (Deemed to be University), Bengaluru.",
 
   skills: {
     backend: [

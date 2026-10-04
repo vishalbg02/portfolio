@@ -133,7 +133,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
       id: `skills-${slugify(label)}`,
       title: `${label} skills`,
       url: "/#stack",
-      text: `${label} skills of ${p.name}: ${items.join(", ")}. ${p.skillsNote}`,
+      text: `${label} skills of ${p.name}: ${items.join(", ")}.`,
     }),
   );
 
