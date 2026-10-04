@@ -71,7 +71,7 @@ export type UiPart =
       skill: string;
       found: boolean;
       where: Array<{
-        type: "project" | "experience" | "skills";
+        type: "project" | "experience" | "skills" | "education";
         title: string;
         detail: string;
         href: string | null;

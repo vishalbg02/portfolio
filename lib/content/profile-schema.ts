@@ -97,6 +97,8 @@ export const ProfileSchema = z
     projects: z.array(ProjectSchema).length(4),
     recognition: z.array(RecognitionSchema),
     leadership: z.array(nonEmpty),
+    /** Where the skills that no project or role shows were learned (stated by Vishal). */
+    skillsNote: nonEmpty,
     skills: SkillsSchema,
     certifications: z.array(nonEmpty),
     languages: z.array(nonEmpty),

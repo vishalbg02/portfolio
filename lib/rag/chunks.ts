@@ -133,7 +133,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
       id: `skills-${slugify(label)}`,
       title: `${label} skills`,
       url: "/#stack",
-      text: `${label} skills of ${p.name}: ${items.join(", ")}.`,
+      text: `${label} skills of ${p.name}: ${items.join(", ")}. ${p.skillsNote}`,
     }),
   );
 
@@ -141,7 +141,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     id: "education",
     title: "Education",
     url: "/#experience",
-    text: p.education.map((e) => `${e.degree}, ${e.school}, ${e.period} — ${e.note}.`).join(" "),
+    text: `${p.education.map((e) => `${e.degree}, ${e.school}, ${e.period} — ${e.note}.`).join(" ")} ${p.skillsNote}`,
   });
   chunks.push({
     id: "certifications",
