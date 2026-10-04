@@ -43,14 +43,21 @@ export function BrowserFrame({
 }
 
 /** Aspect of the Talnio screens: 262 × 569. */
-export function PhoneFrame({ children, className }: { children: ReactNode; className?: string }) {
+export function PhoneFrame({
+  children,
+  className,
+  maxWidth = 300,
+}: {
+  children: ReactNode;
+  className?: string;
+  /** Widest the bezel gets, in px (a style, not a class, so it can never lose a cascade fight). */
+  maxWidth?: number;
+}) {
   return (
     <div
       data-frame="phone"
-      className={cn(
-        "mx-auto w-full max-w-[300px] rounded-[34px] border-2 border-border-2 bg-bg p-2.5",
-        className,
-      )}
+      style={{ maxWidth }}
+      className={cn("mx-auto w-full rounded-[34px] border-2 border-border-2 bg-bg p-2.5", className)}
     >
       <div className="relative aspect-[262/569] w-full overflow-hidden rounded-[24px] bg-surface">
         {children}

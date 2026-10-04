@@ -23,7 +23,7 @@ export function SceneHero({ project, priority = false }: { project: Project; pri
     );
   const frame =
     scene.frame === "phone" ? (
-      <PhoneFrame className="max-w-[170px]">{content}</PhoneFrame>
+      <PhoneFrame maxWidth={170}>{content}</PhoneFrame>
     ) : scene.frame === "diagram" ? (
       <DiagramFrame label={scene.frameLabel}>{content}</DiagramFrame>
     ) : (
