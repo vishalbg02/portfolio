@@ -17,6 +17,8 @@ type Run = {
   active: boolean;
 };
 
+const firstSentence = (t: string) => t.split(/(?<=\.)\s/)[0]!;
+
 const identityVar = (slug: string) => `var(--id-${slug})`;
 
 function NodeShape({
@@ -72,6 +74,8 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
   const [run, setRun] = useState<Run | null>(null);
   const raf = useRef(0);
   const timers = useRef<number[]>([]);
+  const figure = useRef<HTMLElement>(null);
+  const startRef = useRef<() => void>(() => {});
 
   const flow = graph.flows.find((f) => f.id === flowId) ?? graph.flows[0]!;
   const nodeById = Object.fromEntries(graph.nodes.map((n) => [n.id, n]));
@@ -124,6 +128,27 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
     };
     raf.current = requestAnimationFrame(tick);
   };
+
+  useEffect(() => {
+    startRef.current = start;
+  });
+
+  // Run the first request once, by itself, when 60 % of the diagram is on screen (never under reduced
+  // motion). "Run request" stays for replays.
+  useEffect(() => {
+    const el = figure.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        startRef.current();
+        io.disconnect();
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   const selectFlow = (id: string) => {
     stop();
@@ -313,7 +338,11 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
   };
 
   return (
-    <figure className="my-8 rounded-card border border-border bg-surface p-4 md:p-6">
+    <figure
+      ref={figure}
+      data-bleed
+      className="case-bleed my-8 rounded-card border border-border bg-surface p-4 md:p-6"
+    >
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-2 font-mono text-xs text-muted">
           <span aria-hidden="true" className={cn("size-2 rounded-pill", identityBg[graph.slug])} />
@@ -355,6 +384,39 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
       <figcaption className="mt-4 min-h-6 font-mono text-xs text-muted" aria-live="polite">
         {caption}
       </figcaption>
+
+      {/* The same walk as the packet, as text: the step the packet is at lights up. (The sr-only version below is what assistive tech reads.) */}
+      <ol
+        aria-hidden="true"
+        data-testid="diagram-steps"
+        className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {flow.path.map((id, i) => {
+          const node = nodeById[id]!;
+          const here = run && runFlow?.id === flow.id && stepIndex === i;
+          const done = Boolean(run && runFlow?.id === flow.id && reached.has(id) && !here);
+          return (
+            <li
+              key={`${flow.id}-${id}-${i}`}
+              data-step={i + 1}
+              data-on={here ? "true" : undefined}
+              data-done={done ? "true" : undefined}
+              className={cn(
+                "flex gap-3 rounded-sm border px-3 py-2.5 transition-colors",
+                here ? "border-accent bg-bg" : done ? "border-border-2" : "border-border text-muted",
+              )}
+            >
+              <span className={cn("font-mono text-xs", here ? "text-accent" : "text-muted")}>{i + 1}</span>
+              <span className="min-w-0">
+                <span className={cn("block text-sm font-medium", here || done ? "text-text" : "text-muted")}>
+                  {node.label}
+                </span>
+                <span className="mt-0.5 block text-xs text-muted">{firstSentence(node.description)}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ol>
 
       {/* Text-only description for screen readers (and no-JS readers of the DOM). */}
       <div className="sr-only">

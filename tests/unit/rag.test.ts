@@ -85,7 +85,7 @@ describe("corpus (built from the same sources as the site)", () => {
   it("citation anchors point at real headings", async () => {
     const chunks = await buildCorpus();
     const anchors = new Set(
-      ["architecture", "key-decisions", "the-problem", "what-i-built", "outcome"].map((a) => a),
+      ["architecture", "key-decisions", "the-problem", "what-i-built", "try-it", "outcome"].map((a) => a),
     );
     for (const c of chunks.filter((x) => x.url.includes("#") && x.url.startsWith("/work/"))) {
       expect(anchors.has(c.url.split("#")[1]!), c.url).toBe(true);

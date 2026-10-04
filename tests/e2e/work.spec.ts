@@ -195,6 +195,7 @@ test.describe("case studies", () => {
       for (const h of [
         "The problem",
         "What I built",
+        "Try it",
         "Key decisions",
         "Architecture",
         "Code in the wild",
@@ -203,7 +204,8 @@ test.describe("case studies", () => {
         await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
       }
       for (const label of ["Role", "Platform", "Stack", "Status"]) {
-        await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
+        // at ≥ 1100 px the facts live in the rail, below that in the strip: one of the two is visible
+        await expect(page.getByText(label, { exact: true }).locator("visible=true").first()).toBeVisible();
       }
       const decisions = page.locator("article article");
       expect(await decisions.count()).toBeGreaterThanOrEqual(2);
@@ -231,12 +233,12 @@ test.describe("case studies", () => {
       "href",
       "https://goldenverdict.com",
     );
-    await expect(page.getByRole("link", { name: /^Code/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Code\s*↗/ })).toHaveCount(0);
     await page.goto("/work/talnio");
     await expect(page.getByRole("link", { name: /Live site/ })).toHaveCount(0);
     await expect(page.getByText("Live on Google Play").first()).toBeVisible();
     await page.goto("/work/lansymphony");
-    await expect(page.getByRole("link", { name: /^Code/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^Code\s*↗/ })).toHaveCount(0);
   });
 
   test("previous/next navigation wraps around", async ({ page }) => {
@@ -282,8 +284,8 @@ test.describe("architecture diagram", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await mockStatus(page);
     await gotoHydrated(page, "/work/golden-verdict");
-    const caption = page.locator("figure [aria-live='polite']");
-    const run = page.locator("figure").getByRole("button", { name: /Run request|Running/ });
+    const caption = page.locator("figure[data-bleed] [aria-live='polite']");
+    const run = page.locator("figure[data-bleed]").getByRole("button", { name: /Run request|Running/ });
     await run.scrollIntoViewIfNeeded();
     await run.click();
     await expect(run).toBeDisabled();
@@ -302,7 +304,7 @@ test.describe("architecture diagram", () => {
     await flows.getByRole("button", { name: "Meetings" }).click();
     await expect(flows.getByRole("button", { name: "Meetings" })).toHaveAttribute("aria-pressed", "true");
     await page.getByRole("button", { name: /Run request/ }).click();
-    const caption = page.locator("figure [aria-live='polite']");
+    const caption = page.locator("figure[data-bleed] [aria-live='polite']");
     await expect(caption).toContainText("Agora SDK", { timeout: 6000 });
     await expect(caption).toContainText("complete", { timeout: 6000 });
   });
@@ -313,7 +315,7 @@ test.describe("architecture diagram", () => {
     await mockStatus(page);
     await gotoHydrated(page, "/work/lansymphony");
     await page.getByRole("button", { name: /Run request/ }).click();
-    const caption = page.locator("figure [aria-live='polite']");
+    const caption = page.locator("figure[data-bleed] [aria-live='polite']");
     await expect(caption).toContainText(/step 2 of 4/, { timeout: 4000 });
     expect(await page.locator("figure svg circle[fill-opacity='0.25']").count()).toBe(0);
     await expect(caption).toContainText("complete", { timeout: 6000 });

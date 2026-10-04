@@ -46,7 +46,7 @@ export function ChatPanel({
   variant?: "inline" | "sheet";
   autoFocus?: boolean;
   /** A question to send as soon as the panel is shown (e.g. from `ask <question>`); `id` makes repeats distinct. */
-  ask?: { text: string; id: number };
+  ask?: { text: string; id: number; project?: string };
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -115,6 +115,8 @@ export function ChatPanel({
           else if (e.t === "done") patch(botId, (m) => ({ ...m, pending: false }));
         },
         abort.current.signal,
+        // only the question that was asked from a project page is scoped; follow-ups search everything
+        ask && text === ask.text ? ask.project : undefined,
       );
     } catch (err) {
       if ((err as Error).name === "AbortError") {

@@ -5,9 +5,12 @@ import { useEffect, useRef, useState } from "react";
 
 export const OPEN_CHAT_EVENT = "app:open-chat";
 
-/** Open the chat sheet, optionally sending a first question (used by `ask <question>` in the terminals). */
-export const openChat = (question?: string) =>
-  window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: { question } }));
+/**
+ * Open the chat sheet, optionally sending a first question (used by `ask <question>` in the terminals).
+ * With `project`, retrieval puts that project's facts first ("Ask about this project").
+ */
+export const openChat = (question?: string, project?: string) =>
+  window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: { question, project } }));
 
 const loadSheet = () => import("./ChatSheet");
 const ChatSheet = dynamic(loadSheet, { ssr: false });
@@ -21,7 +24,7 @@ export function ChatLauncher() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [inlineVisible, setInlineVisible] = useState(false);
-  const [ask, setAsk] = useState<{ text: string; id: number } | undefined>();
+  const [ask, setAsk] = useState<{ text: string; id: number; project?: string } | undefined>();
   const trigger = useRef<HTMLButtonElement>(null);
 
   const show = () => {
@@ -31,8 +34,9 @@ export function ChatLauncher() {
 
   useEffect(() => {
     const onOpen = (e: Event) => {
-      const q = (e as CustomEvent<{ question?: string }>).detail?.question?.trim();
-      if (q) setAsk({ text: q, id: Date.now() });
+      const d = (e as CustomEvent<{ question?: string; project?: string }>).detail;
+      const q = d?.question?.trim();
+      if (q) setAsk({ text: q, id: Date.now(), project: d?.project });
       setMounted(true);
       setOpen(true);
     };

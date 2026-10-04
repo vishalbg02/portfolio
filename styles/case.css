@@ -1,0 +1,30 @@
+/* Case study pages. */
+/* ── Case study: the rail steps aside for the full-width diagram ─────────────────────────────── */
+.case-grid {
+  container-type: inline-size;
+}
+@container (min-width: 1040px) {
+  .case-bleed {
+    width: 100cqw;
+  }
+}
+[data-rail] {
+  transition: opacity 160ms linear;
+}
+[data-rail][data-away="true"] {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Shared-element transition (card → case study): a short, soft morph. Skipped under reduced motion. */
+::view-transition-group(.morph) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out, ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

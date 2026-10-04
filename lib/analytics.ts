@@ -18,7 +18,11 @@ export type AnalyticsEvent =
   | "work_select"
   | "hero_terminal_command"
   | "hero_row_expand"
-  | "dock_tap";
+  | "dock_tap"
+  | "milestone_open"
+  | "demo_launch"
+  | "demo_step"
+  | "project_ask";
 
 export function track(event: AnalyticsEvent, props?: Record<string, string | number | boolean>) {
   if (typeof window === "undefined") return;

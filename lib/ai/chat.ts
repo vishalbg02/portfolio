@@ -8,7 +8,9 @@ import { chatInstructions } from "./prompts";
 import { getProvider } from "./provider";
 import type { ChatEvent, ChatMessage, OfflineReason } from "./protocol";
 import { RELEVANCE_MIN, type RetrievalResult } from "@/lib/rag/retrieve";
+import { scopeResults } from "@/lib/rag/scope";
 import { getRetriever } from "@/lib/rag/store";
+import type { ProjectSlug } from "@/lib/content/profile-schema";
 
 /** Embeds the question for hybrid retrieval. Any failure just means keyword-only retrieval. */
 async function embedQuery(query: string): Promise<number[] | null> {
@@ -50,10 +52,16 @@ async function* offlineEvents(retrieval: RetrievalResult, reason: OfflineReason)
  *  2. no API key, or daily budget spent → deterministic offline answer
  *  3. otherwise stream the model; if it fails before the first token, fall back to offline
  */
-export async function* chatEvents(messages: ChatMessage[]): AsyncGenerator<ChatEvent> {
+export async function* chatEvents(
+  messages: ChatMessage[],
+  opts: { project?: ProjectSlug } = {},
+): AsyncGenerator<ChatEvent> {
   const retriever = getRetriever();
   const query = retrievalQuery(messages);
-  const retrieval = retriever.retrieve(query, LIMITS.retrievalK, await embedQuery(query));
+  const found = retriever.retrieve(query, LIMITS.retrievalK, await embedQuery(query));
+  const retrieval = opts.project
+    ? { ...found, results: scopeResults(found.results, opts.project, retriever.chunkList()) }
+    : found;
 
   if (retrieval.coverage < RELEVANCE_MIN) {
     log({ mode: "refusal", coverage: +retrieval.coverage.toFixed(2), retrieval: retrieval.mode });
