@@ -39,13 +39,15 @@ async function prepare(page: Page, path: string) {
   );
   await page.goto(path);
   await page.waitForLoadState("networkidle");
-  // Lazy islands (activity, stack map, contact form) load as they near the viewport; a full-page
-  // screenshot never scrolls, so bring each one in and wait for the real content before measuring.
-  for (const island of await page.locator("[data-island]").all()) {
-    await island.scrollIntoViewIfNeeded();
-    await expect(island.locator(".skel")).toHaveCount(0);
-  }
-  await page.evaluate("window.scrollTo(0, 0)");
+  // Lazy islands (activity, stack map, contact form) load as they near the viewport, and a full-page screenshot
+  // never scrolls. Scrolling to them would leave the hero's will-change layers re-rastered with different
+  // anti-aliasing every screenshot, so make the viewport tall enough for all of them to be "near", wait for the
+  // real content, and put the viewport back. Layer promotion is switched off for the same reason.
+  const { width } = page.viewportSize()!;
+  await page.setViewportSize({ width, height: 12_000 });
+  await expect(page.locator(".skel")).toHaveCount(0);
+  await page.setViewportSize({ width, height: 900 });
+  await page.addStyleTag({ content: "*, *::before, *::after { will-change: auto !important; }" });
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
   // Relative times ("13 minutes ago") are computed when the page is built, so they differ between the
