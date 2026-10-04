@@ -15,6 +15,7 @@ const ROUTES = [
   "/resume",
   "/recruiter",
   "/now",
+  "/privacy",
   "/log",
   "/log/an-assistant-that-says-i-dont-know",
 ];

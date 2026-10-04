@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { gotoReady, settleAnimations } from "./helpers";
+import { gotoReady, settleAnimations, loadIslands } from "./helpers";
 
 async function openPalette(page: Page) {
   await page.keyboard.press("Control+k");
@@ -80,6 +80,7 @@ test.describe("command palette", () => {
     // A real field (the contact form), not an injected node: hydration can discard injected DOM.
     await page.route("**/api/status", (route) => route.fulfill({ json: { checkedAt: "", statuses: {} } }));
     await gotoReady(page, "/");
+    await loadIslands(page);
     await page.waitForLoadState("networkidle");
     const message = page.getByLabel("Message");
     await message.scrollIntoViewIfNeeded();

@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { gotoReady, settleAnimations } from "./helpers";
+import { gotoReady, settleAnimations, loadIslands } from "./helpers";
 
 const axe = async (page: Page) => {
   await settleAnimations(page);
@@ -74,6 +74,7 @@ test.describe("terminal", () => {
 
   test("typing ~ inside a form field does not open it", async ({ page }) => {
     await gotoReady(page, "/");
+    await loadIslands(page);
     await page.getByLabel("Name").first().fill("~");
     await expect(page.getByRole("dialog", { name: "Terminal" })).toHaveCount(0);
   });

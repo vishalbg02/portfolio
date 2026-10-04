@@ -58,7 +58,6 @@ export function ContributionCalendar({
   const [pop, setPop] = useState<{ left: number; top: number } | null>(null);
   const sticky = useRef(false);
 
-  const width = LEFT + weeks.length * PITCH;
   const months = monthLabels(weeks);
 
   const tiered = useMemo(
@@ -70,6 +69,14 @@ export function ContributionCalendar({
       ),
     [pins],
   );
+  // A label near the last week hangs past the grid. Reserve that overhang in the viewBox, otherwise the
+  // scroller is a few px wider than its box and "scroll to the end" shifts the weekday labels out of view.
+  const grid = LEFT + weeks.length * PITCH;
+  const overhang = tiered.reduce(
+    (max, p) => Math.max(max, LEFT + p.week * PITCH + CELL / 2 - 12 + labelWidth(p) - grid),
+    0,
+  );
+  const width = grid + (overhang > 0 ? Math.ceil(overhang) + 8 : 0);
   const tiers = tiered.reduce((n, p) => Math.max(n, p.tier + 1), 0);
   const pinH = tiers ? tiers * TIER + 8 : 0;
   const lanes = bands.reduce((n, b) => Math.max(n, (b.lane ?? 0) + 1), 0);

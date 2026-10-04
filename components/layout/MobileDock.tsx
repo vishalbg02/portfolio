@@ -46,6 +46,7 @@ export function MobileDock() {
   const [hidden, setHidden] = useState(false);
   const [section, setSection] = useState<Id | null>(null);
   const last = useRef(0);
+  const height = useRef(0);
 
   useEffect(() => {
     let raf = 0;
@@ -54,6 +55,15 @@ export function MobileDock() {
       raf = requestAnimationFrame(() => {
         const y = window.scrollY;
         const dy = y - last.current;
+        // The page got taller or shorter (a lazy section swapped in): scroll anchoring may have nudged the
+        // position, and that is not the visitor scrolling. Take the new position as the baseline instead.
+        const h = document.documentElement.scrollHeight;
+        if (height.current && h !== height.current) {
+          height.current = h;
+          last.current = y;
+          return;
+        }
+        height.current = h;
         if (y < 80 || dy < -6) setHidden(false);
         else if (dy > 6) setHidden(true);
         last.current = y;

@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { gotoHydrated, settleAnimations } from "./helpers";
+import { gotoHydrated, settleAnimations, loadIslands } from "./helpers";
 
 const at = new Date().toISOString();
 const mockStatus = (page: Page) =>
@@ -123,6 +123,7 @@ test.describe("stack", () => {
   test("hovering a skill shows which projects used it and lights their cards", async ({ page }) => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const stack = page.locator("#stack");
     await stack.getByRole("button", { name: "Firebase" }).hover();
     await expect(stack.locator("[aria-live=polite]").getByText(/used in/)).toBeVisible();
@@ -138,6 +139,7 @@ test.describe("stack", () => {
   test("works by keyboard focus and pins on Enter", async ({ page }) => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const three = page.locator("#stack").getByRole("button", { name: "Three.js" });
     await three.focus();
     await expect(
@@ -150,6 +152,7 @@ test.describe("stack", () => {
   test("skills no project used are plain text, not links to nowhere", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
+    await loadIslands(page);
     const stack = page.locator("#stack");
     await expect(stack.getByText("Java", { exact: true })).toBeVisible();
     await expect(stack.getByRole("button", { name: "Java" })).toHaveCount(0);
@@ -162,6 +165,7 @@ test.describe("live GitHub", () => {
   test("renders stats, a native calendar with day tooltips, and linked activity", async ({ page }) => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const gh = page.locator("#github");
     await expect(gh.getByText("Contributions, last year")).toBeVisible();
     await expect(gh.getByText("Active days, last year")).toBeVisible();
@@ -189,6 +193,7 @@ test.describe("live GitHub", () => {
   test("the calendar is announced with its totals", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
+    await loadIslands(page);
     await expect(
       page.locator("#github").getByRole("img", {
         name: /\d+ contributions, last year\. \d+ active days, longest streak \d+ days?/,
@@ -203,6 +208,7 @@ test.describe("recognition", () => {
   }) => {
     await mockStatus(page);
     await page.goto("/");
+    await loadIslands(page);
     await expect(page.getByRole("region", { name: "Recognition" })).toHaveCount(0);
     await expect(page.locator("#recognition")).toHaveCount(0);
     const gh = page.locator("#github");
@@ -250,6 +256,7 @@ test.describe("contact", () => {
   test("validates on submit, focuses the first problem, and clears errors as you type", async ({ page }) => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const form = page.getByRole("form", { name: "Contact form" });
     await form.getByRole("button", { name: "Send message" }).click();
     await expect(form.getByText("Please enter your name.")).toBeVisible();
@@ -264,6 +271,7 @@ test.describe("contact", () => {
   test("the honeypot is invisible to people and screen readers", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
+    await loadIslands(page);
     const honey = page.locator("input[name='website']");
     // Off-screen (bots still fill it), not focusable, not exposed to assistive tech.
     const box = await honey.boundingBox();
@@ -288,6 +296,7 @@ test.describe("contact", () => {
       await route.fulfill({ json: { ok: true } });
     });
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const form = await fill(page);
     await form.getByRole("button", { name: "Send message" }).click();
     await expect(page.getByText("Message sent").first()).toBeVisible();
@@ -300,6 +309,7 @@ test.describe("contact", () => {
       route.fulfill({ status: 503, json: { error: "not_configured", fallback: "mailto" } }),
     );
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const form = await fill(page);
     await form.getByRole("button", { name: "Send message" }).click();
     await expect(page.getByText("The form can't send right now.")).toBeVisible();
@@ -312,6 +322,7 @@ test.describe("contact", () => {
     await mockStatus(page);
     await page.route("**/api/contact", (route) => route.abort());
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const form = await fill(page);
     await form.getByRole("button", { name: "Send message" }).click();
     await expect(page.getByRole("link", { name: "Open in my email app" })).toBeVisible();
@@ -323,6 +334,7 @@ test.describe("contact", () => {
       route.fulfill({ status: 429, json: { error: "rate_limited" } }),
     );
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const form = await fill(page);
     await form.getByRole("button", { name: "Send message" }).click();
     await expect(page.getByText(/Too many messages/)).toBeVisible();
@@ -401,6 +413,7 @@ test.describe("full home page", () => {
     for (const width of [320, 360, 768, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
+      await loadIslands(page);
       await expect(page.locator("#github svg").first()).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `horizontal overflow at ${width}px`).toBeLessThanOrEqual(0);

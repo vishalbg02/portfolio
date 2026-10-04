@@ -6,6 +6,8 @@
 @import "../styles/terminal.css";
 @import "../styles/history.css";
 @import "../styles/case.css";
+@import "../styles/fx.css";
+@import "../styles/islands.css";
 
 /*
  * Tailwind theme: reset the default palette so only design tokens exist as utilities.

@@ -1,5 +1,5 @@
 import { LetsBuildBanner } from "@/components/sections/LetsBuildBanner";
-import { ContactForm } from "@/components/sections/ContactForm";
+import { ContactFormLoader } from "@/components/sections/ContactFormLoader";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { profile } from "@/content/profile";
@@ -45,7 +45,7 @@ export function Contact() {
             ))}
           </ul>
         </div>
-        <ContactForm toEmail={contact.email} />
+        <ContactFormLoader toEmail={contact.email} />
       </div>
     </section>
   );

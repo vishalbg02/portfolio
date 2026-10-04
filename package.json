@@ -20,6 +20,8 @@
     "resume": "tsx scripts/resume.mts",
     "resume:diff": "tsx scripts/resume-diff.mts",
     "snapshot:github": "tsx scripts/snapshot-github.mts",
+    "media": "tsx scripts/capture-media.mts",
+    "islands": "tsx scripts/measure-islands.mts",
     "embeddings": "tsx scripts/build-embeddings.mts",
     "check:embeddings": "tsx scripts/check-embeddings.mts",
     "email:preview": "tsx scripts/email-preview.mts"
@@ -59,6 +61,7 @@
     "eslint-config-next": "16.3.6",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",

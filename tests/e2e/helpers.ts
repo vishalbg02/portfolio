@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 /** Waits for finite CSS animations/transitions (e.g. fade-ins) to finish so axe sees final colors. */
 export async function settleAnimations(page: Page) {
@@ -26,4 +26,17 @@ export async function gotoHydrated(page: Page, url: string) {
 export async function gotoReady(page: Page, url: string) {
   await page.goto(url);
   await page.locator('html[data-shortcuts="ready"]').waitFor({ state: "attached" });
+}
+
+/**
+ * The heavy sections below the fold (activity, stack map, contact form) load just before they scroll into
+ * view. Tests that look inside them call this first: it scrolls each one near the viewport and waits for the
+ * real content to replace its placeholder, then returns to the top.
+ */
+export async function loadIslands(page: Page) {
+  for (const island of await page.locator("[data-island]").all()) {
+    await island.scrollIntoViewIfNeeded();
+    await expect(island.locator(".skel")).toHaveCount(0);
+  }
+  await page.evaluate("window.scrollTo(0, 0)");
 }

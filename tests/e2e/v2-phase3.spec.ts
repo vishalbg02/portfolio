@@ -43,15 +43,16 @@ test.describe("experience as a git history", () => {
     expect(gutters.every((g) => g === "true")).toBe(true);
   });
 
-  test("branches carry their name; merges and forks show their month; commit ids are stable", async ({
+  test("every role names its branch next to its dates (no standalone merge/fork text rows); commit ids are stable", async ({
     page,
   }) => {
     await mockStatus(page);
     await page.goto("/");
     const exp = page.locator("#experience");
-    await expect(exp.getByText(/merge feat\/golden-verdict · May 2026/)).toBeVisible();
-    await expect(exp.getByText(/merge feat\/social-agent · Mar 2026/)).toBeVisible();
-    await expect(exp.getByText(/branch feat\/social-agent · Jun 2025/)).toBeVisible();
+    const branches = await exp.locator("[data-branch]").allTextContents();
+    expect(branches).toEqual(["feat/golden-verdict", "feat/social-agent", "feat/kaha-technologies"]);
+    await expect(exp.getByText(/^merge |^branch /)).toHaveCount(0);
+    await expect(exp.getByText("Jun 2025 – Mar 2026")).toBeVisible();
     const ids = await exp
       .locator("code")
       .filter({ hasText: /^[0-9a-f]{7}$/ })

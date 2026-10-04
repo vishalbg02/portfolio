@@ -1,0 +1,37 @@
+/*
+ * Shared effects. Flat only (squares, steps, opacity): no gradients anywhere.
+ * .skel is the grid-square skeleton every loading state uses: tiny squares in the contribution-graph
+ * language, blinking in four steps (still under reduced motion).
+ */
+.skel {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='3' y='3' width='10' height='10' rx='2' fill='%23161b22'/%3E%3C/svg%3E");
+  background-size: 16px 16px;
+}
+.skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='3' y='3' width='10' height='10' rx='2' fill='%230e4429'/%3E%3C/svg%3E");
+  background-size: 48px 48px;
+  opacity: 0;
+  animation: skel-blink 1.6s steps(4, end) infinite;
+}
+@keyframes skel-blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel::after {
+    animation: none;
+  }
+}
