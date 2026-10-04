@@ -6,7 +6,7 @@
 .git {
   --gutter: 28px;
   --pad: 12px;
-  --ev-h: 40px;
+  --ev-h: 28px;
 }
 @media (min-width: 768px) {
   .git {
@@ -28,10 +28,6 @@
 }
 .git-ev {
   height: var(--ev-h);
-}
-.git-ev .git-body {
-  display: flex;
-  align-items: center;
 }
 
 /* Things placed on a lane inside the gutter. */

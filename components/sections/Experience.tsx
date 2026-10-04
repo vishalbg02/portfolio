@@ -43,9 +43,7 @@ export function Experience() {
   );
 
   const eventRow = (row: GraphRow, i: number) => {
-    const e = experience[row.role]!;
     const color = laneColor(row.role);
-    const branch = branchName(e.company);
     const x = (k: number) => k * 100 + 50;
     // Merge: main → branch, going down. Fork: branch → main, going down.
     const d =
@@ -80,16 +78,6 @@ export function Experience() {
             )}
           </>,
         )}
-        <div className="git-body font-mono text-xs text-muted">
-          {row.kind === "open" ? (
-            <span className="text-accent">HEAD → {branch}</span>
-          ) : (
-            <span>
-              {row.kind === "merge" ? "merge" : "branch"} <span className="text-text">{branch}</span> ·{" "}
-              {row.when}
-            </span>
-          )}
-        </div>
       </li>
     );
   };
@@ -122,9 +110,13 @@ export function Experience() {
         <div className="git-body py-4 md:py-5">
           <h3 className="text-lg font-semibold text-text">{job.role}</h3>
           <p className="text-muted">{job.company}</p>
-          <p className="mt-1 font-mono text-xs text-muted">
-            {job.period}
-            {job.current ? <span className="ml-2 text-accent">current</span> : null}
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-xs text-muted">
+            <span>{job.period}</span>
+            {job.current ? <span className="text-accent">current</span> : null}
+            <span aria-hidden="true">·</span>
+            <code data-branch className="text-muted">
+              {branchName(job.company)}
+            </code>
           </p>
           <ul className="mt-3 max-w-[68ch] space-y-2.5">{first ? commit(first) : null}</ul>
           {rest.length > 0 ? (
