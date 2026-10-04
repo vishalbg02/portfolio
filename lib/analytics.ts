@@ -15,7 +15,10 @@ export type AnalyticsEvent =
   | "contact_submit"
   | "easter_egg_found"
   | "rail_jump"
-  | "work_select";
+  | "work_select"
+  | "hero_terminal_command"
+  | "hero_row_expand"
+  | "dock_tap";
 
 export function track(event: AnalyticsEvent, props?: Record<string, string | number | boolean>) {
   if (typeof window === "undefined") return;

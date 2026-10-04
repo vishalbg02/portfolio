@@ -14,7 +14,7 @@ export type TerminalAction =
   | { type: "download"; href: string; filename: string }
   | { type: "copy"; text: string; label: string }
   | { type: "game"; name: "cosmostrike" }
-  | { type: "ask" }
+  | { type: "ask"; question?: string }
   | { type: "clear" }
   | { type: "exit" };
 export type Result = { lines: Line[]; action?: TerminalAction; egg?: string };
@@ -240,9 +240,25 @@ const commands: Record<string, Command> = {
     }),
   },
   ask: {
-    summary: "ask the assistant",
-    usage: "ask",
-    run: () => ({ lines: [out("opening Ask Vishal…", "muted")], action: { type: "ask" } }),
+    summary: "ask the assistant a question",
+    usage: "ask <question>",
+    run: (args) => {
+      const question = args.join(" ").trim().slice(0, 1000);
+      return {
+        lines: [out(question ? `asking: ${question}` : "opening Ask Vishal…", "muted")],
+        action: question ? { type: "ask", question } : { type: "ask" },
+      };
+    },
+  },
+  ship: {
+    summary: "list what he has shipped",
+    usage: "ship --all",
+    run: () => ({
+      lines: [
+        ...profile.projects.map((p) => out(`✓ ${p.name.padEnd(30)} ${p.tagline}`)),
+        out("open <name> for the case study", "muted"),
+      ],
+    }),
   },
   cosmostrike: {
     summary: "a small arcade game",
@@ -361,12 +377,4 @@ export function complete(input: string): string[] {
   return [];
 }
 
-/** Longest common prefix, used when Tab has several candidates. */
-export function commonPrefix(items: string[]): string {
-  if (items.length === 0) return "";
-  return items.reduce((p, s) => {
-    let i = 0;
-    while (i < p.length && i < s.length && p[i] === s[i]) i++;
-    return p.slice(0, i);
-  });
-}
+export { commonPrefix } from "./input";

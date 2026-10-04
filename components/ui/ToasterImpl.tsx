@@ -22,6 +22,7 @@ export default function ToasterImpl({ queue, onFlushed }: { queue: ToastRequest[
   return (
     <Toaster
       position="bottom-center"
+      mobileOffset={{ bottom: 88 }} // clear of the phone dock
       duration={2500}
       theme="dark"
       toastOptions={{

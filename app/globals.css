@@ -3,6 +3,7 @@
 @import "../styles/sketches.css";
 @import "../styles/rail.css";
 @import "../styles/showcase.css";
+@import "../styles/terminal.css";
 
 /*
  * Tailwind theme: reset the default palette so only design tokens exist as utilities.

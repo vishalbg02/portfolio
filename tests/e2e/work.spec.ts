@@ -164,12 +164,14 @@ test.describe("work cards & status", () => {
   test("hero ship console links to case studies and shows live status", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
-    const consoleCard = page.locator("section[aria-labelledby='hero-title']").getByRole("list");
-    await expect(consoleCard.getByRole("link", { name: /Golden Verdict/ })).toHaveAttribute(
+    const hero = page.locator("section[aria-labelledby='hero-title']");
+    const row = hero.locator("details", { hasText: "Golden Verdict" });
+    await expect(row.locator("summary").getByText("Live · 142 ms")).toBeVisible();
+    await row.locator("summary").click();
+    await expect(row.getByRole("link", { name: /Case study/ })).toHaveAttribute(
       "href",
       "/work/golden-verdict",
     );
-    await expect(consoleCard.getByText("Live · 142 ms")).toBeVisible();
   });
 
   test("palette lists case studies and live sites", async ({ page }) => {

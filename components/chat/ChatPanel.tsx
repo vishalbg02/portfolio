@@ -41,9 +41,12 @@ const MODE_NOTE: Record<string, string> = {
 export function ChatPanel({
   variant = "inline",
   autoFocus = false,
+  ask,
 }: {
   variant?: "inline" | "sheet";
   autoFocus?: boolean;
+  /** A question to send as soon as the panel is shown (e.g. from `ask <question>`); `id` makes repeats distinct. */
+  ask?: { text: string; id: number };
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -77,6 +80,9 @@ export function ChatPanel({
     if (!el) return;
     if (el.scrollHeight - el.scrollTop - el.clientHeight < 140) el.scrollTop = el.scrollHeight;
   }, [messages]);
+
+  const sendRef = useRef<(t: string) => Promise<void>>(async () => {});
+  const askedId = useRef<number | null>(null);
 
   const patch = (id: number, fn: (m: Msg) => Msg) =>
     setMessages((all) => all.map((m) => (m.id === id ? fn(m) : m)));
@@ -146,6 +152,15 @@ export function ChatPanel({
 
   const tooLong = input.length > MAX;
   const empty = messages.length === 0;
+
+  useEffect(() => {
+    sendRef.current = send;
+  });
+  useEffect(() => {
+    if (!ask || askedId.current === ask.id) return;
+    askedId.current = ask.id;
+    void sendRef.current(ask.text);
+  }, [ask]);
 
   return (
     <div

@@ -20,6 +20,9 @@ const EVENTS = [
   // V2
   "rail_jump",
   "work_select",
+  "hero_terminal_command",
+  "hero_row_expand",
+  "dock_tap",
 ];
 
 function* files(dir: string): Generator<string> {
