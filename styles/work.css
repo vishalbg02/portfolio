@@ -354,7 +354,7 @@
     position: relative;
     display: flex;
     gap: 12px;
-    align-items: stretch;
+    align-items: flex-start;
     margin-inline: -16px;
     padding: 0 16px 8px;
     overflow-x: auto;
