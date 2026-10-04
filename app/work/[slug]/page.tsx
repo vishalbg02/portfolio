@@ -67,7 +67,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
     <article id="case-article" className="container-page py-10 md:py-16">
       <ReadingProgress targetId="case-article" />
       <JsonLd data={projectJsonLd(project, study.frontmatter.description)} />
-      <Link href="/work" className="font-mono text-sm text-muted transition-colors hover:text-text">
+      <Link href="/work" className="tap-slop font-mono text-sm text-muted transition-colors hover:text-text">
         <span aria-hidden="true">←</span> All work
       </Link>
 

@@ -32,7 +32,7 @@ test.describe("experience as a git history", () => {
       "Full-Stack & App Developer Intern",
       "Backend Developer Intern",
     ]);
-    for (const period of ["Jan 2026 – Present", "Jun 2025 – Mar 2026", "May 2024 – Jul 2024"]) {
+    for (const period of ["Jan 2026 – May 2026", "Jun 2025 – Mar 2026", "May 2024 – Jul 2024"]) {
       await expect(list.getByText(period, { exact: false }).first()).toBeVisible();
     }
     // every graph gutter is hidden from assistive tech
@@ -49,7 +49,7 @@ test.describe("experience as a git history", () => {
     await mockStatus(page);
     await page.goto("/");
     const exp = page.locator("#experience");
-    await expect(exp.getByText("HEAD → feat/golden-verdict")).toBeVisible();
+    await expect(exp.getByText(/merge feat\/golden-verdict · May 2026/)).toBeVisible();
     await expect(exp.getByText(/merge feat\/social-agent · Mar 2026/)).toBeVisible();
     await expect(exp.getByText(/branch feat\/social-agent · Jun 2025/)).toBeVisible();
     const ids = await exp
@@ -129,7 +129,7 @@ test.describe("calendar milestones", () => {
     // click pins it open; the proof link works
     const role = gh.getByRole("button", { name: /Started at Golden Verdict, Jan 2026/ });
     await role.click();
-    await expect(pop).toContainText("freelance role (ongoing)");
+    await expect(pop).toContainText("freelance role.");
     await expect(pop.getByRole("link", { name: /See the proof/ })).toHaveAttribute(
       "href",
       "/work/golden-verdict",

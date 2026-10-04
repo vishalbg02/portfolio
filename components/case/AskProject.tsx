@@ -12,7 +12,7 @@ export function AskProject({ slug, name }: { slug: string; name: string }) {
         track("project_ask", { project: slug });
         openChat(`What should I know about the ${name} project?`, slug);
       }}
-      className="inline-flex min-h-10 items-center gap-2 rounded-pill border border-border-2 px-4 font-mono text-sm text-text transition-colors hover:border-accent hover:text-accent"
+      className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border-2 px-4 font-mono text-sm text-text transition-colors hover:border-accent hover:text-accent"
     >
       <span aria-hidden="true" className="text-accent">
         ?

@@ -86,7 +86,9 @@ const commands: Record<string, Command> = {
         out(
           ws.employed
             ? `Working: ${ws.employed.role} at ${ws.employed.company} (${ws.employed.period}).`
-            : `Not in a full-time job or internship right now.${ws.freelance ? ` Freelancing: ${ws.freelance.role} at ${ws.freelance.company.split(",")[0]} (${ws.freelance.period}).` : ""}${ws.lastRole ? ` Most recent internship: ${ws.lastRole.role} at ${ws.lastRole.company.split(",")[0]} (${ws.lastRole.period}).` : ""}`,
+            : ws.freelance
+              ? `Not in a full-time job or internship right now. Freelancing: ${ws.freelance.role} at ${ws.freelance.company.split(",")[0]} (${ws.freelance.period}).${ws.lastRole ? ` Most recent internship: ${ws.lastRole.role} at ${ws.lastRole.company.split(",")[0]} (${ws.lastRole.period}).` : ""}`
+              : `Not working anywhere right now, so free to start.${ws.lastRole ? ` Most recent role: ${ws.lastRole.role} at ${ws.lastRole.company.split(",")[0]} (${ws.lastRole.period}).` : ""}`,
         ),
         out(`Looking for: ${profile.workPreferences.roles.join("; ")}.`),
         out(
@@ -305,6 +307,12 @@ function distance(a: string, b: string): number {
 }
 
 /** Runs one command line. Never throws. */
+/** The commands the hero terminal and the `~` terminal both understand, for the `?` overlay. */
+export const commandHelp = () =>
+  Object.entries(commands)
+    .filter(([, c]) => !c.hidden)
+    .map(([name, c]) => ({ usage: c.usage ?? name, summary: c.summary }));
+
 export function run(input: string): Result {
   const tokens = tokenize(input.trim());
   if (tokens.length === 0) return { lines: [] };

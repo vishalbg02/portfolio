@@ -34,9 +34,9 @@ describe("terminal commands", () => {
 
   it("status says he is not currently in a job and names the last role", () => {
     const t = text("status");
-    expect(t).toMatch(/Not in a full-time job or internship/);
-    expect(t).toContain("Social Agent");
-    expect(t).toContain("Mar 2026");
+    expect(t).toMatch(/Not working anywhere right now/);
+    expect(t).toContain("Golden Verdict");
+    expect(t).toContain("Jan 2026 – May 2026");
     expect(t).toContain(profile.workPreferences.startDate);
   });
 

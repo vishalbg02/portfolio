@@ -10,6 +10,7 @@ import { computeStreaks } from "@/lib/github/streaks";
 import type { ContributionCalendar as Calendar } from "@/lib/github/types";
 import { cn } from "@/lib/utils/cn";
 import { relativeTime } from "@/lib/utils/relative-time";
+import { CountUp } from "@/components/ui/CountUp";
 import { ContributionCalendar } from "./ContributionCalendar";
 
 type View = { calendar: Calendar; asOf: string; updated: string; scrollTo: "start" | "end" };
@@ -17,7 +18,7 @@ type Loaded = Record<string, View | "loading" | "error">;
 
 const unit = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 
-const Stat = ({ value, label }: { value: string; label: string }) => (
+const Stat = ({ value, label }: { value: React.ReactNode; label: string }) => (
   <div className="min-w-0 p-4 sm:p-5">
     <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">{label}</dt>
     <dd className="mt-1.5 text-2xl font-semibold text-text tabular-nums">{value}</dd>
@@ -111,7 +112,7 @@ export function ActivityPanel({
             aria-pressed={key === t.key}
             onClick={() => select(t.key)}
             className={cn(
-              "min-h-8 rounded-pill border px-3 font-mono text-xs transition-colors",
+              "min-h-8 rounded-pill border px-3 font-mono text-xs transition-colors pointer-coarse:min-h-11",
               key === t.key
                 ? "border-accent bg-accent/10 text-accent"
                 : "border-border text-muted hover:border-border-2 hover:text-text",
@@ -123,9 +124,16 @@ export function ActivityPanel({
       </div>
 
       <dl className="grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l">
-        <Stat value={view.calendar.total.toLocaleString("en-US")} label={`Contributions, ${period}`} />
-        <Stat value={activeDays.toLocaleString("en-US")} label={`Active days, ${period}`} />
-        <Stat value={unit(longest)} label="Longest streak" />
+        <Stat value={<CountUp value={view.calendar.total} />} label={`Contributions, ${period}`} />
+        <Stat value={<CountUp value={activeDays} />} label={`Active days, ${period}`} />
+        <Stat
+          value={
+            <>
+              <CountUp value={longest} /> {longest === 1 ? "day" : "days"}
+            </>
+          }
+          label="Longest streak"
+        />
       </dl>
 
       <div

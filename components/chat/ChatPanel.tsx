@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { track } from "@/lib/analytics";
 import { ChatHttpError, streamChat } from "@/lib/ai/client";
 import type { ChatMode, OfflineReason, Source } from "@/lib/ai/protocol";
 import { citedNumbers } from "@/lib/ai/sanitize";
+import { flashProof, jumpTarget } from "@/lib/proof";
 import { cn } from "@/lib/utils/cn";
 import { AnswerText } from "./AnswerText";
 
@@ -42,8 +43,11 @@ export function ChatPanel({
   variant = "inline",
   autoFocus = false,
   ask,
+  onJump,
 }: {
   variant?: "inline" | "sheet";
+  /** Called when a cited source is used, so the sheet can close and let the page underneath scroll. */
+  onJump?: () => void;
   autoFocus?: boolean;
   /** A question to send as soon as the panel is shown (e.g. from `ask <question>`); `id` makes repeats distinct. */
   ask?: { text: string; id: number; project?: string };
@@ -250,7 +254,7 @@ export function ChatPanel({
                   {m.error}
                 </p>
               ) : null}
-              <SourcesRow text={m.text} sources={m.sources} />
+              <SourcesRow text={m.text} sources={m.sources} onJump={onJump} />
             </div>
           ),
         )}
@@ -309,21 +313,34 @@ export function ChatPanel({
   );
 }
 
-function SourcesRow({ text, sources }: { text: string; sources: Source[] }) {
+function SourcesRow({ text, sources, onJump }: { text: string; sources: Source[]; onJump?: () => void }) {
+  const router = useRouter();
+  const pathname = usePathname();
   if (sources.length === 0) return null;
   const cited = citedNumbers(text, sources.length);
   const shown = (cited.length > 0 ? cited : sources.slice(0, 2).map((s) => s.n)).map((n) => sources[n - 1]!);
+
+  const jump = (url: string) => {
+    const target = jumpTarget(url, pathname);
+    track("proof_jump", { kind: target.type === "scroll" ? "same_page" : "other_page" });
+    onJump?.(); // close the sheet first so the page underneath is what scrolls
+    if (target.type === "scroll") window.setTimeout(() => flashProof(target.id), onJump ? 120 : 0);
+    else router.push(target.href);
+  };
+
   return (
     <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 font-mono text-[11px] text-muted">
       <span>Sources</span>
       {shown.map((s) => (
-        <Link
+        <button
           key={s.n}
-          href={s.url}
-          className="rounded-pill border border-border px-2 py-0.5 text-link transition-colors hover:border-border-2"
+          type="button"
+          onClick={() => jump(s.url)}
+          className="min-h-8 rounded-pill border border-border px-2.5 py-1 text-link transition-colors hover:border-border-2"
         >
-          [{s.n}] {s.title.length > 42 ? `${s.title.slice(0, 40)}…` : s.title}
-        </Link>
+          <span className="sr-only">Jump to </span>[{s.n}]{" "}
+          {s.title.length > 42 ? `${s.title.slice(0, 40)}…` : s.title}
+        </button>
       ))}
     </p>
   );

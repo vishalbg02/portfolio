@@ -65,8 +65,8 @@ test.describe("job-description matcher on /resume", () => {
     await expect(row("Docker").getByText("Gap", { exact: true })).toBeVisible();
     await expect(row("Kubernetes").getByText("Gap", { exact: true })).toBeVisible();
     await expect(row("Docker").getByText(/shown as a gap/)).toBeVisible();
-    // ~20 months of work (internships + freelance, overlaps counted once): close to 2 years, so Partial, not Strong
-    await expect(row("2+ years of experience").getByText("Partial", { exact: true })).toBeVisible();
+    // ~16 months of work (internships + freelance, overlaps counted once): under 2 years, so a Gap
+    await expect(row("2+ years of experience").getByText("Gap", { exact: true })).toBeVisible();
     await expect(result.getByText(/Not covered: .*Docker.*Kubernetes/)).toBeVisible();
 
     await row("Java")

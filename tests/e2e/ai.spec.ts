@@ -40,8 +40,8 @@ test.describe("Ask Vishal — inline section (offline mode: the e2e server has n
     await section.getByRole("button", { name: "How can I contact him?" }).click();
     await expect(log.getByText("vishalbg02@gmail.com").first()).toBeVisible();
     await expect(log.getByText(/Offline mode — answered straight from this site/)).toBeVisible();
-    const source = log.getByRole("link", { name: /^\[1\] How to contact Vishal/ });
-    await expect(source).toHaveAttribute("href", "/#contact");
+    // cited sources are buttons now ("jump to proof"); the inline [1] marker stays a link
+    await expect(log.getByRole("button", { name: /\[1\] How to contact Vishal/ })).toBeVisible();
     await expect(log.getByRole("link", { name: /^Source 1:/ })).toHaveAttribute("href", "/#contact");
   });
 

@@ -57,8 +57,8 @@ const data = {
     {
       role: "Full-Stack Developer",
       company: "Golden Verdict, Bengaluru",
-      period: "Jan 2026 – Present",
-      current: true,
+      period: "Jan 2026 – May 2026",
+      current: false,
       kind: "freelance",
       points: [
         "Built and deployed a production legal and tax compliance SaaS (goldenverdict.com) with role-based access for four user roles.",
@@ -96,7 +96,7 @@ const data = {
       name: "Golden Verdict",
       tagline: "Legal & tax compliance SaaS",
       type: "Freelance · Production",
-      period: "Jan 2026 – Present",
+      period: "Jan 2026 – May 2026",
       badge: null,
       live: "https://goldenverdict.com",
       repo: null,

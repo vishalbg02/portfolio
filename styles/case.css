@@ -28,3 +28,52 @@
     animation: none !important;
   }
 }
+
+/* "Jump to proof" flash: a 2 px green outline for 1.5 s (set by lib/proof.ts). No movement, so it is the same under reduced motion. */
+[data-proof-flash] {
+  outline: 2px solid var(--accent);
+  outline-offset: 8px;
+  border-radius: 6px;
+}
+
+/* ── Closing moment: LET'S BUILD in contribution squares, and the footer snake ──────────────────── */
+.px-on[data-l="2"] {
+  fill: var(--grid-2);
+}
+.px-on[data-l="3"] {
+  fill: var(--grid-3);
+}
+.px-on[data-l="4"] {
+  fill: var(--grid-4);
+}
+/* Armed = squares dark; playing = they light up left to right (28 ms per column). */
+[data-reveal="armed"] .px-on {
+  fill: var(--grid-0);
+}
+[data-reveal="play"] .px-on {
+  transition: fill 220ms linear calc(var(--col) * 28ms);
+}
+
+.snake-row {
+  --end: 660px;
+  overflow: hidden;
+}
+.snake {
+  transform: translateX(var(--end));
+}
+[data-reveal="play"] .snake {
+  animation: snake-run 3.4s steps(60, end) 1 both;
+}
+@keyframes snake-run {
+  from {
+    transform: translateX(-80px);
+  }
+  to {
+    transform: translateX(var(--end));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .snake {
+    display: none;
+  }
+}

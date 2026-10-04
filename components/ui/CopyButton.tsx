@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { track, type AnalyticsEvent } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
+import { haptic } from "@/lib/haptics";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils/cn";
 
@@ -29,6 +30,7 @@ export function CopyButton({
     <button
       type="button"
       onClick={async () => {
+        haptic();
         if (await copyText(text)) {
           if (event) track(event);
           toast.success(`${noun} copied`);

@@ -22,7 +22,9 @@ export type AnalyticsEvent =
   | "milestone_open"
   | "demo_launch"
   | "demo_step"
-  | "project_ask";
+  | "project_ask"
+  | "proof_jump"
+  | "stack_skill_select";
 
 export function track(event: AnalyticsEvent, props?: Record<string, string | number | boolean>) {
   if (typeof window === "undefined") return;

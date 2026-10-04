@@ -129,7 +129,7 @@ export function Experience() {
           <ul className="mt-3 max-w-[68ch] space-y-2.5">{first ? commit(first) : null}</ul>
           {rest.length > 0 ? (
             <details className="exp-details group mt-2.5">
-              <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-sm font-mono text-sm text-link select-none marker:hidden [&::-webkit-details-marker]:hidden">
+              <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-sm font-mono text-sm text-link select-none marker:hidden pointer-coarse:min-h-11 [&::-webkit-details-marker]:hidden">
                 <span aria-hidden="true" className="transition-transform duration-200 group-open:rotate-90">
                   ›
                 </span>

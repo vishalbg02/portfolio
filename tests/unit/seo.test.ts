@@ -26,7 +26,7 @@ describe("JSON-LD", () => {
     });
     expect(p.sameAs).toEqual([profile.contact.linkedin, profile.contact.github]);
     expect(p.alumniOf.name).toContain("CHRIST");
-    expect(p.worksFor).toEqual({ "@type": "Organization", name: "Golden Verdict" }); // the current (freelance) role
+    expect(p).not.toHaveProperty("worksFor"); // no current role: Golden Verdict ended May 2026, Social Agent Mar 2026
     const text = JSON.stringify(homeJsonLd());
     expect(text).not.toContain(profile.contact.email);
     expect(text).not.toContain(profile.contact.collegeEmail);

@@ -141,7 +141,7 @@ export function ProductDemo({
                 dispatch({ type: "role", role: i });
               }}
               className={cn(
-                "min-h-8 rounded-pill border px-3 font-mono text-xs transition-colors",
+                "min-h-8 rounded-pill border px-3 font-mono text-xs transition-colors pointer-coarse:min-h-11",
                 i === state.role
                   ? "border-accent bg-accent/10 text-accent"
                   : "border-border text-muted hover:border-border-2 hover:text-text",
@@ -193,7 +193,7 @@ export function ProductDemo({
                 aria-current={i === state.step ? "step" : undefined}
                 onClick={() => go(i)}
                 className={cn(
-                  "inline-flex min-h-9 items-center gap-2 rounded-sm border px-3 font-mono text-xs transition-colors",
+                  "inline-flex min-h-9 items-center gap-2 rounded-sm border px-3 font-mono text-xs transition-colors pointer-coarse:min-h-11",
                   i === state.step
                     ? "border-accent text-accent"
                     : "border-border text-muted hover:border-border-2 hover:text-text",
@@ -214,7 +214,7 @@ export function ProductDemo({
               humanStep.current = true;
               dispatch({ type: "prev" });
             }}
-            className="grid size-9 place-items-center rounded-sm border border-border font-mono text-sm text-text transition-colors hover:border-border-2 disabled:pointer-events-none disabled:opacity-40"
+            className="grid size-9 place-items-center rounded-sm border border-border font-mono text-sm text-text transition-colors hover:border-border-2 disabled:pointer-events-none disabled:opacity-40 pointer-coarse:size-11"
           >
             ←
           </button>
@@ -225,7 +225,7 @@ export function ProductDemo({
                 humanStep.current = true;
                 dispatch({ type: "replay" });
               }}
-              className="inline-flex h-9 items-center rounded-sm border border-accent px-3 font-mono text-xs text-accent transition-colors hover:bg-accent hover:text-bg"
+              className="inline-flex h-9 items-center rounded-sm border border-accent px-3 font-mono text-xs text-accent transition-colors hover:bg-accent hover:text-bg pointer-coarse:h-11"
             >
               Replay
             </button>
@@ -237,7 +237,7 @@ export function ProductDemo({
                 humanStep.current = true;
                 dispatch({ type: "next" });
               }}
-              className="grid size-9 place-items-center rounded-sm border border-border font-mono text-sm text-text transition-colors hover:border-border-2"
+              className="grid size-9 place-items-center rounded-sm border border-border font-mono text-sm text-text transition-colors hover:border-border-2 pointer-coarse:size-11"
             >
               →
             </button>

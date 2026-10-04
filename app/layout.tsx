@@ -8,6 +8,7 @@ import { ClickTracker } from "@/components/analytics/ClickTracker";
 import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
 import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { DelightHost } from "@/components/delight/DelightHost";
+import { ProofHost } from "@/components/ProofHost";
 import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { baseMetadata } from "@/lib/seo/metadata";
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ChatLauncher />
         <ShortcutsHost />
         <DelightHost />
+        <ProofHost />
         <ToastHost />
         <ClickTracker />
         <VercelAnalytics />
