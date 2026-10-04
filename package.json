@@ -22,6 +22,7 @@
     "snapshot:github": "tsx scripts/snapshot-github.mts",
     "media": "tsx scripts/capture-media.mts",
     "islands": "tsx scripts/measure-islands.mts",
+    "telegram:setup": "tsx scripts/telegram-setup.mts",
     "embeddings": "tsx scripts/build-embeddings.mts",
     "check:embeddings": "tsx scripts/check-embeddings.mts",
     "email:preview": "tsx scripts/email-preview.mts"

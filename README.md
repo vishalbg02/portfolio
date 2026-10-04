@@ -19,19 +19,21 @@ pnpm dev           # http://localhost:3000
 
 No environment variables are required. Every integration degrades gracefully when its variable is missing. Copy `.env.example` to `.env.local` to enable the optional features.
 
-| Variable                                             | Enables                                | Fallback when missing               |
-| ---------------------------------------------------- | -------------------------------------- | ----------------------------------- |
-| `GEMINI_API_KEY`                                     | GRID (AI) + JD matcher (first route)   | Next route, else "offline" answers  |
-| `GROQ_API_KEY`                                       | Backup AI route (gpt-oss-120b / 20b)   | Skipped                             |
-| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`             | Messages from GRID to Vishal's phone   | Email only, else a `mailto:` offer  |
-| `GITHUB_TOKEN`                                       | Live calendar, activity, year switcher | Committed snapshots in `generated/` |
-| `RESEND_API_KEY`, `CONTACT_TO_EMAIL`                 | Contact form delivery (see below)      | `mailto:` + copy-email              |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared rate limits / daily AI cap      | Per-instance in-memory limiter      |
-| `NEXT_PUBLIC_SITE_URL`                               | Canonical URLs, sitemap, OG            | `https://vishalbg.vercel.app`       |
-| `NEXT_PUBLIC_GSC_VERIFICATION`                       | Google Search Console meta tag         | Omitted                             |
-| `SHOW_RECOGNITION`                                   | Award pins on the calendar             | `true`                              |
-| `AI_DAILY_LIMIT`                                     | Global daily cap on AI calls           | `400`                               |
-| `SHOW_DRAFTS`                                        | Show Ship Log drafts in a build        | Hidden in production                |
+| Variable                                                                                            | Enables                                          | Fallback when missing               |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------- |
+| `GEMINI_API_KEY`                                                                                    | GRID (AI) + JD matcher (first route)             | Next route, else "offline" answers  |
+| `GROQ_API_KEY`                                                                                      | Backup AI route (gpt-oss-120b / 20b)             | Skipped                             |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`                                                            | Messages from GRID to Vishal's phone             | Email only, else a `mailto:` offer  |
+| `TELEGRAM_WEBHOOK_SECRET`, `LIVE_CHAT_SIGNING_SECRET`, `CRON_SECRET` (+ Telegram and Upstash above) | Live chat, signed thread links, the daily digest | "Leave a message" instead           |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`                                            | Optional bot check on a first live message       | Honeypot, limits and caps only      |
+| `GITHUB_TOKEN`                                                                                      | Live calendar, activity, year switcher           | Committed snapshots in `generated/` |
+| `RESEND_API_KEY`, `CONTACT_TO_EMAIL`                                                                | Contact form delivery (see below)                | `mailto:` + copy-email              |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                | Shared rate limits / daily AI cap                | Per-instance in-memory limiter      |
+| `NEXT_PUBLIC_SITE_URL`                                                                              | Canonical URLs, sitemap, OG                      | `https://vishalbg.vercel.app`       |
+| `NEXT_PUBLIC_GSC_VERIFICATION`                                                                      | Google Search Console meta tag                   | Omitted                             |
+| `SHOW_RECOGNITION`                                                                                  | Award pins on the calendar                       | `true`                              |
+| `AI_DAILY_LIMIT`                                                                                    | Global daily cap on AI calls                     | `400`                               |
+| `SHOW_DRAFTS`                                                                                       | Show Ship Log drafts in a build                  | Hidden in production                |
 
 ## Scripts
 
@@ -62,6 +64,7 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 
 - **GRID** (`/api/chat`): retrieval-augmented Q&A over the profile, case studies and architecture notes, with tools: it can show a project, a diagram, a walkthrough, skill evidence or a job match, and take you somewhere. Retrieval is BM25 plus committed Gemini embeddings, fused with reciprocal-rank fusion (`lib/rag`). Answers stream as NDJSON and cite sources as `[n]`.
 - **Actions** (Phase 3): GRID can draft a message for you to edit, prepare a message to Vishal that **you** review and send (it can never send one itself), show a booking link (set `contact.calLink` in `content/profile.ts` to a `https://cal.com/…` link), re-order his résumé for a role into a one-page PDF (it only moves what he already wrote), and answer interview questions in his own words from `content/interview.ts`. You can also choose the reply language (English, Kannada, Hindi) and use dictation and spoken replies where the browser supports them. Details and the safety gate: [docs/GRID-AGENT.md](docs/GRID-AGENT.md).
+- **Live chat** (Phase 4): visitors can message Vishal; it lands in his Telegram and he answers by replying there (`/online`, `/away`, `/hours`, `/stats`, `/block`, a daily digest). Replies reach the visitor in seconds on the page, or by email if they left. It runs only when its env vars are set (see [docs/LIVE-CHAT-SETUP.md](docs/LIVE-CHAT-SETUP.md)); until then the button says "Leave a message".
 - **Job-description matcher** (`/api/match`, on `/resume#match`): the model only extracts requirements. Grading is deterministic and literal against the profile (strong / partial / gap), and years of experience are computed from dates. The result can be copied as Markdown.
 - **Routes, in order:** Gemini, then Groq `openai/gpt-oss-120b`, then Groq `openai/gpt-oss-20b` (each Groq model has its own rate-limit bucket). A route that fails before showing anything (quota, outage, 8 s of silence) hands over to the next, and is skipped for a minute afterwards so later questions do not wait on it. Either key alone is enough.
 - **Without a key it still works.** No key, an exhausted daily budget, or every route failing before the first token all fall back to an offline answer built from the top passages. Questions outside the corpus get a canned refusal with no model call.

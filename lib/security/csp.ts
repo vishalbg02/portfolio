@@ -15,20 +15,26 @@ export type CspEnv = {
    * exist in production, so only preview builds allow it — production keeps the strict policy.
    */
   isPreview: boolean;
+  /**
+   * Cloudflare Turnstile (the live chat's bot check) is allowed only when its site key is set, and only its own origin:
+   * the script, its iframe and its verification call.
+   */
+  turnstile?: boolean;
 };
 
-export function buildCsp({ isDev, isPreview }: CspEnv): string {
+export function buildCsp({ isDev, isPreview, turnstile = false }: CspEnv): string {
   const live = isPreview ? " https://vercel.live" : "";
+  const cf = turnstile ? " https://challenges.cloudflare.com" : "";
   return [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://va.vercel-scripts.com${live}`,
+    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://va.vercel-scripts.com${cf}${live}`,
     `style-src 'self' 'unsafe-inline'${live}`,
     `img-src 'self' data: blob:${isPreview ? " https://vercel.live https://vercel.com" : ""}`,
     `font-src 'self'${isPreview ? " https://vercel.live https://assets.vercel.com" : ""}`,
-    `connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com${
+    `connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com${cf}${
       isPreview ? " https://vercel.live https://*.pusher.com wss://*.pusher.com" : ""
     }`,
-    `frame-src ${[...EMBED_ORIGINS, ...(isPreview ? ["https://vercel.live"] : [])].join(" ")}`,
+    `frame-src ${[...EMBED_ORIGINS, ...(turnstile ? ["https://challenges.cloudflare.com"] : []), ...(isPreview ? ["https://vercel.live"] : [])].join(" ")}`,
     "media-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

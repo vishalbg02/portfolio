@@ -35,7 +35,7 @@ export const shipped = {
   recruiter: true, // Phase 6
   terminal: true, // Phase 7
   tour: false, // V3 Phase 6 (guided tour)
-  liveChat: false, // V3 Phase 4
+  liveChat: true, // V3 Phase 4: the feature ships; it only runs where its env vars are set (see features.live)
 } as const;
 
 export const navLinks: ReadonlyArray<{ label: string; href: string }> = [

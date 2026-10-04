@@ -2,15 +2,17 @@ import { expect, type BrowserContext, type Page } from "@playwright/test";
 
 /** Waits for finite CSS animations/transitions (e.g. fade-ins) to finish so axe sees final colors. */
 export async function settleAnimations(page: Page) {
-  await page.evaluate(() =>
-    Promise.all(
+  await page.evaluate(() => {
+    const done = Promise.all(
       document
         .getAnimations()
         // paused ones (the sketches wait for hover/scroll) would never finish, so only wait for running ones
         .filter((a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity)
         .map((a) => a.finished.catch(() => undefined)),
-    ),
-  );
+    );
+    // An animation that never finishes (hidden or off-screen content) must not hang the test: wait a moment at most.
+    return Promise.race([done, new Promise((resolve) => setTimeout(resolve, 2000))]);
+  });
 }
 
 /** Navigates and waits until client islands (diagram, status badges) have hydrated. */

@@ -58,6 +58,15 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
     ],
   },
   {
+    id: "live-chat",
+    title: "Live chat",
+    body: [
+      `The “Message ${profile.name}” chat sends what you write, the name you give and the page you were on to his phone through Telegram, and keeps the conversation (your messages and his replies) on a Redis database so you can come back to it. It is deleted automatically after 30 days. Your name and message are never put in analytics.`,
+      "An email address is optional. If you leave one, his reply is emailed to you when you have left the site, with a one-click link to stop. It is used for nothing else, and it is deleted with the thread.",
+      "A salted hash of your IP address (never the address itself) is kept with the thread so that abuse can be blocked. Please do not share sensitive information in the chat.",
+    ],
+  },
+  {
     id: "abuse",
     title: "Abuse protection",
     body: [

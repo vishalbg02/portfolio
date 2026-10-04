@@ -34,6 +34,7 @@ export const TOOL_NAMES = [
   "book_call",
   "tailor_resume",
   "interview_answer",
+  "start_live_chat",
 ] as const;
 export type ToolName = (typeof TOOL_NAMES)[number];
 
@@ -128,7 +129,14 @@ export type UiPart =
       gaps: string[];
     }
   | { kind: "book"; calLink: string | null; mailto: string }
-  | { kind: "interview"; question: string; answer: string | null; matched: string | null; mailto: string };
+  | { kind: "interview"; question: string; answer: string | null; matched: string | null; mailto: string }
+  | {
+      /** Hand the conversation to Vishal himself: the live chat, with a summary to start from. */
+      kind: "live";
+      summary: string;
+      state: "online" | "away" | "off";
+      time: string;
+    };
 
 export const DRAFT_KINDS = ["interview_invite", "intro", "project_inquiry", "hackathon_team"] as const;
 export type DraftKind = (typeof DRAFT_KINDS)[number];
@@ -147,6 +155,7 @@ export const PART_KINDS = [
   "resume",
   "book",
   "interview",
+  "live",
 ] as const;
 
 /** The client trusts parts only from its own origin, but still refuses anything of an unknown shape. */

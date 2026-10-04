@@ -93,6 +93,23 @@ test.describe("LET'S BUILD banner", () => {
   }
 });
 
+test.describe("contact links", () => {
+  for (const width of WIDTHS) {
+    test(`@${width}px: every link label fits inside its button`, async ({ page }) => {
+      await mockStatus(page);
+      await page.setViewportSize({ width, height: 900 });
+      await gotoHydrated(page, "/");
+      const links = page.locator("#contact ul a");
+      await links.first().scrollIntoViewIfNeeded();
+      const m = await links.evaluateAll((as) =>
+        as.map((a) => ({ text: a.textContent, overflow: a.scrollWidth - a.clientWidth })),
+      );
+      expect(m.length).toBeGreaterThanOrEqual(4);
+      for (const l of m) expect(l.overflow, `${l.text} overflows its button`).toBeLessThanOrEqual(0);
+    });
+  }
+});
+
 test.describe("experience", () => {
   test("quiet: graph shapes only between roles, no merge/branch text rows", async ({ page }) => {
     await mockStatus(page);
@@ -118,13 +135,14 @@ test.describe("/privacy", () => {
       "Contact form",
       "GRID (AI assistant)",
       "Messages to Vishal",
+      "Live chat",
       "Abuse protection",
     ]) {
       await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
     }
-    // no feature that is not live yet may be described (messages from GRID go through Telegram since Phase 3)
+    // no feature that is not live yet may be described (messages from GRID go through Telegram since Phase 3, and the live chat is live since Phase 4)
     const text = (await page.locator("main").innerText()).toLowerCase();
-    for (const word of ["live chat", "company link", "turnstile"]) expect(text).not.toContain(word);
+    for (const word of ["company link", "turnstile"]) expect(text).not.toContain(word);
     const xml = await (await request.get("/sitemap.xml")).text();
     expect(xml).toContain("/privacy</loc>");
   });

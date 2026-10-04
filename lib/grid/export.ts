@@ -27,6 +27,8 @@ const describe = (p: UiPart): string => {
       return `[card] Tailored résumé${p.role ? ` for ${p.role}` : ""}`;
     case "book":
       return p.calLink ? "[card] Book a call" : "[card] Book a call (not set up yet)";
+    case "live":
+      return p.state === "off" ? "[card] Leave a message for Vishal" : `[card] Message Vishal (${p.state})`;
     case "interview":
       return p.answer
         ? `[card] In his own words: ${p.question}`

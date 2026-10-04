@@ -43,7 +43,7 @@ describe("the gate: GRID can prepare a message, never send one", () => {
       .split("\n")
       .filter((l) => /^\s*(import\b|\} from )/.test(l))
       .join("\n");
-    expect(imports).not.toMatch(/notify|telegram|resend|email|rate-limit/i);
+    expect(imports).not.toMatch(/notify|telegram|resend|email|rate-limit|live\/(service|webhook|store)/i);
     expect(src).not.toMatch(/\bfetch\(/);
   });
 

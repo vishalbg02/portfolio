@@ -12,6 +12,7 @@ import type { ToolName, UiPart } from "../protocol";
 import {
   bookPart,
   confirmPart,
+  livePart,
   contactCard,
   demoPart,
   diagramPart,
@@ -20,6 +21,7 @@ import {
   skillEvidence,
   statsPart,
 } from "./cards";
+import { currentPresence } from "@/lib/live/read";
 import { draftPart } from "./drafts";
 import { interviewCard } from "./interview";
 import { cleanRole, requirementsFor, resumeCard } from "./resume";
@@ -254,6 +256,32 @@ export function buildTools(ctx: ToolContext) {
             part.kind === "resume"
               ? `Tailored résumé ready (re-ordered only). Gaps, not hidden: ${part.gaps.join(", ") || "none"}.`
               : "Tailored résumé ready.",
+        });
+      },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    start_live_chat: tool({
+      description:
+        "Hand the conversation to Vishal himself: show whether he is online and a button that opens the live chat, starting from a short summary of what the visitor wanted. Use when the visitor wants to talk to him directly, or when you could not answer and a person should.",
+      inputSchema: z.object({
+        summary: z
+          .string()
+          .trim()
+          .max(500)
+          .optional()
+          .describe("One or two sentences of what the visitor asked, in their words; no invented details"),
+      }),
+      execute: async ({ summary }): Promise<ToolResult> => {
+        const presence = await currentPresence();
+        return result({
+          part: livePart(presence, summary ?? ""),
+          summary:
+            presence.configured && presence.state === "online"
+              ? "Showed that Vishal is online and a button to chat with him. Do not repeat the card."
+              : presence.configured
+                ? "Showed that Vishal is away; the visitor can leave a message and he will reply by email."
+                : "Live chat is not switched on; showed an offer to leave a message instead.",
         });
       },
       toModelOutput: ({ output }) => modelText(output),

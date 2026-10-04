@@ -8,6 +8,7 @@ import type { Source, ToolName, UiPart } from "../protocol";
 import {
   bookPart,
   confirmPart,
+  livePart,
   contactCard,
   demoPart,
   diagramPart,
@@ -21,6 +22,7 @@ import {
 import { looksLikeJobDescription, norm } from "./jd";
 import { draftPart, type DraftContext } from "./drafts";
 import { findInterviewNote, interviewCard } from "./interview";
+import { currentPresence } from "@/lib/live/read";
 import { cleanRole, requirementsFor, resumeCard } from "./resume";
 import { SourceRegistry } from "./sources";
 
@@ -148,6 +150,8 @@ const DRAFT =
   /\b(?:draft|write|compose|prepare|help me (?:write|draft))\b.{0,40}\b(?:invite|invitation|intro|introduction|message|email|note|inquiry|enquiry|hackathon)\b|\bsend (?:him|vishal) an? (?:invite|invitation)\b/;
 const MESSAGE =
   /\b(?:send|leave|drop|pass|forward)\b.{0,25}\b(?:message|note|msg|question)\b.{0,25}\b(?:vishal|him)\b|\b(?:message|text|dm|ping)\b (?:vishal|him)\b|\bsend (?:vishal|him) (?:a |an |this |the )?(?:message|note|question)\b|\bi (?:want|would like|d like|wanna) to (?:message|write to|reach out to|talk to|speak to|chat with) (?:vishal|him)\b|\btell (?:vishal|him)\b/;
+const LIVE_CHAT =
+  /\b(?:live chat|chat live|chat with (?:him|vishal)|talk (?:to|with) (?:him|vishal) (?:live|now|directly)|speak (?:to|with) (?:him|vishal)|is (?:he|vishal) (?:online|around|available now))\b/;
 const TAILOR =
   /\b(?:tailor|customi[sz]e|adapt|re-?order|re-?arrange|optimi[sz]e|personali[sz]e)\b.{0,40}\b(?:resume|cv)\b|\b(?:resume|cv)\b.{0,30}\btailored\b/;
 
@@ -194,6 +198,21 @@ async function routeAction(text: string, q: string, mode?: GridMode): Promise<Ro
         sources: [],
       };
     }
+  }
+
+  if (LIVE_CHAT.test(lead)) {
+    const presence = await currentPresence();
+    const part = livePart(presence);
+    return {
+      parts: [{ tool: "start_live_chat", part }],
+      text:
+        part.kind === "live" && part.state === "online"
+          ? "He's online right now. You can message him from here."
+          : part.kind === "live" && part.state === "away"
+            ? "He's away at the moment, but you can leave a message and he'll reply by email."
+            : "Live chat isn't switched on right now, but you can leave a message and he'll reply by email.",
+      sources: [],
+    };
   }
 
   if (BOOK.test(lead)) {

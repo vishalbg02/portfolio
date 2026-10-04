@@ -36,6 +36,7 @@ The model never writes a card. A tool returns `{ part, summary }`: `part` is a c
 | `book_call`              | book      | the Cal.com button when `calLink` is set, else an offer to leave a message |
 | `tailor_resume`          | resume    | re-orders his résumé for a role (see below) with a PDF download            |
 | `interview_answer`       | interview | his own written answer from `content/interview.ts`, or "not written yet"   |
+| `start_live_chat`        | live      | whether he is online, and a button that opens the live chat from a summary |
 
 To add a tool: add its name to `TOOL_NAMES`, a card kind to `UiPart` / `PART_KINDS`, build the card in `cards.ts` (or its
 own module), register it in `buildTools`, draw it in `components/grid/cards/PartView.tsx`, describe it in

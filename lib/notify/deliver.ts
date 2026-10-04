@@ -1,17 +1,33 @@
 import "server-only";
 import { features } from "@/lib/env";
 import { sendOwnerEmail } from "@/lib/email/send";
+import { startConversation } from "@/lib/live/service";
 import { ownerPing, sendTelegram, type OwnerPing } from "./telegram";
 
 export type Channel = "telegram" | "email";
 export type Delivery = { attempted: Channel[]; delivered: Channel[] };
 
 type Deps = {
-  telegram: (text: string) => Promise<boolean>;
+  telegram: (m: OwnerPing) => Promise<boolean>;
   email: (m: OwnerPing) => Promise<void>;
 };
 const real: Deps = {
-  telegram: (text) => sendTelegram(text),
+  // With live chat configured, a confirmed GRID message becomes a conversation, so Vishal's Telegram reply reaches the
+  // visitor by email if they have left. Otherwise it is a one-off ping.
+  telegram: async (m) =>
+    features.live
+      ? (
+          await startConversation({
+            name: m.name,
+            email: m.email,
+            org: null,
+            message: m.message,
+            page: m.page ?? "/",
+            ipHash: m.ipHash ?? "grid",
+            via: "grid",
+          })
+        ).ok
+      : sendTelegram(ownerPing(m)),
   email: (m) =>
     sendOwnerEmail({ name: m.name, email: m.email, message: m.message }, "GRID, the chat on the site"),
 };
@@ -28,7 +44,7 @@ export async function deliverToVishal(m: OwnerPing, deps: Partial<Deps> = {}): P
   ];
   const jobs = attempted.map(async (c): Promise<Channel | null> => {
     try {
-      if (c === "telegram") return (await d.telegram(ownerPing(m))) ? "telegram" : null;
+      if (c === "telegram") return (await d.telegram(m)) ? "telegram" : null;
       await d.email(m);
       return "email";
     } catch (err) {

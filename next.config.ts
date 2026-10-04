@@ -4,7 +4,11 @@ import { buildCsp } from "./lib/security/csp";
 
 const isDev = process.env.NODE_ENV === "development";
 
-const csp = buildCsp({ isDev, isPreview: process.env.VERCEL_ENV === "preview" });
+const csp = buildCsp({
+  isDev,
+  isPreview: process.env.VERCEL_ENV === "preview",
+  turnstile: Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY),
+});
 
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },

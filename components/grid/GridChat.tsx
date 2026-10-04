@@ -14,6 +14,7 @@ import { AnswerText } from "./AnswerText";
 import { PartView } from "./cards/PartView";
 import { GridFace, type FaceState } from "./GridFace";
 import { SourcesRow } from "./SourcesRow";
+import { usePresence } from "@/lib/live/use-presence";
 import { useVoice } from "./voice/useVoice";
 
 const MODE_NOTE: Partial<Record<ChatMode, string>> = {
@@ -63,6 +64,7 @@ export function GridChat({
   autoFocus = false,
   controls,
   onJump,
+  onLive,
 }: {
   variant: "inline" | "sheet";
   autoFocus?: boolean;
@@ -70,8 +72,11 @@ export function GridChat({
   controls?: ReactNode;
   /** Called when a cited source is used, so a modal sheet can close and let the page scroll. */
   onJump?: () => void;
+  /** Opens "Message Vishal" (the live chat) in the same panel. */
+  onLive?: () => void;
 }) {
   const { messages, mode, lang, busy, ai } = useGridStore();
+  const presence = usePresence();
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
   const log = useRef<HTMLDivElement>(null);
@@ -215,6 +220,25 @@ export function GridChat({
         >
           {BRIEF_PROMPT}
         </button>
+        {onLive ? (
+          <button
+            type="button"
+            onClick={onLive}
+            className="inline-flex min-h-8 shrink-0 items-center gap-2 rounded-pill border border-border-2 px-3 font-mono text-xs whitespace-nowrap text-text transition-colors hover:border-accent hover:text-accent pointer-coarse:min-h-11"
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-2 rounded-pill",
+                presence?.configured && presence.state === "online" ? "bg-accent" : "border border-muted",
+              )}
+            />
+            Message Vishal
+            <span className="sr-only">
+              {presence?.configured ? `: ${presence.state === "online" ? "online" : "away"}` : ""}
+            </span>
+          </button>
+        ) : null}
         {availableModes().map((m) => (
           <button
             key={m}

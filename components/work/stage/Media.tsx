@@ -4,6 +4,13 @@ import { clipSources, stillSources } from "@/lib/media/paths";
 import { cn } from "@/lib/utils/cn";
 
 /**
+ * How wide a Work picture is shown: about 58 % of the page on a desktop (never more than 760 px), nearly the full width
+ * of a card (at most 520 px) on a phone. Telling the browser lets it pick the 1× file on a phone instead of the
+ * 2× one, which is twice the bytes for pixels the screen can't show.
+ */
+export const STAGE_SIZES = "(min-width: 1024px) min(58vw, 760px), min(92vw, 520px)";
+
+/**
  * A pre-encoded capture as <picture> (AVIF, then WebP; 1× and 2×) with its real width and height, so the
  * browser reserves the space. Lazy unless it is the first thing on screen.
  */
@@ -11,7 +18,7 @@ export function MediaStill({
   asset,
   priority = false,
   className,
-  sizes,
+  sizes = STAGE_SIZES,
 }: {
   asset: MediaStill;
   priority?: boolean;
@@ -21,8 +28,8 @@ export function MediaStill({
   const s = stillSources(asset);
   return (
     <picture>
-      <source type="image/avif" srcSet={s.avifSet} sizes={sizes} />
-      <source type="image/webp" srcSet={s.webpSet} sizes={sizes} />
+      <source type="image/avif" srcSet={s.avifSetW} sizes={sizes} />
+      <source type="image/webp" srcSet={s.webpSetW} sizes={sizes} />
       {/* pre-encoded AVIF/WebP at 1× and 2×: a re-encode through next/image would only cost quality */}
       <img
         src={s.fallback}
@@ -90,8 +97,8 @@ export function MediaPoster({
   const s = clipSources(asset).poster;
   return (
     <picture>
-      <source type="image/avif" srcSet={s.avifSet} />
-      <source type="image/webp" srcSet={s.webpSet} />
+      <source type="image/avif" srcSet={s.avifSetW} sizes={STAGE_SIZES} />
+      <source type="image/webp" srcSet={s.webpSetW} sizes={STAGE_SIZES} />
       {/* pre-encoded poster at 1× and 2× */}
       <img
         src={s.fallback}

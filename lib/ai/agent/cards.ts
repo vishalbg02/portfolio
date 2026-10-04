@@ -225,6 +225,17 @@ export const bookPart = (): UiPart => ({
   mailto: profile.contact.email,
 });
 
+/** "Message Vishal": where he is right now, and a button that opens the live chat with a summary to start from. */
+export const livePart = (
+  presence: { state: "online" | "away"; configured: boolean; time: string },
+  summary = "",
+): UiPart => ({
+  kind: "live",
+  summary: summary.slice(0, 1000),
+  state: presence.configured ? presence.state : "off",
+  time: presence.time,
+});
+
 /** A message for the visitor to review. The fields are only a proposal: nothing is sent until they confirm. */
 export const confirmPart = (m: { name?: string; email?: string; message?: string }): UiPart => ({
   kind: "confirm",

@@ -50,7 +50,13 @@ export async function POST(req: Request) {
   // The same request id is delivered once: a double click or a retry gets the same "ok" and nothing more is sent.
   if (!(await claimOnce(`gridmsg:${m.requestId}`, 600))) return json({ ok: true, duplicate: true });
 
-  const delivery = await deliverToVishal({ name: m.name, email: m.email, message: m.message, page: m.page });
+  const delivery = await deliverToVishal({
+    name: m.name,
+    email: m.email,
+    message: m.message,
+    page: m.page,
+    ipHash: key,
+  });
   if (delivery.attempted.length === 0) {
     await releaseClaim(`gridmsg:${m.requestId}`);
     return json({ error: "not_configured", fallback: "mailto" }, 503);

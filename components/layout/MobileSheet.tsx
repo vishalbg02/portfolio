@@ -1,6 +1,6 @@
 "use client";
 
-import { openGrid } from "@/lib/grid/events";
+import { openGrid, openLive } from "@/lib/grid/events";
 import { RecruiterToggle } from "./RecruiterToggle";
 import Link from "next/link";
 import { Dialog } from "radix-ui";
@@ -55,6 +55,19 @@ export default function MobileSheet({
                 ?
               </span>
               Ask GRID
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onOpenChange(false);
+                window.setTimeout(() => openLive(), 150);
+              }}
+              className="flex items-baseline gap-4 rounded-sm px-2 py-3 text-left text-2xl font-semibold text-text hover:bg-surface"
+            >
+              <span aria-hidden="true" className="font-mono text-xs text-accent">
+                @
+              </span>
+              Message Vishal
             </button>
             <RecruiterToggle
               onNavigate={() => onOpenChange(false)}
