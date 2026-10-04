@@ -191,34 +191,44 @@ test.describe("pinned stage (desktop 1440)", () => {
     await expect.poll(() => requested.length).toBeGreaterThan(0);
   });
 
-  test("the stage fits the viewport: copy and frame are inside it, nothing scrolls sideways", async ({
-    page,
-  }) => {
-    await mockStatus(page);
-    await gotoReady(page, "/");
-    for (const [i, slug] of SLUGS.entries()) {
-      await toBeat(page, i, 0);
-      await expect(activeScene(page)).toHaveAttribute("data-project", slug, { timeout: 8000 });
-      await dissolveGone(page);
-      const m = await page.evaluate(() => {
-        const stick = document.querySelector(".work-stick")!.getBoundingClientRect();
-        const scene = document.querySelector(".scene[data-active]")!;
-        const bad = [...scene.querySelectorAll<HTMLElement>(".scene-copy > *, .frame-wrap, .beat-list")]
-          .map((el) => ({ cls: el.className.toString().slice(0, 30), r: el.getBoundingClientRect() }))
-          .filter(
-            ({ r }) =>
-              r.width > 0 &&
-              (r.bottom > stick.bottom + 1 || r.top < stick.top - 1 || r.right > window.innerWidth),
-          );
-        return {
-          overflowX: document.documentElement.scrollWidth - window.innerWidth,
-          bad: bad.map((b) => b.cls),
-        };
-      });
-      expect(m.overflowX, slug).toBeLessThanOrEqual(0);
-      expect(m.bad, `${slug}: clipped by the stage`).toEqual([]);
-    }
-  });
+  for (const [w, h] of [
+    [1280, 720],
+    [1366, 768],
+    [1440, 900],
+    [1920, 1080],
+  ] as const) {
+    test(`@${w}×${h}: the stage fits the viewport: copy and frame are inside it, nothing scrolls sideways`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await mockStatus(page);
+      await gotoReady(page, "/");
+      for (const [i, slug] of SLUGS.entries()) {
+        await toBeat(page, i, 0);
+        await expect(activeScene(page)).toHaveAttribute("data-project", slug, { timeout: 8000 });
+        await dissolveGone(page);
+        const m = await page.evaluate(() => {
+          const stick = document.querySelector(".work-stick")!.getBoundingClientRect();
+          const scene = document.querySelector(".scene[data-active]")!;
+          const bad = [
+            ...scene.querySelectorAll<HTMLElement>(".scene-copy > *, .frame-wrap, .beat-list, .beat-note"),
+          ]
+            .map((el) => ({ cls: el.className.toString().slice(0, 30), r: el.getBoundingClientRect() }))
+            .filter(
+              ({ r }) =>
+                r.width > 0 &&
+                (r.bottom > stick.bottom + 1 || r.top < stick.top - 1 || r.right > window.innerWidth),
+            );
+          return {
+            overflowX: document.documentElement.scrollWidth - window.innerWidth,
+            bad: bad.map((b) => b.cls),
+          };
+        });
+        expect(m.overflowX, slug).toBeLessThanOrEqual(0);
+        expect(m.bad, `${slug}: clipped by the stage`).toEqual([]);
+      }
+    });
+  }
 
   test("every scene has no serious axe violations", async ({ page }) => {
     await mockStatus(page);
