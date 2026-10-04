@@ -64,7 +64,7 @@ export function Hero() {
             <Magnetic>
               <span className="m-1.5 inline-block sm:m-2">
                 {/* A plain link: without JS it goes to the Ask section, with JS GridHost opens the chat. */}
-                <Link href="/#ask" data-grid-open="" className={buttonClass("outline")}>
+                <Link href="/#ask" prefetch={false} data-grid-open="" className={buttonClass("outline")}>
                   Ask GRID
                 </Link>
               </span>
@@ -96,6 +96,7 @@ export function Hero() {
           <p className="mt-2 text-sm">
             <Link
               href="/?tour=1"
+              prefetch={false}
               data-tour-open=""
               className="tap-slop inline-flex items-center gap-1.5 rounded-sm font-mono text-xs text-link underline-offset-4 hover:underline"
             >

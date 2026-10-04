@@ -35,6 +35,7 @@ export function SectionHeader({
         {ask ? (
           <Link
             href="/#ask"
+            prefetch={false}
             data-grid-open=""
             data-grid-question={ask}
             data-cursor="ask"

@@ -21,7 +21,11 @@ async function latestActivity() {
 
 export function Wordmark() {
   return (
-    <Link href="/" className="group tap-slop inline-flex items-center gap-1 font-mono text-sm text-text">
+    <Link
+      href="/"
+      prefetch={false}
+      className="group tap-slop inline-flex items-center gap-1 font-mono text-sm text-text"
+    >
       <span className="text-muted transition-colors group-hover:text-text">~/</span>
       <span>vishalbg</span>
       <span aria-hidden="true" className="ml-0.5 inline-block h-4 w-2 animate-blink bg-accent" />
@@ -45,6 +49,7 @@ export async function Nav() {
             <Link
               key={link.href}
               href={link.href}
+              prefetch={link.href.startsWith("/#") ? false : undefined}
               className="rounded-sm px-3 py-1.5 text-sm text-muted transition-colors hover:bg-surface hover:text-text"
             >
               {link.label}
