@@ -11,7 +11,7 @@ import { ACT_EVENT } from "@/lib/grid/store";
 import type { ContactAction, UiPart } from "@/lib/ai/protocol";
 import type { ArchitectureGraph } from "@/components/diagram/types";
 import type { MatchResult } from "@/lib/match/types";
-import { BookCard, InterviewCard, LiveCard } from "./ActionCards";
+import { BookCard, InterviewCard, LiveCard, TourCard } from "./ActionCards";
 import { ConfirmCard } from "./ConfirmCard";
 import { DraftCard } from "./DraftCard";
 import { ProjectCardBody } from "./ProjectCardBody";
@@ -311,6 +311,9 @@ export function PartView({
 
     case "live":
       return <LiveCard part={part} />;
+
+    case "tour":
+      return <TourCard part={part} />;
   }
 }
 

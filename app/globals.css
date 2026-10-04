@@ -247,3 +247,9 @@
 [data-stack-hit="true"] {
   border-color: var(--accent) !important;
 }
+
+/* A personal link outlines the projects most relevant to its role (flat, removed when the banner is dismissed). */
+[data-role-hit] {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}

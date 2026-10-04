@@ -136,13 +136,15 @@ test.describe("/privacy", () => {
       "GRID (AI assistant)",
       "Messages to Vishal",
       "Live chat",
+      "Personal links",
+      "Visitor wall",
       "Abuse protection",
     ]) {
       await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
     }
     // no feature that is not live yet may be described (messages from GRID go through Telegram since Phase 3, and the live chat is live since Phase 4)
     const text = (await page.locator("main").innerText()).toLowerCase();
-    for (const word of ["company link", "turnstile"]) expect(text).not.toContain(word);
+    for (const word of ["turnstile"]) expect(text).not.toContain(word);
     const xml = await (await request.get("/sitemap.xml")).text();
     expect(xml).toContain("/privacy</loc>");
   });

@@ -138,7 +138,7 @@ test.describe("the rest of the intro", () => {
   test("the chat controls: one mode group and a reply-language list", async ({ page }) => {
     const { section } = await openAsk(page);
     const modes = section.getByRole("group", { name: "Mode" });
-    await expect(modes.getByRole("button")).toHaveText(["Ask anything", "Recruiter", "Engineer"]);
+    await expect(modes.getByRole("button")).toHaveText(["Ask anything", "Recruiter", "Engineer", "Tour"]);
     await expect(modes.getByRole("button", { name: "Ask anything" })).toHaveAttribute("aria-pressed", "true");
     const lang = section.getByRole("combobox", { name: "Reply language" });
     await expect(lang).toHaveValue("auto");

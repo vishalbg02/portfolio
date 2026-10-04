@@ -50,6 +50,17 @@ export type Conv = {
   via: "live" | "grid";
 };
 
+/** A personal link for one company (made with /link in Telegram): ?c=<id>.<signature> on the home page. */
+export const LINK = {
+  ttlSec: 90 * 86_400,
+  company: { max: 40 },
+  role: { max: 60 },
+  /** The first open of a link pings him at most this often, and a résumé download or a chat start at most hourly. */
+  openPingSec: 6 * 3600,
+  eventPingSec: 3600,
+} as const;
+export type CompanyLink = { id: string; company: string; role: string | null; createdAt: number };
+
 export type PresenceMode = "auto" | "online" | "away";
 export type Presence = {
   mode: PresenceMode;

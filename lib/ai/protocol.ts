@@ -35,6 +35,7 @@ export const TOOL_NAMES = [
   "tailor_resume",
   "interview_answer",
   "start_live_chat",
+  "start_tour",
 ] as const;
 export type ToolName = (typeof TOOL_NAMES)[number];
 
@@ -136,6 +137,11 @@ export type UiPart =
       summary: string;
       state: "online" | "away" | "off";
       time: string;
+    }
+  | {
+      /** The 60-second guided tour of the home page: a button that starts it. */
+      kind: "tour";
+      stops: number;
     };
 
 export const DRAFT_KINDS = ["interview_invite", "intro", "project_inquiry", "hackathon_team"] as const;
@@ -156,6 +162,7 @@ export const PART_KINDS = [
   "book",
   "interview",
   "live",
+  "tour",
 ] as const;
 
 /** The client trusts parts only from its own origin, but still refuses anything of an unknown shape. */

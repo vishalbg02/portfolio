@@ -134,7 +134,8 @@ html[data-grid="ready"] .needs-grid {
 
 /* ── Omnibar ────────────────────────────────────────────────────────────────────────────────────── */
 /* the chat panel is open: it has its own input, so the bar steps aside */
-html[data-grid-panel="open"] .omnibar {
+html[data-grid-panel="open"] .omnibar,
+html[data-tour-active] .omnibar {
   display: none;
 }
 @media (prefers-reduced-motion: no-preference) {

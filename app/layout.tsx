@@ -12,6 +12,8 @@ import { RouteWipe } from "@/components/delight/RouteWipe";
 import { GridHost } from "@/components/grid/GridHost";
 import { Omnibar } from "@/components/grid/Omnibar";
 import { ProofHost } from "@/components/ProofHost";
+import { CompanyLinkHost } from "@/components/links/CompanyLinkHost";
+import { TourHost } from "@/components/tour/TourHost";
 import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { baseMetadata } from "@/lib/seo/metadata";
@@ -53,6 +55,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <DelightHost />
         <RouteWipe />
         <CursorHost />
+        <TourHost />
+        <CompanyLinkHost />
         <ProofHost />
         <ToastHost />
         <ClickTracker />

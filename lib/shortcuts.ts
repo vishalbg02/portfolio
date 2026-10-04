@@ -18,6 +18,13 @@ export const shortcutList: ShortcutHelp[] = [
   { keys: ["/"], label: "Ask GRID or run a command" },
   { keys: [">"], label: "In the Omnibar: commands only" },
   { keys: ["?"], label: "Show keyboard shortcuts" },
+  { keys: ["j"], label: "Next section" },
+  { keys: ["k"], label: "Previous section" },
+  {
+    keys: ["g", "w"],
+    label: "Go to Work (g e Experience, g a Activity, g s Stack, g g GRID, g c Contact, g h top)",
+  },
+  ...(shipped.tour ? [{ keys: ["t"], label: "Take the 60-second tour" }] : []),
   ...(shipped.terminal ? [{ keys: ["~"], label: "Open terminal" }] : []),
   { keys: ["Esc"], label: "Close any overlay" },
 ];

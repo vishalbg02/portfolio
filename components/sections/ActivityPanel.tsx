@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { unlock } from "@/lib/achievements";
 import { track } from "@/lib/analytics";
 import type { Milestone } from "@/lib/content/milestones";
 import type { RoleSpan } from "@/lib/content/roles";
@@ -243,7 +244,10 @@ export function ActivityPanel({
               type="button"
               aria-pressed={mode === m}
               onClick={() => {
-                if (m === "3d" && mode !== "3d") track("city_3d_on");
+                if (m === "3d" && mode !== "3d") {
+                  track("city_3d_on");
+                  unlock("city");
+                }
                 setMode(m);
               }}
               className={cn(

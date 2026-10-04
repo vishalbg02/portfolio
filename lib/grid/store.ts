@@ -13,6 +13,7 @@ import {
   type ToolName,
   type UiPart,
 } from "@/lib/ai/protocol";
+import { unlock } from "@/lib/achievements";
 import { track as realTrack } from "@/lib/analytics";
 import { ACT_EVENT } from "@/lib/grid/events";
 
@@ -181,6 +182,7 @@ export function createGridStore(deps: Partial<Deps> = {}) {
     const text = raw.trim();
     if (!text || state.busy || text.length > inputLimit(text)) return;
     hydrate();
+    unlock("grid");
     const userId = nextId++;
     const botId = nextId++;
     const prior = history();

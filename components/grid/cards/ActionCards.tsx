@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { UiPart } from "@/lib/ai/protocol";
 import { openLive } from "@/lib/grid/events";
+import { startTour } from "@/lib/tour/events";
 import { ConfirmCard } from "./ConfirmCard";
 import { card, primary, quiet } from "./styles";
 
@@ -101,6 +102,19 @@ export function InterviewCard({
 }
 
 /** Hand-off to the live chat: where he is right now, and a button that opens the chat starting from GRID's summary. */
+export function TourCard({ part }: { part: Extract<UiPart, { kind: "tour" }> }) {
+  return (
+    <section data-grid-card="tour" aria-label="The 60-second tour" className={`${card} p-3.5`}>
+      <p className="text-sm text-text">
+        The 60-second tour: {part.stops} stops down this page, with a line about each. Esc stops it.
+      </p>
+      <button type="button" className={`${primary} mt-3`} onClick={() => startTour()}>
+        Start the tour
+      </button>
+    </section>
+  );
+}
+
 export function LiveCard({ part }: { part: Extract<UiPart, { kind: "live" }> }) {
   const text =
     part.state === "online"

@@ -34,7 +34,7 @@ export const shipped = {
   resume: true, // Phase 4
   recruiter: true, // Phase 6
   terminal: true, // Phase 7
-  tour: false, // V3 Phase 6 (guided tour)
+  tour: true, // V3 Phase 6: the 60-second guided tour
   liveChat: true, // V3 Phase 4: the feature ships; it only runs where its env vars are set (see features.live)
 } as const;
 

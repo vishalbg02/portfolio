@@ -49,14 +49,16 @@ answer: your reply appears in the visitor's chat within a few seconds.
 
 ## What you can do from Telegram
 
-| Command         | What it does                                                                                       |
-| --------------- | -------------------------------------------------------------------------------------------------- |
-| `/online`       | You're reachable. After 20 minutes without any message from you, you're shown as away again.       |
-| `/away`         | You're away until you send `/online`. Visitors are asked to leave a message and an email.          |
-| `/hours 10-22`  | Online whenever it is between those hours in Bengaluru, whatever else you do. `/hours off` clears. |
-| `/stats`        | Today's counts (chats, messages, replies, reply emails) and who is waiting for you.                |
-| `/block a1b2c3` | Blocks that visitor (the id is in the 💬 line) and their address.                                  |
-| `/help`         | The list. (`/link` is reserved for personal company links in a later update.)                      |
+| Command             | What it does                                                                                                                                                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/online`           | You're reachable. After 20 minutes without any message from you, you're shown as away again.                                                                                                                                                                                                 |
+| `/away`             | You're away until you send `/online`. Visitors are asked to leave a message and an email.                                                                                                                                                                                                    |
+| `/hours 10-22`      | Online whenever it is between those hours in Bengaluru, whatever else you do. `/hours off` clears.                                                                                                                                                                                           |
+| `/stats`            | Today's counts (chats, messages, replies, reply emails) and who is waiting for you.                                                                                                                                                                                                          |
+| `/block a1b2c3`     | Blocks that visitor (the id is in the 💬 line) and their address.                                                                                                                                                                                                                            |
+| `/help`             | The list.                                                                                                                                                                                                                                                                                    |
+| `/link Infosys SDE` | A personal link for a company: `https://vishalbg.vercel.app/?c=<code>`, good for 90 days. For a longer name use `\|`: `/link Tata Consultancy \| Java Developer`. You are told here when it is opened (once per 6 hours), when the résumé is downloaded from it and when GRID starts a chat. |
+| `/links`            | Your last ten links and how many times each was opened.                                                                                                                                                                                                                                      |
 
 A **daily digest** arrives at about 21:00 IST with the same numbers (Vercel's cron runs once a day, anywhere within an
 hour; it needs `CRON_SECRET`, which Vercel then sends automatically).

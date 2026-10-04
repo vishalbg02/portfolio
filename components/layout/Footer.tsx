@@ -2,6 +2,7 @@ import { profile } from "@/content/profile";
 import { site } from "@/lib/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { LighthouseStrip } from "./LighthouseStrip";
+import { FooterExtras } from "./FooterExtras";
 import { LocalTime } from "./LocalTime";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -83,6 +84,8 @@ export function Footer() {
             Bengaluru · <LocalTime />
           </p>
         </div>
+
+        <FooterExtras />
 
         <LighthouseStrip />
 

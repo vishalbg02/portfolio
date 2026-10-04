@@ -30,6 +30,7 @@ export const TOOL_WORKING: Record<ToolName, string> = {
   tailor_resume: "Re-ordering the résumé",
   interview_answer: "Finding his answer",
   start_live_chat: "Checking if he is online",
+  start_tour: "Getting the tour ready",
 };
 
 /** The same, once the tool has finished. */
@@ -49,6 +50,7 @@ export const TOOL_DONE: Record<ToolName, string> = {
   tailor_resume: "Re-ordered the résumé",
   interview_answer: "Found his answer",
   start_live_chat: "Checked if he is online",
+  start_tour: "Got the tour ready",
 };
 
 /** The timeline of one scene in milliseconds from its start. Pure, so the reel and its tests share it. */

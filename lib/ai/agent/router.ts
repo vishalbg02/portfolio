@@ -2,6 +2,7 @@ import { profile } from "@/content/profile";
 import { resumeConfig } from "@/content/resume";
 import type { ProjectSlug } from "@/lib/content/profile-schema";
 import { runMatch } from "@/lib/match/run";
+import { shipped } from "@/lib/site";
 import { getStatuses } from "@/lib/status/cache";
 import { BRIEF_PROMPT, type GridMode } from "../modes";
 import type { Source, ToolName, UiPart } from "../protocol";
@@ -17,6 +18,7 @@ import {
   projectCard,
   skillEvidence,
   statsPart,
+  tourPart,
   type ContactKind,
 } from "./cards";
 import { looksLikeJobDescription, norm } from "./jd";
@@ -152,6 +154,8 @@ const MESSAGE =
   /\b(?:send|leave|drop|pass|forward)\b.{0,25}\b(?:message|note|msg|question)\b.{0,25}\b(?:vishal|him)\b|\b(?:message|text|dm|ping)\b (?:vishal|him)\b|\bsend (?:vishal|him) (?:a |an |this |the )?(?:message|note|question)\b|\bi (?:want|would like|d like|wanna) to (?:message|write to|reach out to|talk to|speak to|chat with) (?:vishal|him)\b|\btell (?:vishal|him)\b/;
 const LIVE_CHAT =
   /\b(?:live chat|chat live|chat with (?:him|vishal)|talk (?:to|with) (?:him|vishal) (?:live|now|directly)|speak (?:to|with) (?:him|vishal)|is (?:he|vishal) (?:online|around|available now))\b/;
+const TOUR_ASK =
+  /\b(?:(?:take|give|start|begin|run|play)\s+(?:me\s+)?(?:on\s+)?(?:a\s+|the\s+)?(?:\d+[- ]?(?:second|sec)\s+)?(?:guided\s+)?tour|show\s+me\s+around|guided\s+tour|tour\s+of\s+(?:the\s+|this\s+)?(?:site|portfolio|page))\b/;
 const TAILOR =
   /\b(?:tailor|customi[sz]e|adapt|re-?order|re-?arrange|optimi[sz]e|personali[sz]e)\b.{0,40}\b(?:resume|cv)\b|\b(?:resume|cv)\b.{0,30}\btailored\b/;
 
@@ -198,6 +202,14 @@ async function routeAction(text: string, q: string, mode?: GridMode): Promise<Ro
         sources: [],
       };
     }
+  }
+
+  if (shipped.tour && TOUR_ASK.test(lead)) {
+    return {
+      parts: [{ tool: "start_tour", part: tourPart() }],
+      text: "Starting the 60-second tour. It scrolls through the page; press Esc to stop.",
+      sources: [],
+    };
   }
 
   if (LIVE_CHAT.test(lead)) {

@@ -1,11 +1,23 @@
 import Link from "next/link";
 import { navLinks, resumeHref } from "@/lib/site";
 import { buttonClass } from "@/components/ui/Button";
+import { getGithubData } from "@/lib/github/data";
+import { latestTicker } from "@/lib/github/ticker";
 import { BootLine } from "./BootLine";
+import { CommitTicker } from "./CommitTicker";
 import { NavShell } from "./NavShell";
 import { MobileMenu } from "./MobileMenu";
 import { PaletteButton } from "./PaletteButton";
 import { RecruiterToggle } from "./RecruiterToggle";
+
+/** The latest GitHub activity for the ticker. Never fails the page: no data, no ticker. */
+async function latestActivity() {
+  try {
+    return latestTicker((await getGithubData()).activity);
+  } catch {
+    return null;
+  }
+}
 
 export function Wordmark() {
   return (
@@ -18,12 +30,14 @@ export function Wordmark() {
   );
 }
 
-export function Nav() {
+export async function Nav() {
+  const ticker = await latestActivity();
   return (
     <NavShell>
       <div className="container-page flex h-full items-center justify-between gap-4">
         <div className="relative">
           <Wordmark />
+          {ticker ? <CommitTicker ticker={ticker} /> : null}
           <BootLine />
         </div>
         <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">

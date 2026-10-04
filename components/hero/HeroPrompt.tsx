@@ -7,6 +7,7 @@ import { track } from "@/lib/analytics";
 import type { Line } from "@/lib/terminal/commands";
 import { applyTab, historyStep } from "@/lib/terminal/input";
 import { cn } from "@/lib/utils/cn";
+import { unlock } from "@/lib/achievements";
 
 type Entry = { id: number; command: string; lines: Line[] };
 type Engine = typeof import("@/lib/terminal/commands");
@@ -71,6 +72,7 @@ export function HeroPrompt() {
     }
     const { run, COMMAND_NAMES } = await load();
     const first = command.split(/\s+/)[0]!.toLowerCase();
+    unlock("command");
     track("hero_terminal_command", { command: COMMAND_NAMES.includes(first) ? first : "unknown" });
     const result = run(command);
     if (result.egg) track("easter_egg_found", { name: result.egg });

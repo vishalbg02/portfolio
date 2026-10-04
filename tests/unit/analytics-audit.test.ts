@@ -38,6 +38,11 @@ const EVENTS = [
   "proof_jump",
   "stack_skill_select",
   "city_3d_on",
+  "secret_found",
+  "tour_start",
+  "tour_complete",
+  "company_link_open",
+  "sound_on",
 ];
 
 function* files(dir: string): Generator<string> {

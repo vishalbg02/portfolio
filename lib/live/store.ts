@@ -1,7 +1,15 @@
 import "server-only";
 import { Redis } from "@upstash/redis";
 import { features } from "@/lib/env";
-import { DEFAULT_PRESENCE, LIVE, type Conv, type LiveMessage, type Presence } from "./types";
+import {
+  DEFAULT_PRESENCE,
+  LINK,
+  LIVE,
+  type CompanyLink,
+  type Conv,
+  type LiveMessage,
+  type Presence,
+} from "./types";
 
 /**
  * Where threads live. Upstash Redis in production (every key expires after 30 days), an in-memory copy for tests.
@@ -36,6 +44,12 @@ export interface LiveStore {
   blockIp(hash: string): Promise<void>;
   isIpBlocked(hash: string): Promise<boolean>;
   countEmail(id: string, day: string): Promise<number>;
+  createLink(l: CompanyLink): Promise<void>;
+  getLink(id: string): Promise<CompanyLink | null>;
+  /** Counts an open of the link; returns how many there have been. */
+  noteLinkOpen(id: string): Promise<number>;
+  /** The newest links first, each with how many times it was opened. */
+  listLinks(limit: number): Promise<Array<CompanyLink & { opens: number }>>;
 }
 
 const P = "vishalbg:live:";
@@ -130,6 +144,31 @@ export class UpstashLiveStore implements LiveStore {
     if (n === 1) await this.r.expire(k, 2 * 86_400);
     return n;
   }
+  async createLink(l: CompanyLink) {
+    await Promise.all([
+      this.r.set(`${P}link:${l.id}`, l, { ex: LINK.ttlSec }),
+      this.r.zadd(`${P}links`, { score: l.createdAt, member: l.id }),
+      this.r.expire(`${P}links`, LINK.ttlSec),
+    ]);
+  }
+  getLink(id: string) {
+    return this.r.get<CompanyLink>(`${P}link:${id}`);
+  }
+  async noteLinkOpen(id: string) {
+    const k = `${P}link:${id}:opens`;
+    const n = await this.r.incr(k);
+    if (n === 1) await this.r.expire(k, LINK.ttlSec);
+    return n;
+  }
+  async listLinks(limit: number) {
+    const ids = await this.r.zrange<string[]>(`${P}links`, 0, limit - 1, { rev: true });
+    if (ids.length === 0) return [];
+    const [rows, opens] = await Promise.all([
+      this.r.mget<Array<CompanyLink | null>>(...ids.map((id) => `${P}link:${id}`)),
+      this.r.mget<Array<number | null>>(...ids.map((id) => `${P}link:${id}:opens`)),
+    ]);
+    return rows.flatMap((l, i) => (l ? [{ ...l, opens: Number(opens[i] ?? 0) }] : []));
+  }
 }
 
 /** In-memory twin of the store, for tests (and nothing else: serverless instances do not share memory). */
@@ -145,6 +184,8 @@ export class MemoryLiveStore implements LiveStore {
   stats = new Map<string, number>();
   blocked = new Set<string>();
   emails = new Map<string, number>();
+  links = new Map<string, CompanyLink>();
+  linkOpens = new Map<string, number>();
 
   async createConv(c: Conv) {
     this.convs.set(c.id, { ...c });
@@ -225,6 +266,24 @@ export class MemoryLiveStore implements LiveStore {
     const n = (this.emails.get(k) ?? 0) + 1;
     this.emails.set(k, n);
     return n;
+  }
+  async createLink(l: CompanyLink) {
+    this.links.set(l.id, { ...l });
+  }
+  async getLink(id: string) {
+    const l = this.links.get(id);
+    return l ? { ...l } : null;
+  }
+  async noteLinkOpen(id: string) {
+    const n = (this.linkOpens.get(id) ?? 0) + 1;
+    this.linkOpens.set(id, n);
+    return n;
+  }
+  async listLinks(limit: number) {
+    return [...this.links.values()]
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, limit)
+      .map((l) => ({ ...l, opens: this.linkOpens.get(l.id) ?? 0 }));
   }
 }
 

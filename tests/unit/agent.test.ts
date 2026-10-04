@@ -203,8 +203,13 @@ describe("the tools (schemas are the guard)", () => {
     const { tools } = await load();
     const t = tools.buildTools({ sources: new SourceRegistry() });
     expect(Object.keys(t).sort()).toEqual([...TOOL_NAMES].sort());
-    // the tour tool arrives with its phase
-    for (const later of ["start_tour"]) expect(Object.keys(t)).not.toContain(later);
+    // the tour tool only starts a tour: its card is a button, and the tool itself takes one fixed mode
+    const tour = t.start_tour as unknown as {
+      inputSchema: { safeParse: (v: unknown) => { success: boolean } };
+    };
+    expect(tour.inputSchema.safeParse({}).success).toBe(true);
+    expect(tour.inputSchema.safeParse({ mode: "60s" }).success).toBe(true);
+    expect(tour.inputSchema.safeParse({ mode: "scrape everything" }).success).toBe(false);
   });
 
   it("rejects what the schema does not allow: a slug, a navigation target, an empty query, a too-short job text", async () => {
@@ -281,8 +286,8 @@ describe("protocol and suggestions", () => {
     expect(MODE_SUGGESTIONS.engineer.length).toBeGreaterThan(2);
   });
 
-  it("only offers the modes that exist today", () => {
-    expect(availableModes()).toEqual(["default", "recruiter", "engineer"]);
+  it("only offers the modes that exist today (Interview appears once Vishal has written answers)", () => {
+    expect(availableModes()).toEqual(["default", "recruiter", "engineer", "tour"]);
     expect(isMode("recruiter")).toBe(true);
     expect(isMode("root")).toBe(false);
   });
