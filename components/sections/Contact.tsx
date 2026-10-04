@@ -34,7 +34,7 @@ export function Contact() {
           <CopyButton label="Phone" noun="Phone" text={contact.phone} event="copy_phone" />
           <ul className="grid grid-cols-2 gap-3 pt-1">
             {links.map((l) => (
-              <li key={l.label}>
+              <li key={l.label} className="last:odd:col-span-2">
                 <a
                   href={l.href}
                   className={link}

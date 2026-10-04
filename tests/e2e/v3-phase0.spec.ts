@@ -93,6 +93,23 @@ test.describe("LET'S BUILD banner", () => {
   }
 });
 
+test.describe("contact links", () => {
+  for (const width of WIDTHS) {
+    test(`@${width}px: every link label fits inside its button`, async ({ page }) => {
+      await mockStatus(page);
+      await page.setViewportSize({ width, height: 900 });
+      await gotoHydrated(page, "/");
+      const links = page.locator("#contact ul a");
+      await links.first().scrollIntoViewIfNeeded();
+      const m = await links.evaluateAll((as) =>
+        as.map((a) => ({ text: a.textContent, overflow: a.scrollWidth - a.clientWidth })),
+      );
+      expect(m.length).toBeGreaterThanOrEqual(4);
+      for (const l of m) expect(l.overflow, `${l.text} overflows its button`).toBeLessThanOrEqual(0);
+    });
+  }
+});
+
 test.describe("experience", () => {
   test("quiet: graph shapes only between roles, no merge/branch text rows", async ({ page }) => {
     await mockStatus(page);

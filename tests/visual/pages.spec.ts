@@ -47,7 +47,12 @@ async function prepare(page: Page, path: string) {
   await page.setViewportSize({ width, height: 12_000 });
   await expect(page.locator(".skel")).toHaveCount(0);
   await page.setViewportSize({ width, height: 900 });
-  await page.addStyleTag({ content: "*, *::before, *::after { will-change: auto !important; }" });
+  // Off-screen Work cards are not rendered until they are near (content-visibility), and a full-page screenshot
+  // can be taken before that resolves: render them so the baselines keep guarding the deck.
+  await page.addStyleTag({
+    content:
+      "*, *::before, *::after { will-change: auto !important; } .scene { content-visibility: visible !important; }",
+  });
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
   // Relative times ("13 minutes ago") are computed when the page is built, so they differ between the
