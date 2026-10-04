@@ -40,7 +40,14 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      { source: "/(.*)", headers: securityHeaders },
+      {
+        // Captures keep stable file names (pnpm media overwrites them), so cache for a day and revalidate in the background.
+        source: "/media/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=2592000" }],
+      },
+    ];
   },
 };
 
