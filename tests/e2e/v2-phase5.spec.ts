@@ -1,4 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { gotoHydrated, settleAnimations } from "./helpers";
 
@@ -267,11 +269,27 @@ test.describe("closing moment", () => {
     await expect(page.locator(".snake")).toBeHidden();
   });
 
-  test("the footer Lighthouse strip is hidden when there are no CI numbers (nothing is hard-coded)", async ({
+  test("the footer Lighthouse strip shows exactly what CI wrote to generated/lighthouse.json (truncated, never rounded up), or nothing", async ({
     page,
   }) => {
+    const file = path.join(process.cwd(), "generated", "lighthouse.json");
     await page.goto("/");
-    await expect(page.getByTestId("lighthouse-strip")).toHaveCount(0);
+    const strip = page.getByTestId("lighthouse-strip");
+    if (!existsSync(file)) return expect(strip).toHaveCount(0);
+    const lh = JSON.parse(readFileSync(file, "utf8")) as {
+      commit: string;
+      scores: Record<"performance" | "accessibility" | "bestPractices" | "seo", number>;
+    };
+    const shown = (n: number) => String(Math.floor(n * 100 + 1e-9));
+    await expect(strip).toBeVisible();
+    for (const [label, key] of [
+      ["Performance", "performance"],
+      ["Accessibility", "accessibility"],
+      ["Best Practices", "bestPractices"],
+      ["SEO", "seo"],
+    ] as const)
+      await expect(strip.getByText(new RegExp(`^${label}\\s+${shown(lh.scores[key])}$`))).toBeVisible();
+    await expect(strip).toContainText(lh.commit);
   });
 });
 

@@ -19,33 +19,34 @@ pnpm dev           # http://localhost:3000
 
 No environment variables are required. Every integration degrades gracefully when its variable is missing. Copy `.env.example` to `.env.local` to enable the optional features.
 
-| Variable                                             | Enables                               | Fallback when missing              |
-| ---------------------------------------------------- | ------------------------------------- | ---------------------------------- |
-| `GEMINI_API_KEY`                                     | Ask Vishal (AI) + JD matcher          | Friendly "offline" state           |
-| `GITHUB_TOKEN`                                       | Live contribution calendar + activity | Committed snapshot in `generated/` |
-| `RESEND_API_KEY`, `CONTACT_TO_EMAIL`                 | Contact form delivery                 | `mailto:` + copy-email             |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared rate limits / daily AI cap     | Per-instance in-memory limiter     |
-| `NEXT_PUBLIC_SITE_URL`                               | Canonical URLs, sitemap, OG           | `https://vishalbg.vercel.app`      |
-| `NEXT_PUBLIC_GSC_VERIFICATION`                       | Google Search Console meta tag        | Omitted                            |
-| `SHOW_RECOGNITION`                                   | Award pins on the calendar            | `true`                             |
-| `AI_DAILY_LIMIT`                                     | Global daily cap on AI calls          | `400`                              |
-| `SHOW_DRAFTS`                                        | Show Ship Log drafts in a build       | Hidden in production               |
+| Variable                                             | Enables                                | Fallback when missing               |
+| ---------------------------------------------------- | -------------------------------------- | ----------------------------------- |
+| `GEMINI_API_KEY`                                     | Ask Vishal (AI) + JD matcher           | Friendly "offline" state            |
+| `GITHUB_TOKEN`                                       | Live calendar, activity, year switcher | Committed snapshots in `generated/` |
+| `RESEND_API_KEY`, `CONTACT_TO_EMAIL`                 | Contact form delivery (see below)      | `mailto:` + copy-email              |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared rate limits / daily AI cap      | Per-instance in-memory limiter      |
+| `NEXT_PUBLIC_SITE_URL`                               | Canonical URLs, sitemap, OG            | `https://vishalbg.vercel.app`       |
+| `NEXT_PUBLIC_GSC_VERIFICATION`                       | Google Search Console meta tag         | Omitted                             |
+| `SHOW_RECOGNITION`                                   | Award pins on the calendar             | `true`                              |
+| `AI_DAILY_LIMIT`                                     | Global daily cap on AI calls           | `400`                               |
+| `SHOW_DRAFTS`                                        | Show Ship Log drafts in a build        | Hidden in production                |
 
 ## Scripts
 
-| Command                 | What it does                                                                                  |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| `pnpm lint`             | ESLint, then the **no-gradient guard**, then Prettier check                                   |
-| `pnpm typecheck`        | `next typegen`, then `tsc --noEmit`                                                           |
-| `pnpm test`             | Vitest unit tests                                                                             |
-| `pnpm build`            | Production build (all pages static)                                                           |
-| `pnpm check:bundle`     | Fails if the home route's initial JS is over **170 KB gzipped** (run after build)             |
-| `pnpm e2e`              | Playwright e2e + axe against the production build                                             |
-| `pnpm resume`           | Validates and builds the résumé PDF (`--open` to view); see docs/UPDATING-RESUME.md           |
-| `pnpm embeddings`       | Re-embeds changed content chunks (needs `GEMINI_API_KEY`); commit `generated/embeddings.json` |
-| `pnpm check:embeddings` | Warns if the committed embeddings are stale. Never fails, never calls the API                 |
-| `pnpm analyze`          | Turbopack bundle analyzer (`next experimental-analyze`)                                       |
-| `pnpm verify`           | Everything above, in CI order                                                                 |
+| Command                 | What it does                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm lint`             | ESLint, then the **no-gradient guard**, then Prettier check                                                               |
+| `pnpm typecheck`        | `next typegen`, then `tsc --noEmit`                                                                                       |
+| `pnpm test`             | Vitest unit tests                                                                                                         |
+| `pnpm build`            | Production build (all pages static)                                                                                       |
+| `pnpm check:bundle`     | Fails if the home route's initial JS is over **170 KB gzipped** (run after build)                                         |
+| `pnpm e2e`              | Playwright e2e + axe against the production build                                                                         |
+| `pnpm resume`           | Validates and builds the résumé PDF (`--open` to view); see docs/UPDATING-RESUME.md                                       |
+| `pnpm embeddings`       | Re-embeds changed content chunks (needs `GEMINI_API_KEY`); commit `generated/embeddings.json`                             |
+| `pnpm check:embeddings` | Warns if the committed embeddings are stale. Never fails, never calls the API                                             |
+| `pnpm snapshot:github`  | Refreshes `generated/github-snapshot.json` and `github-years.json` (`GITHUB_TOKEN=$(gh auth token) pnpm snapshot:github`) |
+| `pnpm analyze`          | Turbopack bundle analyzer (`next experimental-analyze`)                                                                   |
+| `pnpm verify`           | Everything above, in CI order                                                                                             |
 
 ## Content
 
@@ -64,6 +65,24 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 - **Model IDs** live only in [`lib/ai/models.ts`](lib/ai/models.ts).
 - **Embeddings** are generated locally and committed. After editing `profile.ts` or a case study, run `pnpm embeddings` and commit `generated/embeddings.json`. CI only warns when they are stale, and the Vercel build never calls the API.
 - Evaluation questions: [tests/ai-evals.md](tests/ai-evals.md). Unit tests blank all API keys, so they are hermetic.
+
+## What V2 added (and where it comes from)
+
+Everything is derived from `content/profile.ts` or the MDX, never typed into a component:
+
+- **Grid Rail, decoded headers, hero terminal, phone dock, project stage and deck** (`components/rail`, `components/hero`, `components/layout/MobileDock.tsx`, `components/work`).
+- **Experience as a git history** (`components/sections/Experience.tsx`, `lib/content/history.ts`): roles are branches laid out from their dates, commit ids are a hash of the text, education is tagged on main.
+- **Activity calendar with milestones and a year switcher** (`ActivityPanel`, `lib/content/milestones.ts`, `/api/github/calendar?year=`): awards and role starts pinned on their month. Past years use `generated/github-years.json` until `GITHUB_TOKEN` is set.
+- **Case studies**: two-column layout with a sticky rail, a diagram that runs once at 60 % visible, `ProductDemo` walkthroughs (Golden Verdict, Talnio, LanSymphony) and the Virtual Tour loaded in a sandboxed iframe only after a click (the one origin in the CSP `frame-src`, kept in `lib/security/embeds.ts`).
+- **Ask Vishal**: "Ask about this project" scopes retrieval to that project, and cited sources jump to the section and flash it (`#proof=<id>`).
+- **Stack connection map**, **LET'S BUILD banner**, footer snake, boot line, count-ups, haptics and the opt-in shake easter egg.
+- **Footer Lighthouse strip**: reads `generated/lighthouse.json`, which only `.github/workflows/lighthouse-prod.yml` writes (3-run mobile Lighthouse CI against production after each deploy, committed with `[skip ci]`). Scores are truncated, never rounded up. No file, no strip.
+
+Everything new has a `prefers-reduced-motion` variant: reduced motion shows the final state and never moves.
+
+### Contact form
+
+`/api/contact` sends through Resend. The shared `onboarding@resend.dev` sender only delivers to the Resend account owner's address, so set `CONTACT_TO_EMAIL` to that address (the visitor's email is the reply-to). To send to any inbox, verify a domain in Resend and set `CONTACT_FROM_EMAIL`.
 
 ## Recruiter Mode, Ship Log and /now
 
@@ -108,6 +127,7 @@ All lazy: the always-mounted [`DelightHost`](components/delight/DelightHost.tsx)
 | Add a **project**            | `profile.ts` (+ slug in `lib/content/profile-schema.ts`), `content/work/<slug>.mdx`, a diagram in `components/diagram/graphs.ts`, then `pnpm embeddings` |
 | Add a **Ship Log post**      | `content/log/<slug>.mdx` (filename = slug, `draft: false` to publish)                                                                                    |
 | The /now page                | [`content/now.ts`](content/now.ts)                                                                                                                       |
+| Calendar pins                | They are derived: add an award to `recognition` or a role to `experience` in `profile.ts` (month-level dates only)                                       |
 | What the AI knows            | It is built from the files above. After editing them run `pnpm embeddings` and commit                                                                    |
 | Colors, radii, motion        | [`styles/tokens.css`](styles/tokens.css)                                                                                                                 |
 
@@ -122,7 +142,8 @@ All lazy: the always-mounted [`DelightHost`](components/delight/DelightHost.tsx)
 ## CI / deploy
 
 - `.github/workflows/ci.yml` runs on every push and PR: install → lint → typecheck → unit → build → bundle budget → e2e + axe.
-- `.github/workflows/visual.yml`: visual regression (see above).
+- `.github/workflows/visual.yml`: visual regression (see above). After a change that alters pages: push, run it with `update` ticked, pull the bot commit, then push once more so the PR compares against the new baselines.
+- `.github/workflows/lighthouse-prod.yml`: measures production after each deploy and commits `generated/lighthouse.json` (see "What V2 added").
 - `.github/workflows/lighthouse.yml` runs Lighthouse CI (mobile, ≥ 95 in all four categories) against each **Vercel preview** URL. Deployment Protection stays on. Requests use the `VERCEL_AUTOMATION_BYPASS_SECRET` repository secret (Vercel → Project → Settings → Deployment Protection → Protection Bypass for Automation).
 - Vercel Git integration: pushes to `main` deploy to production, and each PR gets a preview URL. Node 22.x (`engines.node: "22.x"`).
 
