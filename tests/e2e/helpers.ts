@@ -10,8 +10,7 @@ export async function settleAnimations(page: Page) {
         .filter((a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity)
         .map((a) => a.finished.catch(() => undefined)),
     );
-    // Content that is not rendered yet (an off-screen card under content-visibility) never finishes its animations:
-    // don't wait for it for more than a moment.
+    // An animation that never finishes (hidden or off-screen content) must not hang the test: wait a moment at most.
     return Promise.race([done, new Promise((resolve) => setTimeout(resolve, 2000))]);
   });
 }
