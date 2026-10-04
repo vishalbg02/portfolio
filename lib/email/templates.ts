@@ -102,7 +102,11 @@ const quote = (message: string) =>
   `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="${C.bg}" style="background:${C.bg};border-left:3px solid ${C.accent};border-radius:4px;padding:14px 16px;font-family:${SANS};font-size:15px;line-height:1.65;color:${C.text};">${para(message)}</td></tr></table>`;
 
 /** What Vishal receives. */
-export function ownerEmail(sub: Submission, now: Date = new Date()): Email {
+export function ownerEmail(
+  sub: Submission,
+  now: Date = new Date(),
+  source: string = "the contact form",
+): Email {
   const name = singleLine(sub.name);
   const org = sub.org ? singleLine(sub.org) : "";
   const subject = `Portfolio message from ${subj(name)}${org ? ` (${subj(org)})` : ""}`;
@@ -119,9 +123,9 @@ ${row("From", esc(name))}${row("Email", `<a href="mailto:${esc(sub.email)}" styl
 ${label("Message")}
 ${quote(sub.message)}
 <p style="margin:24px 0 0 0;">${button(reply, `Reply to ${firstName(name)}`, true)}${button(site.url, "Open the portfolio", false)}</p>`,
-    footer: `Sent from the contact form at ${esc(site.url.replace(/^https?:\/\//, ""))}. Replying to this email goes straight to ${esc(name)}.`,
+    footer: `Sent from ${esc(source)} at ${esc(site.url.replace(/^https?:\/\//, ""))}. Replying to this email goes straight to ${esc(name)}.`,
   });
-  const text = `New message from ${name}\n\nFrom: ${name}\nEmail: ${sub.email}${org ? `\nRole / company: ${org}` : ""}\nSent: ${istStamp(now)}\n\n${sub.message}\n\n—\nReply to this email to answer ${firstName(name)} directly.\nSent from ${site.url}`;
+  const text = `New message from ${name}\n\nFrom: ${name}\nEmail: ${sub.email}${org ? `\nRole / company: ${org}` : ""}\nSent: ${istStamp(now)}\n\n${sub.message}\n\n—\nReply to this email to answer ${firstName(name)} directly.\nSent from ${source} at ${site.url}`;
   return { subject, html, text };
 }
 

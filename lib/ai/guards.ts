@@ -2,6 +2,7 @@ import { z } from "zod";
 import { ProjectSlugSchema, type ProjectSlug } from "@/lib/content/profile-schema";
 import { inputLimit } from "./agent/jd";
 import { LIMITS } from "./limits";
+import { isLang, type Lang } from "./lang";
 import { isMode, type GridMode } from "./modes";
 import type { ChatMessage } from "./protocol";
 
@@ -17,10 +18,12 @@ const BodySchema = z.object({
   project: ProjectSlugSchema.optional(),
   /** GRID's mode (recruiter, engineer…): changes the prompt and the suggestions, nothing else. */
   mode: z.string().max(16).optional(),
+  /** The reply language the visitor chose (en, kn, hi), or auto. */
+  lang: z.string().max(16).optional(),
 });
 
 export type ChatValidation =
-  | { ok: true; messages: ChatMessage[]; question: string; project?: ProjectSlug; mode: GridMode }
+  | { ok: true; messages: ChatMessage[]; question: string; project?: ProjectSlug; mode: GridMode; lang: Lang }
   | { ok: false; error: string; status: number };
 
 /**
@@ -54,7 +57,8 @@ export function validateChatRequest(body: unknown): ChatValidation {
         : { ...m, content: m.content.slice(0, LIMITS.chatInputChars) },
     );
   const mode: GridMode = isMode(parsed.data.mode) ? parsed.data.mode : "default";
-  return { ok: true, messages, question: last.content, project: parsed.data.project, mode };
+  const lang: Lang = isLang(parsed.data.lang) ? parsed.data.lang : "auto";
+  return { ok: true, messages, question: last.content, project: parsed.data.project, mode, lang };
 }
 
 export const MatchBodySchema = z.object({ jd: z.string() });

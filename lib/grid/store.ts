@@ -1,5 +1,6 @@
 import { ChatHttpError, streamChat as realStreamChat } from "@/lib/ai/client";
 import { inputLimit } from "@/lib/ai/agent/jd";
+import { isLang, type Lang } from "@/lib/ai/lang";
 import { isMode, type GridMode } from "@/lib/ai/modes";
 import { normalizeModelText } from "@/lib/ai/sanitize";
 import {
@@ -21,7 +22,8 @@ import { ACT_EVENT } from "@/lib/grid/events";
  * last messages in localStorage (every access in try/catch: private windows, blocked storage), and tells the
  * page when a card asks for something to happen (navigate, play a demo). No message text ever goes to analytics.
  */
-export type PartItem = { id: string; part: UiPart };
+/** `done`: what the visitor did with a card that asks for a decision (a message to send), so it is not offered again. */
+export type PartItem = { id: string; part: UiPart; done?: "sent" | "cancelled" };
 export type ToolPill = { id: string; name: ToolName; state: "running" | "done" | "error" };
 
 export type Msg = {
@@ -41,6 +43,7 @@ export type Msg = {
 export type GridState = {
   messages: Msg[];
   mode: GridMode;
+  lang: Lang;
   busy: boolean;
   /** null until /api/chat has been asked whether the model is online. */
   ai: boolean | null;
@@ -71,7 +74,7 @@ const browserStorage = (): Storage | null => {
   }
 };
 
-const EMPTY: GridState = { messages: [], mode: "default", busy: false, ai: null };
+const EMPTY: GridState = { messages: [], mode: "default", lang: "auto", busy: false, ai: null };
 
 export function createGridStore(deps: Partial<Deps> = {}) {
   const d: Deps = {
@@ -115,10 +118,10 @@ export function createGridStore(deps: Partial<Deps> = {}) {
     if (!storage) return;
     try {
       let msgs = state.messages.filter((m) => !m.pending).slice(-MAX_SAVED);
-      let json = JSON.stringify({ v: 1, mode: state.mode, messages: msgs });
+      let json = JSON.stringify({ v: 1, mode: state.mode, lang: state.lang, messages: msgs });
       while (json.length > MAX_BYTES && msgs.length > 2) {
         msgs = msgs.slice(2);
-        json = JSON.stringify({ v: 1, mode: state.mode, messages: msgs });
+        json = JSON.stringify({ v: 1, mode: state.mode, lang: state.lang, messages: msgs });
       }
       storage.setItem(STORAGE_KEY, json);
     } catch {
@@ -142,18 +145,25 @@ export function createGridStore(deps: Partial<Deps> = {}) {
     try {
       const raw = storage.getItem(STORAGE_KEY);
       if (!raw) return;
-      const saved = JSON.parse(raw) as { v?: number; mode?: unknown; messages?: unknown[] };
+      const saved = JSON.parse(raw) as { v?: number; mode?: unknown; lang?: unknown; messages?: unknown[] };
       if (saved.v !== 1 || !Array.isArray(saved.messages)) return;
       const messages = saved.messages.filter(sane).map((m, i) => ({
         ...m,
         id: i + 1,
         pending: false,
         tools: [],
-        parts: m.parts.filter((p) => isUiPart(p?.part)),
+        parts: m.parts
+          .filter((p) => isUiPart(p?.part))
+          .map((p) => ({ ...p, done: p.done === "sent" || p.done === "cancelled" ? p.done : undefined })),
         followups: Array.isArray(m.followups) ? m.followups.slice(0, 3) : [],
       }));
       nextId = messages.length + 1;
-      state = { ...state, messages, mode: isMode(saved.mode) ? saved.mode : "default" };
+      state = {
+        ...state,
+        messages,
+        mode: isMode(saved.mode) ? saved.mode : "default",
+        lang: isLang(saved.lang) ? saved.lang : "auto",
+      };
       listeners.forEach((l) => l());
     } catch {
       /* corrupt: start fresh */
@@ -237,6 +247,7 @@ export function createGridStore(deps: Partial<Deps> = {}) {
         // only the question asked from a project page is scoped; follow-ups search everything
         project: opts.project,
         mode: state.mode === "default" ? undefined : state.mode,
+        lang: state.lang === "auto" ? undefined : state.lang,
       });
     } catch (err) {
       const fail = (error: string) => patch(botId, (m) => ({ ...m, pending: false, error }));
@@ -289,6 +300,14 @@ export function createGridStore(deps: Partial<Deps> = {}) {
       } catch {
         /* ignore */
       }
+    },
+    setLang(lang: Lang) {
+      if (lang === state.lang) return;
+      set({ lang });
+    },
+    /** Remembers what the visitor did with a card (sent / cancelled), so it is not offered again after a reload. */
+    resolvePart(msgId: number, partId: string, done: "sent" | "cancelled") {
+      patch(msgId, (m) => ({ ...m, parts: m.parts.map((p) => (p.id === partId ? { ...p, done } : p)) }));
     },
     setMode(mode: GridMode) {
       if (mode === state.mode) return;

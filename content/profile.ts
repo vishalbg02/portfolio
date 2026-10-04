@@ -35,7 +35,7 @@ const data = {
     collegeEmail: "vishal.bg@mca.christuniversity.in",
     linkedin: "https://linkedin.com/in/vishalbg",
     github: "https://github.com/vishalbg02",
-    calLink: null, // TODO(vishal): Cal.com 15-min link — "Book a call" stays hidden until set
+    calLink: "https://cal.com/vishal-b-g-02/15min", // his public 15-minute booking page (verified 2026-10-04)
   },
 
   education: [
@@ -207,6 +207,10 @@ const data = {
   leadership: [
     "Core Committee, Technical Team (App Development) — GATEWAYS 2026, CHRIST University: built the official fest app in React Native.",
   ],
+
+  // Stated by Vishal (2026-10-04): the skills below that no project or role shows were learned in his degrees.
+  skillsNote:
+    "Skills named on this site that no project or internship shows were learned during his BCA and MCA at CHRIST (Deemed to be University), Bengaluru.",
 
   skills: {
     backend: [

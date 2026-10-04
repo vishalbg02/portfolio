@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       "Retry-After": String(limit.retryAfterSec),
     });
 
-  const events = chatEvents(valid.messages, { project: valid.project, mode: valid.mode });
+  const events = chatEvents(valid.messages, { project: valid.project, mode: valid.mode, lang: valid.lang });
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async pull(controller) {

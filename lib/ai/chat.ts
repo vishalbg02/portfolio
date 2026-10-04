@@ -2,6 +2,7 @@ import "server-only";
 import { isStepCount, streamText } from "ai";
 import { consumeDaily } from "./budget";
 import { LIMITS } from "./limits";
+import { isLang, type Lang } from "./lang";
 import { isMode, type GridMode } from "./modes";
 import { REFUSAL_TEXT, offlineAnswer } from "./offline";
 import { agentInstructions } from "./prompts";
@@ -86,12 +87,12 @@ async function* offlineEvents(
  */
 export async function* chatEvents(
   messages: ChatMessage[],
-  opts: { project?: ProjectSlug; mode?: GridMode } = {},
+  opts: { project?: ProjectSlug; mode?: GridMode; lang?: Lang } = {},
 ): AsyncGenerator<ChatEvent> {
   const mode: GridMode = isMode(opts.mode) ? opts.mode : "default";
   const question = messages.filter((m) => m.role === "user").at(-1)!.content;
 
-  const routed = await routeIntent(question);
+  const routed = await routeIntent(question, { mode });
   if (routed) {
     log({ mode: "router", tools: routed.parts.length });
     yield* routedEvents(routed, question, mode);
@@ -122,7 +123,10 @@ export async function* chatEvents(
 
   const registry = new SourceRegistry();
   registry.add(retrieval.results.map((r) => r.chunk));
-  const instructions = agentInstructions(retrieval.results, { mode });
+  const instructions = agentInstructions(retrieval.results, {
+    mode,
+    lang: isLang(opts.lang) ? opts.lang : "auto",
+  });
 
   const shown: UiPart[] = [];
   const toolsUsed: string[] = [];

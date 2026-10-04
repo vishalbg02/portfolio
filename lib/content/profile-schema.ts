@@ -90,13 +90,21 @@ export const ProfileSchema = z
       collegeEmail: z.email(),
       linkedin: url,
       github: url,
-      calLink: url.nullable(),
+      /** His Cal.com booking page (only cal.com is accepted), or null until he sets one. */
+      calLink: url
+        .nullable()
+        .refine(
+          (v) => v === null || /^https:\/\/(?:[a-z0-9-]+\.)?cal\.com\//.test(v),
+          "calLink must be a https://cal.com/… link",
+        ),
     }),
     education: z.array(EducationSchema).min(1),
     experience: z.array(ExperienceSchema).min(1),
     projects: z.array(ProjectSchema).length(4),
     recognition: z.array(RecognitionSchema),
     leadership: z.array(nonEmpty),
+    /** Where the skills that no project or role shows were learned (stated by Vishal). */
+    skillsNote: nonEmpty,
     skills: SkillsSchema,
     certifications: z.array(nonEmpty),
     languages: z.array(nonEmpty),

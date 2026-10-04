@@ -153,6 +153,8 @@ export function matchSkill(raw: string): string | null {
 
 const clip = (t: string, n = 160) => (t.length <= n ? t : `${t.slice(0, n - 1).trimEnd()}…`);
 
+const SITE_SKILLS = ["RAG fundamentals", "Function calling / API integration"];
+
 export function skillEvidence(raw: string): UiPart {
   const skill = matchSkill(raw);
   if (!skill) return { kind: "skill", skill: raw.trim().slice(0, 40), found: false, where: [] };
@@ -178,6 +180,23 @@ export function skillEvidence(raw: string): UiPart {
         href: "/#experience",
       });
   }
+  const lead = profile.leadership.find((l) => norm(l).includes(needle));
+  if (lead)
+    where.push({
+      type: "experience",
+      title: `Leadership: ${lead.split("—")[0]!.trim()}`,
+      detail: clip(lead),
+      href: "/resume",
+    });
+  // This portfolio is itself the proof of these two: GRID retrieves from the site's content and calls tools.
+  if (SITE_SKILLS.includes(skill))
+    where.push({
+      type: "project",
+      title: "This portfolio",
+      detail:
+        "GRID answers from this site's own content with retrieval and calls typed tools to show and do things.",
+      href: "/#ask",
+    });
   const group = (Object.entries(profile.skills) as Array<[string, string[]]>).find(([, items]) =>
     items.includes(skill),
   );
@@ -188,8 +207,33 @@ export function skillEvidence(raw: string): UiPart {
       detail: `${skill} (${group[0]})`,
       href: "/#stack",
     });
+  // Skills no project, role or activity shows: Vishal says he learned them in his degrees.
+  if (!where.some((w) => w.type !== "skills") && group)
+    where.push({
+      type: "education",
+      title: `Learned at ${profile.education[0]!.school.split(",")[0]!.replace(/\s*\(.*$/, "")}`,
+      detail: profile.skillsNote,
+      href: "/#experience",
+    });
   return { kind: "skill", skill, found: where.length > 0, where };
 }
+
+/** "Book a call": the Cal.com link when Vishal has set one, otherwise the card offers a message instead. */
+export const bookPart = (): UiPart => ({
+  kind: "book",
+  calLink: profile.contact.calLink,
+  mailto: profile.contact.email,
+});
+
+/** A message for the visitor to review. The fields are only a proposal: nothing is sent until they confirm. */
+export const confirmPart = (m: { name?: string; email?: string; message?: string }): UiPart => ({
+  kind: "confirm",
+  action: "send_message",
+  name: (m.name ?? "").slice(0, 80),
+  email: (m.email ?? "").slice(0, 200),
+  message: (m.message ?? "").slice(0, 1500),
+  mailto: profile.contact.email,
+});
 
 export function demoPart(slug: string, beat?: number): UiPart | null {
   const p = projectBySlug(slug);

@@ -23,6 +23,7 @@ No environment variables are required. Every integration degrades gracefully whe
 | ---------------------------------------------------- | -------------------------------------- | ----------------------------------- |
 | `GEMINI_API_KEY`                                     | GRID (AI) + JD matcher (first route)   | Next route, else "offline" answers  |
 | `GROQ_API_KEY`                                       | Backup AI route (gpt-oss-120b / 20b)   | Skipped                             |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`             | Messages from GRID to Vishal's phone   | Email only, else a `mailto:` offer  |
 | `GITHUB_TOKEN`                                       | Live calendar, activity, year switcher | Committed snapshots in `generated/` |
 | `RESEND_API_KEY`, `CONTACT_TO_EMAIL`                 | Contact form delivery (see below)      | `mailto:` + copy-email              |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared rate limits / daily AI cap      | Per-instance in-memory limiter      |
@@ -60,6 +61,7 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 ## AI features
 
 - **GRID** (`/api/chat`): retrieval-augmented Q&A over the profile, case studies and architecture notes, with tools: it can show a project, a diagram, a walkthrough, skill evidence or a job match, and take you somewhere. Retrieval is BM25 plus committed Gemini embeddings, fused with reciprocal-rank fusion (`lib/rag`). Answers stream as NDJSON and cite sources as `[n]`.
+- **Actions** (Phase 3): GRID can draft a message for you to edit, prepare a message to Vishal that **you** review and send (it can never send one itself), show a booking link (set `contact.calLink` in `content/profile.ts` to a `https://cal.com/…` link), re-order his résumé for a role into a one-page PDF (it only moves what he already wrote), and answer interview questions in his own words from `content/interview.ts`. You can also choose the reply language (English, Kannada, Hindi) and use dictation and spoken replies where the browser supports them. Details and the safety gate: [docs/GRID-AGENT.md](docs/GRID-AGENT.md).
 - **Job-description matcher** (`/api/match`, on `/resume#match`): the model only extracts requirements. Grading is deterministic and literal against the profile (strong / partial / gap), and years of experience are computed from dates. The result can be copied as Markdown.
 - **Routes, in order:** Gemini, then Groq `openai/gpt-oss-120b`, then Groq `openai/gpt-oss-20b` (each Groq model has its own rate-limit bucket). A route that fails before showing anything (quota, outage, 8 s of silence) hands over to the next, and is skipped for a minute afterwards so later questions do not wait on it. Either key alone is enough.
 - **Without a key it still works.** No key, an exhausted daily budget, or every route failing before the first token all fall back to an offline answer built from the top passages. Questions outside the corpus get a canned refusal with no model call.

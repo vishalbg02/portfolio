@@ -1,14 +1,12 @@
 import { Resend } from "resend";
 import { env, features } from "@/lib/env";
+import { FROM, sendOwnerEmail } from "@/lib/email/send";
 import { ContactSchema } from "@/lib/contact/schema";
 import { json, sameOrigin } from "@/lib/http";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
-import { canAutoReply, ownerEmail, visitorEmail } from "@/lib/email/templates";
+import { canAutoReply, visitorEmail } from "@/lib/email/templates";
 
 const MAX_BODY_BYTES = 10_000;
-// Resend's shared sender works without a verified domain (mail goes to the account owner).
-// Switch to a verified domain later by setting CONTACT_FROM_EMAIL (see README).
-const FROM = process.env.CONTACT_FROM_EMAIL || "Portfolio contact <onboarding@resend.dev>";
 
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return json({ error: "forbidden" }, 403);
@@ -44,20 +42,11 @@ export async function POST(req: Request) {
 
   const submission = parsed.data;
   try {
-    const resend = new Resend(env.RESEND_API_KEY);
-    const mail = ownerEmail(submission);
-    const { error } = await resend.emails.send({
-      from: FROM,
-      to: env.CONTACT_TO_EMAIL!,
-      replyTo: submission.email,
-      subject: mail.subject,
-      html: mail.html,
-      text: mail.text,
-    });
-    if (error) throw new Error(error.message);
+    await sendOwnerEmail(submission);
 
     // The visitor's confirmation needs a sender on a verified domain; with the shared sender it is skipped.
     if (canAutoReply(process.env.CONTACT_FROM_EMAIL)) {
+      const resend = new Resend(env.RESEND_API_KEY);
       const copy = visitorEmail(submission);
       const sent = await resend.emails
         .send({ from: FROM, to: submission.email, replyTo: env.CONTACT_TO_EMAIL!, ...copy })

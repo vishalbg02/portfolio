@@ -15,7 +15,10 @@ export type Source = { n: number; title: string; url: string };
 export type ChatMode = "ai" | "offline" | "refusal" | "router";
 export type OfflineReason = "no_key" | "budget" | "error" | "off_topic";
 
-/** The tools GRID can call. Every one is read-only in Phase 2; the side-effect tools come with a confirmation gate. */
+/**
+ * The tools GRID can call. None of them DOES anything to the world: the ones that touch it (send_message_to_vishal)
+ * only prepare a card the visitor must confirm, and the send itself goes through its own API route.
+ */
 export const TOOL_NAMES = [
   "search_profile",
   "navigate",
@@ -26,6 +29,11 @@ export const TOOL_NAMES = [
   "match_job",
   "get_contact",
   "get_site_stats",
+  "draft_message",
+  "send_message_to_vishal",
+  "book_call",
+  "tailor_resume",
+  "interview_answer",
 ] as const;
 export type ToolName = (typeof TOOL_NAMES)[number];
 
@@ -71,7 +79,7 @@ export type UiPart =
       skill: string;
       found: boolean;
       where: Array<{
-        type: "project" | "experience" | "skills";
+        type: "project" | "experience" | "skills" | "education";
         title: string;
         detail: string;
         href: string | null;
@@ -99,7 +107,31 @@ export type UiPart =
   | { kind: "diagram"; slug: string; name: string }
   | { kind: "demo"; slug: string; name: string; beat: number | null; label: string }
   | { kind: "navigate"; target: string; href: string; label: string }
-  | { kind: "match"; result: unknown };
+  | { kind: "match"; result: unknown }
+  | {
+      /** A message to Vishal, ready for the visitor to review. Nothing is sent until they press Send. */
+      kind: "confirm";
+      action: "send_message";
+      name: string;
+      email: string;
+      message: string;
+      /** Where to write instead if delivery is not possible (built on the server from the profile). */
+      mailto: string;
+    }
+  | { kind: "draft"; draftKind: DraftKind; subject: string; body: string; mailto: string }
+  | {
+      kind: "resume";
+      role: string | null;
+      requirements: Array<{ skill: string; importance: "high" | "medium" | "low" }>;
+      movedUp: string[];
+      emphasised: string[];
+      gaps: string[];
+    }
+  | { kind: "book"; calLink: string | null; mailto: string }
+  | { kind: "interview"; question: string; answer: string | null; matched: string | null; mailto: string };
+
+export const DRAFT_KINDS = ["interview_invite", "intro", "project_inquiry", "hackathon_team"] as const;
+export type DraftKind = (typeof DRAFT_KINDS)[number];
 
 export const PART_KINDS = [
   "project",
@@ -110,6 +142,11 @@ export const PART_KINDS = [
   "demo",
   "navigate",
   "match",
+  "confirm",
+  "draft",
+  "resume",
+  "book",
+  "interview",
 ] as const;
 
 /** The client trusts parts only from its own origin, but still refuses anything of an unknown shape. */
