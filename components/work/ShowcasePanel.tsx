@@ -15,7 +15,7 @@ export function ShowcasePanel({ project, index }: { project: Project; index: num
   return (
     <article
       data-project={project.slug}
-      className="flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface"
+      className="group flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface"
     >
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5 font-mono text-xs text-muted">
         <span className="flex min-w-0 items-center gap-2">
