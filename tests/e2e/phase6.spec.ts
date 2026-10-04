@@ -240,8 +240,11 @@ test.describe("sound", () => {
     await expect(toggle).toHaveAttribute("aria-pressed", "false");
     await expect(toggle).toContainText("Sound off");
     await page.keyboard.press("~");
+    const terminal = page.getByRole("dialog", { name: "Terminal" });
+    await expect(terminal).toBeVisible(); // it loads lazily; while it is open the rest of the page is hidden from the tree
     await page.keyboard.type("hello");
     await page.keyboard.press("Escape");
+    await expect(terminal).toHaveCount(0);
     expect(await page.evaluate(() => (window as unknown as { __ctx: number }).__ctx)).toBe(0);
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();

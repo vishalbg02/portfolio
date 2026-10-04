@@ -61,7 +61,7 @@ export function PresenceWall() {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ v: id }),
         });
-        if (!res.ok) return;
+        if (res.status !== 200) return; // an error, or 202: too many from this address, not counted
         const next = (await res.json()) as HereView;
         setView(next);
         setMe(cellFor(id)); // your own square (only once the wall is live, so a server render and the first client render agree)

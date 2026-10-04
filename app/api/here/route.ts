@@ -15,11 +15,11 @@ export async function POST(req: Request) {
   if (!sameOrigin(req)) return json({ error: "forbidden" }, 403, NO_STORE);
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return json({ error: "invalid" }, 400, NO_STORE);
-  const limited = await rateLimit({ scope: "here", limit: 6, windowSec: 60 }, clientKey(req.headers));
+  // One address can be a whole office or campus, and each open tab beats twice a minute, so the allowance is generous.
+  // Over it, the answer is a quiet "not counted" (202), never an error status: the wall is decoration and must not put
+  // a failed request in a visitor's console.
+  const limited = await rateLimit({ scope: "here", limit: 20, windowSec: 60 }, clientKey(req.headers));
   if (!limited.ok)
-    return json({ error: "rate_limited" }, 429, {
-      ...NO_STORE,
-      "Retry-After": String(limited.retryAfterSec),
-    });
+    return json({ throttled: true }, 202, { ...NO_STORE, "Retry-After": String(limited.retryAfterSec) });
   return json(await heartbeat(parsed.data.v), 200, NO_STORE);
 }
