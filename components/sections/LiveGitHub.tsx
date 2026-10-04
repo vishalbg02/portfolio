@@ -5,9 +5,10 @@ import { activityYears } from "@/lib/github/years";
 import { milestones } from "@/lib/content/milestones";
 import { roleSpans } from "@/lib/content/roles";
 import { features } from "@/lib/env";
+import { computeStreaks } from "@/lib/github/streaks";
 import { nowMs } from "@/lib/utils/now";
 import { relativeTime } from "@/lib/utils/relative-time";
-import { ActivityPanel } from "./ActivityPanel";
+import { ActivityLoader } from "./ActivityLoader";
 
 const dateFmt = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -33,11 +34,19 @@ export async function LiveGitHub() {
     ),
   );
 
+  // The numbers also go in the HTML as the placeholder text while the calendar island loads.
+  const days = data.calendar.weeks.flat();
+  const longest = computeStreaks(days, asOf).longest;
+  const summary = `${data.calendar.total.toLocaleString("en-US")} contributions in the last year · ${
+    days.filter((d) => d.count > 0).length
+  } active days · longest streak ${longest} ${longest === 1 ? "day" : "days"}`;
+
   return (
     <section id="github" aria-labelledby="github-label" className="container-page section-y">
       <SectionHeader prefix=">_" label="Activity" id="github-label" title="Live from GitHub" />
 
-      <ActivityPanel
+      <ActivityLoader
+        summary={summary}
         initial={{
           calendar: data.calendar,
           asOf,

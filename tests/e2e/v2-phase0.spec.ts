@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { gotoReady } from "./helpers";
+import { gotoReady, loadIslands } from "./helpers";
 
 /** V2 · Phase 0: section rhythm, sketches that move on touch, GitHub stats, no floating pill on mobile. */
 const SECTIONS = ["work", "experience", "stack", "github", "ask", "contact"];
@@ -60,6 +60,7 @@ test.describe("GitHub stats", () => {
   }) => {
     await mockStatus(page);
     await page.goto("/");
+    await loadIslands(page);
     const github = page.locator("#github");
     await expect(github.getByText("Contributions, last year")).toBeVisible();
     await expect(github.getByText("Active days, last year")).toBeVisible();

@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { gotoHydrated, settleAnimations } from "./helpers";
+import { gotoHydrated, settleAnimations, loadIslands } from "./helpers";
 
 /** V2 · Phase 5: jump to proof, stack map, closing moment, boot line, count-ups, touch polish. */
 const mockStatus = (page: Page) =>
@@ -195,6 +195,7 @@ test.describe("stack as a connection map", () => {
   test("axe is clean with a skill active", async ({ page }) => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     await page.locator("#stack").getByRole("button", { name: "Firebase" }).focus();
     expect(await axe(page, "#stack")).toEqual([]);
   });
@@ -345,9 +346,13 @@ test.describe("count-ups", () => {
   }) => {
     await mockStatus(page);
     const html = await (await page.request.get("/")).text();
-    const m = /Contributions, last year<\/dt><dd[^>]*><span[^>]*>([\d,]+)<\/span>/.exec(html);
+    // the activity block is a lazy island: until it loads, its placeholder carries the real totals in the HTML
+    const m = /([\d,]+) contributions in the last year · [\d,]+ active days · longest streak \d+ days?/.exec(
+      html,
+    );
     expect(m, "final contribution count is server-rendered").not.toBeNull();
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const stat = page.locator("#github dl dd").first();
     await stat.scrollIntoViewIfNeeded();
     await expect(stat).toHaveText(m![1]!, { timeout: 4000 });
@@ -356,6 +361,7 @@ test.describe("count-ups", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await mockStatus(page);
     await gotoHydrated(page, "/");
+    await loadIslands(page);
     const stat = page.locator("#github dl dd").first();
     await stat.scrollIntoViewIfNeeded();
     expect(await stat.textContent()).toMatch(/^[\d,]+$/);
