@@ -102,48 +102,50 @@ function Encrypt() {
       className="ill block size-full"
     >
       <rect width="960" height="600" fill="var(--bg)" />
-      <Peer x={110} y={330} label="sender" />
-      <Peer x={850} y={330} label="receiver" />
-      <line x1="168" y1="330" x2="792" y2="330" stroke={C} strokeOpacity="0.6" strokeWidth="3.5" />
-      <rect
-        x="196"
-        y="298"
-        width="132"
-        height="64"
-        rx="10"
-        fill="var(--surface)"
-        stroke="var(--border-2)"
-        strokeWidth="2.5"
-      />
-      <text x="262" y="338" fontSize="21" fill="var(--text)" textAnchor="middle" style={mono}>
-        text
-      </text>
-      <g className="ill-cipher">
-        {cipher.map((c, i) => (
-          <rect key={i} x={c.x} y={c.y} width="26" height="26" rx="4" fill={L[c.l]} />
-        ))}
+      <g transform="translate(0 56)">
+        <Peer x={110} y={330} label="sender" />
+        <Peer x={850} y={330} label="receiver" />
+        <line x1="168" y1="330" x2="792" y2="330" stroke={C} strokeOpacity="0.6" strokeWidth="3.5" />
+        <rect
+          x="196"
+          y="298"
+          width="132"
+          height="64"
+          rx="10"
+          fill="var(--surface)"
+          stroke="var(--border-2)"
+          strokeWidth="2.5"
+        />
+        <text x="262" y="338" fontSize="21" fill="var(--text)" textAnchor="middle" style={mono}>
+          text
+        </text>
+        <g className="ill-cipher">
+          {cipher.map((c, i) => (
+            <rect key={i} x={c.x} y={c.y} width="26" height="26" rx="4" fill={L[c.l]} />
+          ))}
+        </g>
+        <g transform="translate(480 150) scale(1.7)">
+          <rect x="-22" y="-4" width="44" height="34" rx="6" fill={C} />
+          <path d="M-12 -4 v-12 a12 12 0 0 1 24 0 v12" fill="none" stroke={C} strokeWidth="5" />
+          <circle cx="0" cy="12" r="4" fill="var(--bg)" />
+        </g>
+        <text x="480" y="82" fontSize="36" fill="var(--text)" textAnchor="middle" style={mono}>
+          AES-256
+        </text>
+        <rect
+          x="632"
+          y="298"
+          width="132"
+          height="64"
+          rx="10"
+          fill="var(--surface)"
+          stroke="var(--border-2)"
+          strokeWidth="2.5"
+        />
+        <text x="698" y="338" fontSize="21" fill="var(--text)" textAnchor="middle" style={mono}>
+          text
+        </text>
       </g>
-      <g transform="translate(480 150) scale(1.7)">
-        <rect x="-22" y="-4" width="44" height="34" rx="6" fill={C} />
-        <path d="M-12 -4 v-12 a12 12 0 0 1 24 0 v12" fill="none" stroke={C} strokeWidth="5" />
-        <circle cx="0" cy="12" r="4" fill="var(--bg)" />
-      </g>
-      <text x="480" y="82" fontSize="36" fill="var(--text)" textAnchor="middle" style={mono}>
-        AES-256
-      </text>
-      <rect
-        x="632"
-        y="298"
-        width="132"
-        height="64"
-        rx="10"
-        fill="var(--surface)"
-        stroke="var(--border-2)"
-        strokeWidth="2.5"
-      />
-      <text x="698" y="338" fontSize="21" fill="var(--text)" textAnchor="middle" style={mono}>
-        text
-      </text>
     </svg>
   );
 }
