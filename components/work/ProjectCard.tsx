@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { Chip } from "@/components/ui/Chip";
 import type { Project } from "@/lib/content/profile-schema";
 import { shipped } from "@/lib/site";
@@ -33,9 +34,13 @@ export function ProjectCard({
         "focus-within:border-border-2 hover:-translate-y-0.5 hover:border-border-2",
       )}
     >
-      <SketchPlayer>
-        <Sketch slug={project.slug} />
-      </SketchPlayer>
+      <ViewTransition name={`sketch-${project.slug}`} share="morph" default="none">
+        <div>
+          <SketchPlayer>
+            <Sketch slug={project.slug} />
+          </SketchPlayer>
+        </div>
+      </ViewTransition>
 
       <div className="mt-5">
         <ProjectStatus project={project} />
@@ -46,7 +51,9 @@ export function ProjectCard({
           />
           {shipped.caseStudies ? (
             <Link href={href} className="after:absolute after:inset-0 after:content-['']">
-              {project.name}
+              <ViewTransition name={`title-${project.slug}`} share="morph" default="none">
+                <span className="inline-block">{project.name}</span>
+              </ViewTransition>
             </Link>
           ) : (
             project.name

@@ -14,11 +14,12 @@ export async function streamChat(
   messages: ChatMessage[],
   onEvent: (e: ChatEvent) => void,
   signal?: AbortSignal,
+  project?: string,
 ): Promise<void> {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, project }),
     signal,
   });
   if (!res.ok || !res.body) {

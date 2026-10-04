@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { track } from "@/lib/analytics";
 import type { Milestone } from "@/lib/content/milestones";
 import { monthTotals } from "@/lib/github/calendar";
 import { pinsFor } from "@/lib/github/pins";
@@ -173,7 +174,10 @@ export function ActivityPanel({
                     <button
                       type="button"
                       aria-expanded={open}
-                      onClick={() => setSelectedId(open ? null : m.id)}
+                      onClick={() => {
+                        if (!open) track("milestone_open", { kind: m.kind });
+                        setSelectedId(open ? null : m.id);
+                      }}
                       className="flex min-h-11 w-full items-center gap-3 rounded-sm text-left text-sm text-text"
                     >
                       <span

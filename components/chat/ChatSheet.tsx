@@ -13,7 +13,7 @@ export default function ChatSheet({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onClosed: () => void;
-  ask?: { text: string; id: number };
+  ask?: { text: string; id: number; project?: string };
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

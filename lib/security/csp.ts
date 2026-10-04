@@ -5,6 +5,8 @@
  * flight-data <script> tags, so script-src needs 'unsafe-inline' without per-request nonces.
  * Everything else is locked down. See README → "Security: CSP".
  */
+import { EMBED_ORIGINS } from "./embeds";
+
 export type CspEnv = {
   /** `next dev` needs 'unsafe-eval' for React's debugging. */
   isDev: boolean;
@@ -26,7 +28,7 @@ export function buildCsp({ isDev, isPreview }: CspEnv): string {
     `connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com${
       isPreview ? " https://vercel.live https://*.pusher.com wss://*.pusher.com" : ""
     }`,
-    ...(isPreview ? ["frame-src https://vercel.live"] : []),
+    `frame-src ${[...EMBED_ORIGINS, ...(isPreview ? ["https://vercel.live"] : [])].join(" ")}`,
     "media-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react";
+import { Demo } from "@/components/demo/Demo";
 import { ArchitectureDiagram } from "@/components/diagram/ArchitectureDiagram";
 import { graphs } from "@/components/diagram/graphs";
 import type { ProjectSlug } from "@/lib/content/profile-schema";
@@ -65,6 +66,7 @@ export function getMdxComponents(slug: ProjectSlug) {
     Decisions,
     Decision,
     Snippet,
+    Demo: () => <Demo slug={slug} />,
     Architecture: () => <ArchitectureDiagram graph={graphs[slug]} />,
   };
 }

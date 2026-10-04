@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import { Chip } from "@/components/ui/Chip";
 import type { Project } from "@/lib/content/profile-schema";
 import { cn } from "@/lib/utils/cn";
@@ -35,11 +36,13 @@ export function ShowcasePanel({ project, index }: { project: Project; index: num
         <span data-c="tr" aria-hidden="true" className="stage-corner" />
         <span data-c="bl" aria-hidden="true" className="stage-corner" />
         <span data-c="br" aria-hidden="true" className="stage-corner" />
-        <div className="mx-auto max-w-[560px]">
-          <Tilt>
-            <Sketch slug={project.slug} />
-          </Tilt>
-        </div>
+        <ViewTransition name={`sketch-${project.slug}`} share="morph" default="none">
+          <div className="mx-auto max-w-[560px]">
+            <Tilt>
+              <Sketch slug={project.slug} />
+            </Tilt>
+          </div>
+        </ViewTransition>
       </div>
 
       <div className="flex flex-1 flex-col gap-5 p-5 sm:p-6">
@@ -51,7 +54,9 @@ export function ShowcasePanel({ project, index }: { project: Project; index: num
                   <span aria-hidden="true" className="mr-2 font-mono text-sm text-accent">
                     {String(index + 1).padStart(2, "0")}
                   </span>
-                  {project.name}
+                  <ViewTransition name={`title-${project.slug}`} share="morph" default="none">
+                    <span className="inline-block">{project.name}</span>
+                  </ViewTransition>
                 </h3>
                 <p className="mt-1 text-muted">{project.tagline}</p>
               </div>

@@ -23,6 +23,10 @@ const EVENTS = [
   "hero_terminal_command",
   "hero_row_expand",
   "dock_tap",
+  "milestone_open",
+  "demo_launch",
+  "demo_step",
+  "project_ask",
 ];
 
 function* files(dir: string): Generator<string> {

@@ -6,7 +6,8 @@ export async function settleAnimations(page: Page) {
     Promise.all(
       document
         .getAnimations()
-        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        // paused ones (the sketches wait for hover/scroll) would never finish, so only wait for running ones
+        .filter((a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity)
         .map((a) => a.finished.catch(() => undefined)),
     ),
   );

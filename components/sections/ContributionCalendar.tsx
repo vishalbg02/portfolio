@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { track } from "@/lib/analytics";
 import type { Milestone } from "@/lib/content/milestones";
 import { describeDay, monthLabels } from "@/lib/github/calendar";
 import { assignTiers, dayRow, pinsFor } from "@/lib/github/pins";
@@ -124,6 +125,7 @@ export function ContributionCalendar({
     if (!box) return;
     const r = button.getBoundingClientRect();
     sticky.current = stick;
+    if (stick) track("milestone_open", { kind: milestoneKind(id) });
     setTip(null);
     setPop({
       left: Math.min(Math.max(r.left - box.left + r.width / 2 - 24, 0), Math.max(0, box.width - POPOVER_W)),
@@ -148,6 +150,7 @@ export function ContributionCalendar({
       if (!sticky.current) setOpenId(null);
     }, 160);
   }
+  const milestoneKind = (id: string) => pins.find((p) => p.milestone.id === id)?.milestone.kind ?? "unknown";
   const openMilestone = pins.find((p) => p.milestone.id === openId)?.milestone;
 
   // Click outside closes a pinned popover.

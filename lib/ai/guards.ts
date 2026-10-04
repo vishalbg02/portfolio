@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProjectSlugSchema, type ProjectSlug } from "@/lib/content/profile-schema";
 import { LIMITS } from "./limits";
 import type { ChatMessage } from "./protocol";
 
@@ -10,10 +11,13 @@ const BodySchema = z.object({
     .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string() }))
     .min(1)
     .max(60),
+  /** "Ask about this project": retrieval puts this project's chunks first. */
+  project: ProjectSlugSchema.optional(),
 });
 
 export type ChatValidation =
-  { ok: true; messages: ChatMessage[]; question: string } | { ok: false; error: string; status: number };
+  | { ok: true; messages: ChatMessage[]; question: string; project?: ProjectSlug }
+  | { ok: false; error: string; status: number };
 
 /**
  * Validates a chat request body. Only the last N messages are kept; the newest must be a user
@@ -45,7 +49,7 @@ export function validateChatRequest(body: unknown): ChatValidation {
           }
         : { ...m, content: m.content.slice(0, LIMITS.chatInputChars) },
     );
-  return { ok: true, messages, question: last.content };
+  return { ok: true, messages, question: last.content, project: parsed.data.project };
 }
 
 export const MatchBodySchema = z.object({ jd: z.string() });

@@ -29,13 +29,14 @@ describe("case-study content", () => {
   });
 
   it.each(profile.projects.map((p) => p.slug))(
-    "%s follows problem → built → decisions → architecture → code → outcome",
+    "%s follows problem → built → try it → decisions → architecture → code → outcome",
     async (slug) => {
       const { body } = (await getCaseStudy(slug))!;
       const headings = [...body.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
       expect(headings).toEqual([
         "The problem",
         "What I built",
+        "Try it",
         "Key decisions",
         "Architecture",
         "Code in the wild",
