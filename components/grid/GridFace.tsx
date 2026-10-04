@@ -29,10 +29,13 @@ export function GridFace({
   size = 28,
   className,
   label,
+  still = false,
 }: {
   state?: FaceState;
   size?: number;
   className?: string;
+  /** No animation, only the pattern: for the many small faces in a conversation, so only the live one moves. */
+  still?: boolean;
   /** Spoken label; omit when the face sits beside text that says it already (then it is decorative). */
   label?: string;
 }) {
@@ -45,6 +48,7 @@ export function GridFace({
       aria-label={label}
       aria-hidden={label ? undefined : true}
       data-state={state}
+      data-still={still ? "" : undefined}
       className={cn("gf shrink-0", className)}
     >
       {cells.map(({ c, r, on }) => (

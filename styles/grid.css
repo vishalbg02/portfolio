@@ -108,6 +108,11 @@
     transform: translate(0, 6px);
   }
 }
+/* a conversation's older faces keep their pattern and stand still: only the live one moves */
+.gf[data-still] rect,
+.gf[data-still] .trav {
+  animation: none !important;
+}
 @media (prefers-reduced-motion: reduce) {
   .gf rect,
   .gf .trav {
@@ -156,5 +161,67 @@ html[data-grid-dock="open"] body {
   from {
     transform: translateX(24px);
     opacity: 0;
+  }
+}
+
+/* ── the demo, the streaming caret, the activity line ───────────────────────────────────────────── */
+/* a flat block, like the terminal cursor in the nav: it blinks (steps, no fade) and is a still block under reduced motion */
+.grid-caret {
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: var(--accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .grid-caret {
+    animation: grid-blink 1.1s steps(1, end) infinite;
+  }
+  /* what GRID shows arrives with a small slide (transform only, so text is never half-faded) */
+  .demo-in {
+    animation: demo-in 220ms ease-out;
+  }
+  .grid-activity > span {
+    animation: grid-activity 1.3s ease-in-out infinite;
+  }
+}
+@keyframes grid-blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes demo-in {
+  from {
+    transform: translateY(6px);
+  }
+}
+/* GRID is working: a short accent bar runs along the header's bottom edge */
+.grid-activity {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.grid-activity > span {
+  display: block;
+  width: 34%;
+  height: 100%;
+  background: var(--accent);
+}
+@keyframes grid-activity {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grid-activity > span {
+    width: 100%;
+    opacity: 0.55;
   }
 }

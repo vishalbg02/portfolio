@@ -6,8 +6,18 @@ import type { Source } from "@/lib/ai/protocol";
  * Renders a model answer as plain React text (never as HTML). Citations [n] become links to the
  * source page; numbers with no matching source are dropped by the parser.
  */
-export function AnswerText({ text, sources }: { text: string; sources: Source[] }) {
+export function AnswerText({
+  text,
+  sources,
+  streaming = false,
+}: {
+  text: string;
+  sources: Source[];
+  /** Shows a caret after the last word while the answer is still arriving. */
+  streaming?: boolean;
+}) {
   const blocks = parseBlocks(text, sources.length);
+  const caret = streaming ? <span aria-hidden="true" className="grid-caret" /> : null;
   const renderInline = (parts: Inline[]) =>
     parts.map((p, i) => {
       if (p.kind === "text") return <span key={i}>{p.text}</span>;
@@ -35,7 +45,10 @@ export function AnswerText({ text, sources }: { text: string; sources: Source[] 
     <div className="space-y-2 text-[15px] leading-relaxed text-text">
       {blocks.map((b, i) =>
         b.kind === "p" ? (
-          <p key={i}>{renderInline(b.inline)}</p>
+          <p key={i}>
+            {renderInline(b.inline)}
+            {i === blocks.length - 1 ? caret : null}
+          </p>
         ) : (
           <ul key={i} className="space-y-1.5">
             {b.items.map((item, j) => (
@@ -43,7 +56,10 @@ export function AnswerText({ text, sources }: { text: string; sources: Source[] 
                 <span aria-hidden="true" className="text-accent">
                   ›
                 </span>
-                <span>{renderInline(item)}</span>
+                <span>
+                  {renderInline(item)}
+                  {i === blocks.length - 1 && j === b.items.length - 1 ? caret : null}
+                </span>
               </li>
             ))}
           </ul>

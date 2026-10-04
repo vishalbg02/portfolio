@@ -2,16 +2,20 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
-import { LANGS, LANG_LABEL } from "@/lib/ai/lang";
+import { LANGS, LANG_LABEL, type Lang } from "@/lib/ai/lang";
 import { MODE_LABEL, MODE_SUGGESTIONS, BRIEF_PROMPT, availableModes } from "@/lib/ai/modes";
 import type { ChatMode } from "@/lib/ai/protocol";
 import { inputLimit } from "@/lib/ai/agent/jd";
+import { TOOL_DONE, TOOL_WORKING, type DemoScene } from "@/lib/grid/demo";
 import { gridStore, type Msg } from "@/lib/grid/store";
 import { toTranscript } from "@/lib/grid/export";
 import { useGridStore } from "@/lib/grid/use-store";
+import { copyText } from "@/lib/clipboard";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils/cn";
 import { AnswerText } from "./AnswerText";
 import { PartView } from "./cards/PartView";
+import { DemoReel } from "./DemoReel";
 import { GridFace, type FaceState } from "./GridFace";
 import { SourcesRow } from "./SourcesRow";
 import { usePresence } from "@/lib/live/use-presence";
@@ -20,18 +24,6 @@ import { useVoice } from "./voice/useVoice";
 const MODE_NOTE: Partial<Record<ChatMode, string>> = {
   offline: "Offline mode — answered straight from this site's content, no AI.",
   refusal: "I only answer questions about Vishal.",
-};
-
-const TOOL_LABEL: Record<string, string> = {
-  search_profile: "Searching his profile",
-  navigate: "Taking you there",
-  show_project: "Pulling up the project",
-  play_demo: "Opening the walkthrough",
-  show_diagram: "Drawing the architecture",
-  show_skill_evidence: "Finding the evidence",
-  match_job: "Matching the job description",
-  get_contact: "Getting his contact details",
-  get_site_stats: "Reading the site's numbers",
 };
 
 /** Stops a runaway paste in the field itself; the real limit is `inputLimit`. */
@@ -65,6 +57,7 @@ export function GridChat({
   controls,
   onJump,
   onLive,
+  demo,
 }: {
   variant: "inline" | "sheet";
   autoFocus?: boolean;
@@ -74,6 +67,8 @@ export function GridChat({
   onJump?: () => void;
   /** Opens "Message Vishal" (the live chat) in the same panel. */
   onLive?: () => void;
+  /** Scripted exchanges to play in the empty chat (the Ask section); the sheet has none. */
+  demo?: DemoScene[];
 }) {
   const { messages, mode, lang, busy, ai } = useGridStore();
   const presence = usePresence();
@@ -84,6 +79,7 @@ export function GridChat({
   const uid = useId();
   const last = messages.at(-1);
   const empty = messages.length === 0;
+  const showDemo = Boolean(demo?.length);
   const limit = inputLimit(input);
   const tooLong = input.length > limit;
 
@@ -169,8 +165,13 @@ export function GridChat({
         variant === "sheet" ? "h-full" : "rounded-card border border-border bg-surface",
       )}
     >
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <GridFace state={face} size={32} label={`GRID is ${face === "idle" ? "ready" : face}`} />
+      <div className="relative flex items-center gap-3 border-b border-border px-4 py-3">
+        {busy ? (
+          <span aria-hidden="true" className="grid-activity">
+            <span />
+          </span>
+        ) : null}
+        <GridFace state={face} size={36} label={`GRID is ${face === "idle" ? "ready" : face}`} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-mono text-sm text-text">GRID</p>
           <p className="flex items-center gap-1.5 truncate font-mono text-[11px] whitespace-nowrap text-muted">
@@ -207,71 +208,53 @@ export function GridChat({
         {controls}
       </div>
 
-      <div
-        className="flex items-center gap-1.5 overflow-x-auto border-b border-border px-4 py-2.5 sm:flex-wrap"
-        role="group"
-        aria-label="Mode"
-      >
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => ask(BRIEF_PROMPT)}
-          className="inline-flex min-h-8 shrink-0 items-center rounded-pill border border-accent px-3 font-mono text-xs whitespace-nowrap text-accent transition-colors hover:bg-accent hover:text-bg disabled:opacity-50 pointer-coarse:min-h-11"
-        >
-          {BRIEF_PROMPT}
-        </button>
-        {onLive ? (
+      <div className="space-y-2.5 border-b border-border px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={onLive}
-            className="inline-flex min-h-8 shrink-0 items-center gap-2 rounded-pill border border-border-2 px-3 font-mono text-xs whitespace-nowrap text-text transition-colors hover:border-accent hover:text-accent pointer-coarse:min-h-11"
+            disabled={busy}
+            onClick={() => ask(BRIEF_PROMPT)}
+            className="inline-flex min-h-8 items-center rounded-pill border border-accent px-3 font-mono text-xs whitespace-nowrap text-accent transition-colors hover:bg-accent hover:text-bg disabled:opacity-50 pointer-coarse:min-h-11"
           >
-            <span
-              aria-hidden="true"
-              className={cn(
-                "size-2 rounded-pill",
-                presence?.configured && presence.state === "online" ? "bg-accent" : "border border-muted",
-              )}
-            />
-            Message Vishal
-            <span className="sr-only">
-              {presence?.configured ? `: ${presence.state === "online" ? "online" : "away"}` : ""}
-            </span>
+            {BRIEF_PROMPT}
           </button>
-        ) : null}
-        {availableModes().map((m) => (
-          <button
-            key={m}
-            type="button"
-            aria-pressed={mode === m}
-            onClick={() => gridStore.setMode(m)}
-            className={cn(
-              "inline-flex min-h-8 shrink-0 items-center rounded-pill border px-3 font-mono text-xs whitespace-nowrap transition-colors pointer-coarse:min-h-11",
-              mode === m
-                ? "border-border-2 bg-surface-2 text-text"
-                : "border-border text-muted hover:border-border-2 hover:text-text",
-            )}
-          >
-            {MODE_LABEL[m]}
-          </button>
-        ))}
-        <span aria-hidden="true" className="mx-0.5 h-5 w-px shrink-0 bg-border" />
-        <div role="group" aria-label="Reply language" className="flex shrink-0 items-center gap-1.5">
-          {LANGS.map((l) => (
+          {onLive ? (
             <button
-              key={l}
               type="button"
-              aria-pressed={lang === l}
-              lang={l === "kn" ? "kn" : l === "hi" ? "hi" : undefined}
-              onClick={() => gridStore.setLang(l)}
+              onClick={onLive}
+              className="inline-flex min-h-8 items-center gap-2 rounded-pill border border-border-2 px-3 font-mono text-xs whitespace-nowrap text-text transition-colors hover:border-accent hover:text-accent pointer-coarse:min-h-11"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "size-2 rounded-pill",
+                  presence?.configured && presence.state === "online" ? "bg-accent" : "border border-muted",
+                )}
+              />
+              Message Vishal
+              <span className="sr-only">
+                {presence?.configured ? `: ${presence.state === "online" ? "online" : "away"}` : ""}
+              </span>
+            </button>
+          ) : null}
+        </div>
+        <div
+          role="group"
+          aria-label="Mode"
+          className="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-pill border border-border p-0.5"
+        >
+          {availableModes().map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={mode === m}
+              onClick={() => gridStore.setMode(m)}
               className={cn(
-                "inline-flex min-h-8 items-center rounded-pill border px-2.5 font-mono text-xs whitespace-nowrap transition-colors pointer-coarse:min-h-11",
-                lang === l
-                  ? "border-border-2 bg-surface-2 text-text"
-                  : "border-border text-muted hover:border-border-2 hover:text-text",
+                "inline-flex min-h-7 shrink-0 items-center rounded-pill px-3 font-mono text-xs whitespace-nowrap transition-colors pointer-coarse:min-h-10",
+                mode === m ? "bg-surface-2 text-text" : "text-muted hover:text-text",
               )}
             >
-              {LANG_LABEL[l]}
+              {MODE_LABEL[m]}
             </button>
           ))}
         </div>
@@ -289,91 +272,152 @@ export function GridChat({
         aria-label="Conversation with GRID"
         className={cn(
           "overflow-y-auto px-4 py-4",
-          variant === "sheet" ? "min-h-0 flex-1" : "max-h-[520px] min-h-[260px]",
+          variant === "sheet"
+            ? "min-h-0 flex-1"
+            : empty && showDemo
+              ? "min-h-[260px]"
+              : "max-h-[520px] min-h-[260px]",
         )}
       >
         <div ref={inner} className="space-y-5">
           {empty ? (
-            <div>
-              <p className="text-sm text-muted">
-                I&apos;m GRID, Vishal&apos;s AI. Ask about his work, skills or experience (answers come only
-                from this site, with sources), or ask me to show you something: a project, an architecture
-                diagram, where he used a skill. Paste a job description and I&apos;ll match it.
-              </p>
-              <ul className="mt-4 flex flex-wrap gap-2" aria-label="Suggested questions">
-                {MODE_SUGGESTIONS[mode].map((s) => (
-                  <li key={s}>
-                    <button type="button" onClick={() => ask(s)} className={chip}>
-                      {s}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <div className="space-y-4">
+              {demo && showDemo ? (
+                <DemoReel scenes={demo} onTry={ask} />
+              ) : (
+                <p className="text-sm text-muted">
+                  I&apos;m GRID, Vishal&apos;s AI. Ask about his work, skills or experience (answers come only
+                  from this site, with sources), or ask me to show you something: a project, an architecture
+                  diagram, where he used a skill. Paste a job description and I&apos;ll match it.
+                </p>
+              )}
+              <div className={showDemo ? "pt-3" : undefined}>
+                {showDemo ? (
+                  <p className="mb-2.5 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
+                    Or ask your own
+                  </p>
+                ) : null}
+                <ul
+                  className={cn(showDemo ? "grid gap-2 sm:grid-cols-2" : "flex flex-wrap gap-2")}
+                  aria-label="Suggested questions"
+                >
+                  {MODE_SUGGESTIONS[mode].map((s) => (
+                    <li key={s}>
+                      <button
+                        type="button"
+                        onClick={() => ask(s)}
+                        className={cn(
+                          chip,
+                          showDemo && "min-h-11 w-full rounded-card px-3.5 py-2 leading-snug",
+                        )}
+                      >
+                        {s}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           ) : null}
 
-          {messages.map((m, i) =>
-            m.role === "user" ? (
-              <div key={m.id} className="flex justify-end">
-                <p className="max-w-[85%] rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-[15px] whitespace-pre-wrap text-text">
-                  {m.text}
-                </p>
-              </div>
-            ) : (
-              <div key={m.id} className="max-w-[96%] space-y-3" aria-busy={m.pending}>
-                {m.tools
-                  .filter((t) => t.state === "running")
-                  .map((t) => (
-                    <p key={t.id} role="status" className="font-mono text-xs text-muted">
-                      <span aria-hidden="true" className="mr-2 text-accent">
-                        ▸
-                      </span>
-                      {TOOL_LABEL[t.name] ?? "Working"}
-                      <span className="animate-blink">…</span>
-                    </p>
+          {messages.map((m, i) => {
+            if (m.role === "user")
+              return (
+                <div key={m.id} className="flex justify-end">
+                  <p className="max-w-[85%] rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-[15px] whitespace-pre-wrap text-text">
+                    {m.text}
+                  </p>
+                </div>
+              );
+            const live = i === messages.length - 1 && busy;
+            return (
+              <div key={m.id} className="flex max-w-[98%] items-start gap-2.5" aria-busy={m.pending}>
+                <GridFace
+                  state={live ? face : "idle"}
+                  still={!live}
+                  size={24}
+                  className="mt-0.5 max-sm:hidden"
+                />
+                <div className="min-w-0 flex-1 space-y-3">
+                  {m.tools.map((t) =>
+                    t.state === "running" ? (
+                      <p key={t.id} role="status" className="font-mono text-xs text-muted">
+                        <span aria-hidden="true" className="mr-2 text-accent">
+                          ▸
+                        </span>
+                        {TOOL_WORKING[t.name]}
+                        <span className="animate-blink">…</span>
+                      </p>
+                    ) : t.state === "done" ? (
+                      <p key={t.id} className="font-mono text-[11px] text-muted">
+                        <span aria-hidden="true" className="mr-2 text-accent">
+                          ✓
+                        </span>
+                        {TOOL_DONE[t.name]}
+                      </p>
+                    ) : null,
+                  )}
+                  {m.parts.map((p) => (
+                    <PartView
+                      key={p.id}
+                      part={p.part}
+                      done={p.done}
+                      onResolve={(d) => gridStore.resolvePart(m.id, p.id, d)}
+                      onAsk={busy ? undefined : ask}
+                    />
                   ))}
-                {m.parts.map((p) => (
-                  <PartView
-                    key={p.id}
-                    part={p.part}
-                    done={p.done}
-                    onResolve={(d) => gridStore.resolvePart(m.id, p.id, d)}
-                    onAsk={busy ? undefined : ask}
-                  />
-                ))}
-                {m.pending &&
-                !m.text &&
-                m.tools.every((t) => t.state !== "running") &&
-                m.parts.length === 0 ? (
-                  <p className="font-mono text-sm text-muted" role="status">
-                    Thinking<span className="animate-blink">…</span>
-                  </p>
-                ) : m.text ? (
-                  <AnswerText text={m.text} sources={m.sources} />
-                ) : null}
-                {m.mode && MODE_NOTE[m.mode] ? (
-                  <p className="font-mono text-[11px] text-muted">{MODE_NOTE[m.mode]}</p>
-                ) : null}
-                {m.error ? (
-                  <p role="alert" className="text-sm text-danger">
-                    {m.error}
-                  </p>
-                ) : null}
-                <SourcesRow text={m.text} sources={m.sources} onJump={onJump} />
-                {i === messages.length - 1 && !busy && m.followups.length > 0 ? (
-                  <ul className="flex flex-wrap gap-2 pt-1" aria-label="Suggested follow-ups">
-                    {m.followups.map((f) => (
-                      <li key={f}>
-                        <button type="button" onClick={() => ask(f)} className={chip}>
-                          {f}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
+                  {m.pending &&
+                  !m.text &&
+                  m.tools.every((t) => t.state !== "running") &&
+                  m.parts.length === 0 ? (
+                    <p className="font-mono text-sm text-muted" role="status">
+                      Thinking<span className="animate-blink">…</span>
+                    </p>
+                  ) : m.text ? (
+                    <AnswerText text={m.text} sources={m.sources} streaming={Boolean(m.pending)} />
+                  ) : null}
+                  {m.mode && MODE_NOTE[m.mode] ? (
+                    <p className="font-mono text-[11px] text-muted">{MODE_NOTE[m.mode]}</p>
+                  ) : null}
+                  {m.error ? (
+                    <p role="alert" className="text-sm text-danger">
+                      {m.error}
+                    </p>
+                  ) : null}
+                  <SourcesRow text={m.text} sources={m.sources} onJump={onJump} />
+                  {m.text && !m.pending && !m.error ? (
+                    <button
+                      type="button"
+                      onClick={async () =>
+                        (await copyText(m.text)) ? toast.success("Copied") : toast.error("Couldn't copy")
+                      }
+                      className={cn(small, "-ml-1 inline-flex items-center gap-1.5 px-1")}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" />
+                        <path
+                          d="M8 4V2.5A1.5 1.5 0 0 0 6.5 1h-4A1.5 1.5 0 0 0 1 2.5v4A1.5 1.5 0 0 0 2.5 8H4"
+                          stroke="currentColor"
+                        />
+                      </svg>
+                      Copy answer
+                    </button>
+                  ) : null}
+                  {i === messages.length - 1 && !busy && m.followups.length > 0 ? (
+                    <ul className="flex flex-wrap gap-2 pt-1" aria-label="Suggested follow-ups">
+                      {m.followups.map((f) => (
+                        <li key={f}>
+                          <button type="button" onClick={() => ask(f)} className={chip}>
+                            {f}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
               </div>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
 
@@ -387,7 +431,7 @@ export function GridChat({
         <label htmlFor={`${uid}-in`} className="sr-only">
           Ask GRID
         </label>
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-2 rounded-card border border-border bg-bg p-2 transition-colors focus-within:border-accent hover:border-border-2 focus-within:hover:border-accent">
           <textarea
             id={`${uid}-in`}
             ref={field}
@@ -405,7 +449,7 @@ export function GridChat({
                 submit();
               }
             }}
-            className="min-h-11 flex-1 resize-none rounded-sm border border-border bg-bg px-3 py-2 text-[15px] text-text placeholder:text-muted hover:border-border-2 focus:border-accent focus:outline-none"
+            className="min-h-11 flex-1 resize-none bg-transparent px-2 py-2 text-[15px] text-text placeholder:text-muted focus:outline-none"
           />
           {voice.support.listen ? (
             <button
@@ -421,8 +465,10 @@ export function GridChat({
                 }
               }}
               className={cn(
-                "inline-flex size-11 shrink-0 items-center justify-center rounded-sm border transition-colors hover:border-border-2",
-                voice.listening ? "border-accent text-accent" : "border-border text-muted hover:text-text",
+                "inline-flex size-11 shrink-0 items-center justify-center rounded-sm border transition-colors",
+                voice.listening
+                  ? "border-accent text-accent"
+                  : "border-transparent text-muted hover:border-border-2 hover:text-text",
               )}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -459,10 +505,13 @@ export function GridChat({
                 : voice.note}
           </p>
         ) : null}
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
           <p
             id={`${uid}-hint`}
-            className={cn("font-mono text-[11px]", tooLong ? "text-danger" : "text-muted")}
+            className={cn(
+              "font-mono text-[11px]",
+              tooLong ? "text-danger" : "text-muted max-sm:hidden pointer-coarse:hidden",
+            )}
           >
             {tooLong
               ? `Too long: ${input.length}/${limit} characters.`
@@ -470,24 +519,41 @@ export function GridChat({
                 ? `${input.length}/${limit}`
                 : "Enter to send · Shift+Enter for a new line"}
           </p>
-          {messages.length > 0 ? (
-            <span className="flex items-center gap-3">
-              <button type="button" onClick={download} className={small}>
-                Export
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  voice.stopSpeaking();
-                  gridStore.reset();
-                  setInput("");
-                }}
-                className={small}
+          <span className="flex items-center gap-3 max-sm:w-full max-sm:justify-between">
+            <label className="flex items-center gap-1.5 font-mono text-[11px] text-muted">
+              Reply in
+              <select
+                aria-label="Reply language"
+                value={lang}
+                onChange={(e) => gridStore.setLang(e.target.value as Lang)}
+                className="min-h-7 cursor-pointer rounded-sm border border-border bg-bg px-1.5 font-mono text-[11px] text-text hover:border-border-2 focus-visible:border-accent pointer-coarse:min-h-11"
               >
-                New chat
-              </button>
-            </span>
-          ) : null}
+                {LANGS.map((l) => (
+                  <option key={l} value={l} lang={l === "kn" ? "kn" : l === "hi" ? "hi" : undefined}>
+                    {LANG_LABEL[l]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {messages.length > 0 ? (
+              <span className="flex items-center gap-3">
+                <button type="button" onClick={download} className={small}>
+                  Export
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    voice.stopSpeaking();
+                    gridStore.reset();
+                    setInput("");
+                  }}
+                  className={small}
+                >
+                  New chat
+                </button>
+              </span>
+            ) : null}
+          </span>
         </div>
       </form>
     </div>

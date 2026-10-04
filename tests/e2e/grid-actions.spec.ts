@@ -330,16 +330,16 @@ test.describe("language and voice", () => {
     });
     await gotoReady(page, "/");
     await page.getByRole("link", { name: "Ask GRID", exact: true }).first().click();
-    const langs = sheet(page).getByRole("group", { name: "Reply language" });
-    await expect(langs.getByRole("button", { name: "Auto" })).toHaveAttribute("aria-pressed", "true");
-    await langs.getByRole("button", { name: "ಕನ್ನಡ" }).click();
-    await expect(langs.getByRole("button", { name: "ಕನ್ನಡ" })).toHaveAttribute("aria-pressed", "true");
+    const langs = sheet(page).getByRole("combobox", { name: "Reply language" });
+    await expect(langs).toHaveValue("auto");
+    await langs.selectOption({ label: "ಕನ್ನಡ" });
+    await expect(langs).toHaveValue("kn");
     const box = sheet(page).getByRole("textbox", { name: "Ask GRID" });
     await box.fill("What has he built?");
     await box.press("Enter");
     await expect(sheet(page).getByText("ಉತ್ತರ")).toBeVisible();
     expect(bodies[0]!.lang).toBe("kn");
-    await langs.getByRole("button", { name: "Auto" }).click();
+    await langs.selectOption({ label: "Auto" });
     await box.fill("And his skills?");
     await box.press("Enter");
     await expect.poll(() => bodies.length).toBe(2);
@@ -470,10 +470,7 @@ test.describe("language and voice", () => {
     });
     await gotoReady(page, "/");
     await page.getByRole("link", { name: "Ask GRID", exact: true }).first().click();
-    await sheet(page)
-      .getByRole("group", { name: "Reply language" })
-      .getByRole("button", { name: "हिन्दी" })
-      .click();
+    await sheet(page).getByRole("combobox", { name: "Reply language" }).selectOption({ label: "हिन्दी" });
     await sheet(page).getByRole("button", { name: "Speak your question" }).click();
     expect(await page.evaluate(() => (window as unknown as { __recLang: string }).__recLang)).toBe("hi-IN");
   });

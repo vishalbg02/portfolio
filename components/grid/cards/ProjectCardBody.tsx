@@ -15,7 +15,16 @@ const action =
  * so the same card renders in the chat and, on the server, in the Ask section's example. `actions` is a slot
  * for the chat's "show the diagram / play the walkthrough" buttons.
  */
-export function ProjectCardBody({ part, actions }: { part: Project; actions?: ReactNode }) {
+export function ProjectCardBody({
+  part,
+  actions,
+  compact = false,
+}: {
+  part: Project;
+  actions?: ReactNode;
+  /** A shorter picture, for the Ask section's demo where height is at a premium. */
+  compact?: boolean;
+}) {
   const img = part.image;
   return (
     <article
@@ -26,7 +35,8 @@ export function ProjectCardBody({ part, actions }: { part: Project; actions?: Re
       {img ? (
         <div
           className={cn(
-            "stage-grid relative flex h-[150px] items-center justify-center overflow-hidden border-b border-border",
+            "stage-grid relative flex items-center justify-center overflow-hidden border-b border-border",
+            compact ? "h-[112px]" : "h-[150px]",
             img.frame === "phone" ? "py-3" : "",
           )}
         >

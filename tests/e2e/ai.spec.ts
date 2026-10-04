@@ -29,9 +29,11 @@ test.describe("GRID: inline section (offline mode: the e2e server has no API key
   }) => {
     const { section } = await openInline(page);
     await expect(section.getByRole("heading", { name: "Meet GRID, my AI" })).toBeVisible();
-    // a real example exchange, server-rendered: the project card is the one GRID draws
+    // the demo plays real exchanges (the router's own answers): pause it on the first and the project card is the one GRID draws
     const example = section.getByRole("figure", { name: "An example conversation with GRID" });
-    await expect(example.getByText("Show me Talnio")).toBeVisible();
+    await example.getByRole("button", { name: "Pause demo" }).click();
+    await example.getByRole("button", { name: /^Example 1 of 4/ }).click();
+    await expect(example.getByTestId("demo-question")).toHaveText("Show me Talnio");
     await expect(example.locator('[data-grid-card="project"]')).toBeVisible();
     await expect(section.getByRole("link", { name: "Draws architecture" })).toBeVisible();
     await expect(section.getByText("Vishal's AI · offline mode")).toBeVisible();

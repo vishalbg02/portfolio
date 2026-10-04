@@ -81,8 +81,11 @@ export function PartView({
   onAsk,
   done,
   onResolve,
+  compact = false,
 }: {
   part: UiPart;
+  /** Smaller cards, for the demo in the Ask section. */
+  compact?: boolean;
   onAsk?: (q: string) => void;
   /** What the visitor did with a card that asks for a decision, so it is not offered again after a reload. */
   done?: "sent" | "cancelled";
@@ -93,6 +96,7 @@ export function PartView({
       return (
         <ProjectCardBody
           part={part}
+          compact={compact}
           actions={
             onAsk ? (
               <>

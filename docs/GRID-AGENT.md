@@ -93,3 +93,23 @@ limits, a daily budget (`AI_DAILY_LIMIT`), input caps and output caps. Model IDs
 | `RESEND_API_KEY`, `CONTACT_TO_EMAIL`     | messages to his inbox (and the contact form)          |
 
 Everything is optional: with none of them the site builds and runs, and GRID answers offline.
+
+## The Ask section's intro
+
+The home page's Ask section (`components/sections/AskVishal.tsx`) opens with a pitch, four promises (each is something
+the code does), and eight capability cards, each a link that opens GRID with its question. Beside them the chat loads
+lazily (`LazyGridChat`) and its empty state plays a **demo**:
+
+- `DemoReel` loops four exchanges: _Show me Talnio_, _Where did he use Spring Boot?_, _Take me to contact_, _Can I book a
+  call with him?_ Each is the **deterministic router's real answer** (`lib/ai/agent/demo.ts` calls `routeIntent`; nothing
+  is scripted by hand), so the demo can only show cards GRID really draws. The questions need no model and no network at
+  build time; the unit test fails if the router stops answering one, and keeps live presence and site stats out of it.
+- The timeline is a pure function (`frameAt` in `lib/grid/demo.ts`): type the question, send, think, the tool's working
+  line, the card, the answer typed with its citations, hold. The face follows the phase.
+- It is decorative to assistive tech: the stage is `aria-hidden` and `inert`, and a visually hidden caption carries the
+  same example as text. There is a Pause/Play button (WCAG 2.2.2), dots to choose an example, and "Ask this myself",
+  which sends that question to the real chat. It pauses by itself when scrolled away or in a background tab, and under
+  `prefers-reduced-motion` nothing plays: the first example is already finished and the dots step through them.
+- Heights: the stage is a fixed height and the placeholder (`LazyGridChat`) is as tall as the opened chat, so the section
+  does not change height when the chat loads (e2e checks 390, 768 and 1440 px). If the demo's content or the chat's
+  controls change height, re-measure and update the placeholder's `h-[…]` classes.
