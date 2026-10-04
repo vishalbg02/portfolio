@@ -325,17 +325,22 @@ const clips: Record<string, (b: Browser) => Promise<{ raw: string; trim: number;
       b,
       (p) => open(p, `${VT}/`),
       async (p) => {
+        // After every navigation wait for the campus photo behind the card, or the clip shows a blank white page.
+        const settle = async () => {
+          await p.waitForLoadState("networkidle");
+          await p.waitForTimeout(1_400);
+        };
         await p.waitForTimeout(700);
         await p.getByRole("link", { name: "Enter VR Tour" }).hover();
         await p.waitForTimeout(900);
         await p.getByRole("link", { name: "Meet The Team" }).click();
-        await p.waitForTimeout(2_300);
+        await settle();
         await p.goBack();
-        await p.waitForTimeout(1_200);
+        await settle();
         await p.getByRole("link", { name: "About The Project" }).click();
-        await p.waitForTimeout(2_300);
+        await settle();
         await p.goBack();
-        await p.waitForTimeout(900);
+        await settle();
       },
     ),
 };

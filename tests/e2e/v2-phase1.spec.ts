@@ -102,6 +102,9 @@ test.describe("decode headers", () => {
     await h.scrollIntoViewIfNeeded();
     // overlay (if still running) is hidden from assistive tech; the real heading text is intact
     await expect(h).toHaveText("Where I've shipped");
+    // The effect starts when the heading is 60% visible and lasts ~420 ms. Give it time to have run, so that
+    // "no overlay" below means "finished", not "not started yet".
+    await page.waitForTimeout(1200);
     await expect(page.locator("[data-decoding]")).toHaveCount(0, { timeout: 3000 });
     await expect(h).toHaveText("Where I've shipped");
     expect(await h.locator("[aria-hidden='true']").count()).toBe(0);

@@ -30,7 +30,7 @@ export default function WorkPage() {
       </p>
       <ul className="mt-10 grid gap-4 md:grid-cols-2">
         {profile.projects.map((p) => (
-          <li key={p.slug}>
+          <li key={p.slug} className="min-w-0">
             <ProjectCard project={p} showSummary headingLevel="h2" />
           </li>
         ))}

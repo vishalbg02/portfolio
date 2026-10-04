@@ -9,7 +9,8 @@ import { Chip } from "@/components/ui/Chip";
 import { getMdxComponents } from "@/components/mdx/components";
 import { identityBg } from "@/components/work/identity";
 import { ProjectStatus } from "@/components/work/ProjectStatus";
-import { Sketch } from "@/components/work/Sketch";
+import { Gallery } from "@/components/work/stage/Gallery";
+import { SceneHero } from "@/components/work/stage/SceneHero";
 import { getAdjacentProjects, getAllCaseStudySlugs, getCaseStudy } from "@/lib/content/work";
 import { AskProject } from "@/components/case/AskProject";
 import { CaseToc } from "@/components/case/CaseToc";
@@ -112,11 +113,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
             ))}
           </ul>
         </div>
-        <ViewTransition name={`sketch-${project.slug}`} share="morph" default="none">
-          <div className="rounded-card border border-border bg-surface p-3">
-            <Sketch slug={project.slug} />
-          </div>
-        </ViewTransition>
+        <SceneHero project={project} priority />
       </header>
 
       <dl className="mt-10 grid overflow-hidden rounded-card border border-border bg-surface min-[1100px]:hidden sm:grid-cols-2 lg:grid-cols-4 [&>div]:border-border lg:[&>div]:border-t-0 [&>div:not(:first-child)]:border-t lg:[&>div:not(:first-child)]:border-l sm:[&>div:nth-child(2)]:border-t-0 sm:[&>div:nth-child(even)]:border-l">
@@ -128,6 +125,8 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
         </Glance>
         <Glance label="Status">{glance.status}</Glance>
       </dl>
+
+      <Gallery project={project} />
 
       <div className="case-grid mt-14 min-[1100px]:grid min-[1100px]:grid-cols-[minmax(0,720px)_minmax(0,1fr)] min-[1100px]:gap-14">
         <div className="max-w-4xl min-w-0 min-[1100px]:max-w-none">{content}</div>

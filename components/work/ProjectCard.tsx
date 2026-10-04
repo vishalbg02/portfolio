@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { identityBg } from "./identity";
 import { ProjectStatus } from "./ProjectStatus";
 import { ProjectLinks } from "./ProjectLinks";
-import { Sketch } from "./Sketch";
-import { SketchPlayer } from "./SketchPlayer";
+import { SceneHero } from "./stage/SceneHero";
 
 const MAX_CHIPS = 5;
 export function ProjectCard({
@@ -34,13 +33,7 @@ export function ProjectCard({
         "focus-within:border-border-2 hover:-translate-y-0.5 hover:border-border-2",
       )}
     >
-      <ViewTransition name={`sketch-${project.slug}`} share="morph" default="none">
-        <div>
-          <SketchPlayer>
-            <Sketch slug={project.slug} />
-          </SketchPlayer>
-        </div>
-      </ViewTransition>
+      <SceneHero project={project} />
 
       <div className="mt-5">
         <ProjectStatus project={project} />

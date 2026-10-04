@@ -19,7 +19,8 @@ const EVENTS = [
   "easter_egg_found",
   // V2
   "rail_jump",
-  "work_select",
+  "scene_view",
+  "media_fullscreen",
   "hero_terminal_command",
   "hero_row_expand",
   "dock_tap",

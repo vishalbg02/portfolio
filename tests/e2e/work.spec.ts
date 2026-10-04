@@ -27,10 +27,12 @@ const mockStatus = (page: Page, body = statusBody(), delayMs = 0) =>
     await route.fulfill({ json: body });
   });
 
-/** Desktop stage: select a project on the index and wait for its panel (the grid wipe swaps it in). */
+/**
+ * These tests run with reduced motion, where the Work scenes are plain rows (all visible at once), so each
+ * project's copy, links and status can be checked without scrolling a pinned stage (that is v3-phase1.spec).
+ */
 const showProject = async (page: Page, slug: string) => {
-  await page.locator(`#tab-${slug}`).click();
-  await expect(page.locator(`#panel-${slug}`)).toBeVisible();
+  await expect(page.locator(`.scene[data-project='${slug}']`)).toBeVisible();
 };
 
 const axe = async (page: Page) =>
@@ -39,7 +41,9 @@ const axe = async (page: Page) =>
   ).violations.filter((v) => v.impact === "serious" || v.impact === "critical");
 
 test.describe("work cards & status", () => {
-  test("home shows the four projects on a stage with code-drawn visuals and the right actions", async ({
+  test.use({ reducedMotion: "reduce", viewport: { width: 1280, height: 900 } });
+
+  test("home shows the four projects as scenes with their real captures and the right actions", async ({
     page,
   }) => {
     await mockStatus(page);
@@ -47,14 +51,14 @@ test.describe("work cards & status", () => {
     const work = page.locator("#work");
     for (const slug of SLUGS) {
       await showProject(page, slug);
-      const panel = page.locator(`#panel-${slug}`);
-      await expect(panel.getByRole("img")).toBeVisible();
+      const panel = page.locator(`.scene[data-project='${slug}']`);
+      await expect(panel.locator(".beat[data-active]").getByRole("img")).toBeVisible();
       await expect(panel.getByRole("link", { name: /Case study/ })).toHaveAttribute("href", `/work/${slug}`);
     }
     // Live ↗ only where a live URL exists; Code ↗ only where a repo exists; Google Play only for Talnio
     const has = async (slug: string, name: RegExp) => {
       await showProject(page, slug);
-      return page.locator(`#panel-${slug}`).getByRole("link", { name }).count();
+      return page.locator(`.scene[data-project='${slug}']`).getByRole("link", { name }).count();
     };
     expect([await has("golden-verdict", /^Live/), await has("golden-verdict", /^Code/)]).toEqual([1, 0]);
     expect([await has("talnio", /^Live/), await has("talnio", /^Google Play/)]).toEqual([0, 1]);
@@ -70,7 +74,7 @@ test.describe("work cards & status", () => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
     await showProject(page, "talnio");
-    const talnio = page.locator("#panel-talnio");
+    const talnio = page.locator(".scene[data-project='talnio']");
     await expect(talnio.getByRole("list", { name: "Stack" }).getByRole("listitem")).toHaveCount(7); // 6 + "+2"
     await expect(talnio.getByText("+2")).toBeVisible();
   });
@@ -78,17 +82,19 @@ test.describe("work cards & status", () => {
   test("status badges: skeleton first, then Live · ms / Degraded / static badges", async ({ page }) => {
     await mockStatus(page, statusBody(), 700);
     await gotoReady(page, "/"); // not networkidle: we want to see the skeleton before the status arrives
-    const gv = page.locator("#panel-golden-verdict");
+    const gv = page.locator(".scene[data-project='golden-verdict']");
     await expect(gv.getByRole("status").getByText("Checking status")).toBeVisible();
     await expect(gv.getByText("Live · 142 ms")).toBeVisible();
     await showProject(page, "virtual-tour");
-    await expect(page.locator("#panel-virtual-tour").getByText("Degraded")).toBeVisible();
+    await expect(page.locator(".scene[data-project='virtual-tour']").getByText("Degraded")).toBeVisible();
     await showProject(page, "talnio");
     await expect(
-      page.locator("#panel-talnio").getByText("Live on Google Play", { exact: true }),
+      page.locator(".scene[data-project='talnio']").getByText("Live on Google Play", { exact: true }),
     ).toBeVisible();
     await showProject(page, "lansymphony");
-    await expect(page.locator("#panel-lansymphony").getByText("2nd place · OpenBuild")).toBeVisible();
+    await expect(
+      page.locator(".scene[data-project='lansymphony']").getByText("2nd place · OpenBuild"),
+    ).toBeVisible();
   });
 
   test("offline and fetch-error states render", async ({ page }) => {
@@ -132,21 +138,6 @@ test.describe("work cards & status", () => {
     // the endpoint accepts no URL parameter (no SSRF surface)
     const probe = await request.get("/api/status?url=http://169.254.169.254/");
     expect(Object.keys((await probe.json()).statuses)).toHaveLength(4);
-  });
-
-  test("project visuals idle, run on hover, and are not frozen for touch (see v2-phase0.spec)", async ({
-    page,
-  }) => {
-    await mockStatus(page);
-    await gotoHydrated(page, "/");
-    const card = page.locator("#work article", { hasText: "Golden Verdict" });
-    const state = () =>
-      card.locator(".sk-gv-progress").evaluate((el) => getComputedStyle(el).animationPlayState);
-    await card.scrollIntoViewIfNeeded();
-    // plays for a few seconds when it scrolls into view, then idles
-    await expect.poll(state, { timeout: 12000 }).toBe("paused");
-    await card.hover();
-    expect(await state()).toBe("running");
   });
 
   test("/work lists all projects with summaries and has no serious axe violations", async ({ page }) => {

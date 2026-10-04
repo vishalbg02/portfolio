@@ -31,29 +31,6 @@ test.describe("section rhythm", () => {
   }
 });
 
-test.describe("project sketches", () => {
-  test("play when their project is shown, then idle; a swipe to the next card plays that one", async ({
-    page,
-  }) => {
-    await mockStatus(page);
-    await page.setViewportSize({ width: 390, height: 800 });
-    await page.goto("/");
-    const first = page.locator("#panel-golden-verdict");
-    const second = page.locator("#panel-talnio");
-    await first.scrollIntoViewIfNeeded();
-    await expect(first).toHaveAttribute("data-play", "true");
-    // the svg is genuinely running while playing
-    expect(
-      await first
-        .locator("svg.sketch *")
-        .evaluateAll((els) => els.some((e) => getComputedStyle(e).animationPlayState === "running")),
-    ).toBe(true);
-    await expect(first).toHaveAttribute("data-play", "false", { timeout: 9000 });
-    await second.scrollIntoViewIfNeeded();
-    await expect(second).toHaveAttribute("data-play", "true");
-  });
-});
-
 test.describe("GitHub stats", () => {
   test("shows contributions, active days and longest streak; no 'current streak' and no 'Snapshot' label", async ({
     page,
