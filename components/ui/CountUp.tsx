@@ -16,7 +16,9 @@ export function CountUp({ value, className }: { value: number; className?: strin
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || played.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!el) return;
+    el.textContent = fmt(value); // a new value always shows at once (the animation only plays the first time)
+    if (played.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -37,7 +39,6 @@ export function CountUp({ value, className }: { value: number; className?: strin
     return () => {
       io.disconnect();
       cancelAnimationFrame(raf);
-      if (el) el.textContent = fmt(value); // never leave a half-counted number behind
     };
   }, [value]);
 

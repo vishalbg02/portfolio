@@ -21,7 +21,8 @@
     "resume:diff": "tsx scripts/resume-diff.mts",
     "snapshot:github": "tsx scripts/snapshot-github.mts",
     "embeddings": "tsx scripts/build-embeddings.mts",
-    "check:embeddings": "tsx scripts/check-embeddings.mts"
+    "check:embeddings": "tsx scripts/check-embeddings.mts",
+    "email:preview": "tsx scripts/email-preview.mts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.87",

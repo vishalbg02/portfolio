@@ -108,9 +108,8 @@ test.describe("calendar milestones", () => {
     await gotoHydrated(page, "/");
     const gh = page.locator("#github");
     await gh.scrollIntoViewIfNeeded();
-    const pins = gh.locator("[data-milestone]");
-    await expect(pins).toHaveCount(3);
-    await expect(gh.locator("rect[data-pin-cell]")).toHaveCount(3);
+    await expect(gh.locator("[data-kind=award]")).toHaveCount(2);
+    await expect(gh.locator("rect[data-pin-cell]")).toHaveCount(5); // 2 awards + the 3 busiest days
 
     const hackathon = gh.getByRole("button", { name: /24-Hour Hackathon 2026 — 2nd Place, Feb 2026/ });
     await hackathon.hover();
@@ -126,10 +125,12 @@ test.describe("calendar milestones", () => {
     await page.keyboard.press("Escape");
     await expect(pop).toHaveCount(0);
 
-    // click pins it open; the proof link works
-    const role = gh.getByRole("button", { name: /Started at Golden Verdict, Jan 2026/ });
+    // click pins it open; the proof link works (roles are bands now)
+    const role = gh.getByRole("button", {
+      name: /Full-Stack Developer, Golden Verdict, Jan 2026 – May 2026/,
+    });
     await role.click();
-    await expect(pop).toContainText("freelance role.");
+    await expect(pop).toContainText("Freelance role, ended");
     await expect(pop.getByRole("link", { name: /See the proof/ })).toHaveAttribute(
       "href",
       "/work/golden-verdict",
@@ -174,8 +175,9 @@ test.describe("calendar milestones", () => {
     await group.getByRole("button", { name: "2025" }).click();
     await expect(gh.getByText("Contributions, 2025")).toBeVisible();
     await expect(group.getByRole("button", { name: "2025" })).toHaveAttribute("aria-pressed", "true");
-    // Jun 2025 (Social Agent) and Aug 2025 (OpenBuild) fall inside 2025
-    await expect(gh.locator("[data-milestone]")).toHaveCount(2);
+    // Aug 2025 (OpenBuild) is the one award in 2025; Social Agent (from Jun 2025) is a band
+    await expect(gh.locator("[data-kind=award]")).toHaveCount(1);
+    await expect(gh.locator("[data-band]")).toHaveCount(1);
     await expect(
       gh.getByRole("button", { name: /Windsurf × The AI Collective OpenBuild — 2nd Place/ }),
     ).toBeVisible();
@@ -186,7 +188,7 @@ test.describe("calendar milestones", () => {
 
     await group.getByRole("button", { name: "Last 12 months" }).click();
     await expect(gh.getByText("Contributions, last year")).toBeVisible();
-    await expect(gh.locator("[data-milestone]")).toHaveCount(3);
+    await expect(gh.locator("[data-kind=award]")).toHaveCount(2);
   });
 
   test("the calendar API validates the year and serves a cached calendar", async ({ request }) => {

@@ -52,3 +52,6 @@ next-env.d.ts
 
 # generated résumé preview
 /.resume
+
+# rendered email previews
+.email-preview/

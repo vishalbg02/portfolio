@@ -23,9 +23,9 @@ function weeks(from: string, to: string): ContributionDay[][] {
 
 describe("milestones", () => {
   const all = milestones();
-  it("pins every award and every role start, with month-level dates only", () => {
+  it("pins every award (roles are drawn as bands instead), with month-level dates only", () => {
     expect(all.filter((m) => m.kind === "award")).toHaveLength(profile.recognition.length);
-    expect(all.filter((m) => m.kind === "role")).toHaveLength(profile.experience.length);
+    expect(all).toHaveLength(profile.recognition.length);
     for (const m of all) expect(m.date).toMatch(/^\d{4}-\d{2}$/);
   });
   it("uses the one 'Event — Nth Place' format for awards", () => {
@@ -58,12 +58,12 @@ describe("pinsFor", () => {
     expect(pinsFor(w, [aug24])).toEqual([]);
   });
   it("handles a partial first week by day-of-week, not array index", () => {
-    const w = weeks("2024-05-01", "2024-12-31"); // starts on a Wednesday
+    const w = weeks("2024-08-01", "2024-12-31"); // starts on a Thursday
     const [pin] = pinsFor(
       w,
-      milestones().filter((m) => m.date === "2024-05"),
+      milestones().filter((m) => m.date === "2024-08"),
     );
-    expect(pin!.day).toBe(3);
+    expect(pin!.day).toBe(4);
   });
 });
 
