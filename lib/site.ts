@@ -34,6 +34,9 @@ export const shipped = {
   resume: true, // Phase 4
   recruiter: true, // Phase 6
   terminal: true, // Phase 7
+  interview: false, // V3 Phase 3 (curated interview notes)
+  tour: false, // V3 Phase 6 (guided tour)
+  liveChat: false, // V3 Phase 4
 } as const;
 
 export const navLinks: ReadonlyArray<{ label: string; href: string }> = [

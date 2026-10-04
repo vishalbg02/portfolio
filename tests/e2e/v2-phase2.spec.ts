@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { gotoReady, settleAnimations } from "./helpers";
+import { gotoReady, settleAnimations, ownClient } from "./helpers";
 
 /** V2 · Phase 2: interactive hero terminal and the phone dock. */
 const mockStatus = (page: Page, delayMs = 0) =>
@@ -26,6 +26,8 @@ const run = async (page: Page, cmd: string) => {
   await prompt(page).fill(cmd);
   await prompt(page).press("Enter");
 };
+
+test.beforeEach(async ({ context }) => ownClient(context));
 
 test.describe("hero terminal", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
@@ -129,11 +131,11 @@ test.describe("hero terminal", () => {
     await expect(page).toHaveURL(/\/work\/talnio$/);
   });
 
-  test("ask <question> opens Ask Vishal and sends the question", async ({ page }) => {
+  test("ask <question> opens GRID and sends the question", async ({ page }) => {
     await mockStatus(page);
     await gotoReady(page, "/");
     await run(page, "ask Where is he working now?");
-    const dialog = page.getByRole("dialog", { name: /Ask Vishal/ });
+    const dialog = page.getByRole("dialog", { name: /GRID/ });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("log").getByText("Where is he working now?")).toBeVisible();
     // offline mode in e2e (no key): an answer from the site still arrives
@@ -203,12 +205,15 @@ test.describe("phone dock", () => {
 
   const dock = (page: Page) => page.getByRole("navigation", { name: "Quick links" });
 
-  test("shows Work · Ask · Résumé · Contact on a phone and not on desktop", async ({ page, browser }) => {
+  test("shows Work · Résumé · GRID · Recruiter · Contact on a phone and not on desktop", async ({
+    page,
+    browser,
+  }) => {
     await mockStatus(page);
     await gotoReady(page, "/");
     await expect(dock(page)).toBeVisible();
-    await expect(dock(page).getByRole("link")).toHaveCount(3);
-    await expect(dock(page).getByRole("button", { name: "Ask" })).toBeVisible();
+    await expect(dock(page).getByRole("link")).toHaveCount(4);
+    await expect(dock(page).getByRole("button", { name: "Ask GRID" })).toBeVisible();
     const box = (await dock(page).boundingBox())!;
     expect(box.height).toBeGreaterThanOrEqual(64);
     const desktop = await browser.newPage({ viewport: { width: 1280, height: 800 } });
@@ -218,7 +223,7 @@ test.describe("phone dock", () => {
     await desktop.close();
   });
 
-  test("Work scrolls to the work section; Contact to contact; Résumé navigates; Ask opens the chat", async ({
+  test("Work scrolls to the work section; Contact to contact; Résumé navigates; GRID opens the chat", async ({
     page,
   }) => {
     await mockStatus(page);
@@ -231,8 +236,8 @@ test.describe("phone dock", () => {
     await page.evaluate(() => window.scrollBy(0, -40)); // scrolling up brings the dock back
     await dock(page).getByRole("link", { name: "Work" }).click();
     await expect(page).toHaveURL(/#work$/);
-    await dock(page).getByRole("button", { name: "Ask" }).click();
-    await expect(page.getByRole("dialog", { name: /Ask Vishal/ })).toBeVisible();
+    await dock(page).getByRole("button", { name: "Ask GRID" }).click();
+    await expect(page.getByRole("dialog", { name: /GRID/ })).toBeVisible();
     await page.keyboard.press("Escape");
     await dock(page).getByRole("link", { name: "Résumé" }).click();
     await expect(page).toHaveURL(/\/resume$/);

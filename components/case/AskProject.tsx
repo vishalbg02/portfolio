@@ -1,9 +1,9 @@
 "use client";
 
-import { openChat } from "@/components/chat/ChatLauncher";
+import { openChat } from "@/lib/grid/events";
 import { track } from "@/lib/analytics";
 
-/** "Ask about this project": opens Ask Vishal with a first question, retrieval scoped to this project. */
+/** "Ask about this project": opens GRID with a first question, retrieval scoped to this project. */
 export function AskProject({ slug, name }: { slug: string; name: string }) {
   return (
     <button

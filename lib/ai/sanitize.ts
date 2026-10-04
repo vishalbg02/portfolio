@@ -1,10 +1,18 @@
 /**
+ * Different models spell the same things differently. Groq's gpt-oss writes citations as 【3】 and uses
+ * non-breaking hyphens; both become what the rest of the app understands ([3] and "-").
+ */
+export function normalizeModelText(raw: string): string {
+  return raw.replace(/【\s*(\d{1,2})\s*】/g, "[$1]").replace(/[\u2011\u2010]/g, "-");
+}
+
+/**
  * Model output is untrusted. It is only ever rendered as React text (never as HTML), and on top of
  * that this strips anything that could mislead: links, HTML, code fences and raw URLs.
  * Allowed: paragraphs, "- " bullets, **bold**, and [n] citation markers.
  */
 export function sanitizeAnswer(raw: string): string {
-  return raw
+  return normalizeModelText(raw)
     .replace(/```[\s\S]*?```/g, "") // code fences
     .replace(/<[^>]*>/g, "") // HTML tags
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "") // images

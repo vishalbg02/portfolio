@@ -19,7 +19,7 @@ const RAIL_SECTIONS = [
 ];
 
 /**
- * Home: Hero → Work → Experience → Stack → Live GitHub (with award and role milestones on the calendar) → Ask Vishal → Contact.
+ * Home: Hero → Work → Experience → Stack → Live GitHub (with award and role milestones on the calendar) → Ask GRID → Contact.
  */
 export default function HomePage() {
   return (

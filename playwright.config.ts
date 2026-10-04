@@ -34,6 +34,12 @@ export default defineConfig({
         // Hermetic: blank keys override anything in .env.local, so AI/email/GitHub run in their offline modes.
         env: {
           GEMINI_API_KEY: "",
+          GROQ_API_KEY: "",
+          TELEGRAM_BOT_TOKEN: "",
+          TELEGRAM_CHAT_ID: "",
+          TELEGRAM_WEBHOOK_SECRET: "",
+          LIVE_CHAT_SIGNING_SECRET: "",
+          CRON_SECRET: "",
           RESEND_API_KEY: "",
           GITHUB_TOKEN: "",
           UPSTASH_REDIS_REST_URL: "",

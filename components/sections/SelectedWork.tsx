@@ -10,7 +10,13 @@ import { WorkShowcase } from "@/components/work/stage/WorkShowcase";
 export function SelectedWork() {
   return (
     <section id="work" aria-labelledby="work-label" className="container-page section-y">
-      <SectionHeader prefix="{ }" label="Work" id="work-label" title="Selected work" />
+      <SectionHeader
+        prefix="{ }"
+        label="Work"
+        id="work-label"
+        title="Selected work"
+        ask="Which of his projects should I look at first, and why?"
+      />
       <WorkShowcase />
       <p className="mt-8">
         <Link href="/work" className="font-mono text-sm text-link underline-offset-4 hover:underline">

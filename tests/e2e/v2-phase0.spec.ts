@@ -49,23 +49,26 @@ test.describe("GitHub stats", () => {
 });
 
 test.describe("mobile: nothing floats over the content", () => {
-  test("no floating Ask pill on a phone; Ask is in the menu", async ({ page }) => {
+  test("no Omnibar bar on a phone; GRID is the dock's middle button and is in the menu", async ({ page }) => {
     await mockStatus(page);
     await page.setViewportSize({ width: 360, height: 800 });
     await gotoReady(page, "/");
-    await expect(page.getByRole("button", { name: "Ask Vishal", exact: true })).toBeHidden();
+    await expect(page.getByRole("button", { name: "Ask GRID or run a command" })).toBeHidden();
+    await expect(
+      page.getByRole("navigation", { name: "Quick links" }).getByRole("button", { name: "Ask GRID" }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Open menu" }).click();
     await page
       .getByRole("dialog")
-      .getByRole("button", { name: /Ask Vishal/ })
+      .getByRole("button", { name: /Ask GRID/ })
       .click();
-    await expect(page.getByRole("dialog", { name: /Ask Vishal/ })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: /GRID/ })).toBeVisible();
   });
 
-  test("the floating Ask pill still exists on desktop", async ({ page }) => {
+  test("the Omnibar bar exists on desktop", async ({ page }) => {
     await mockStatus(page);
     await page.setViewportSize({ width: 1280, height: 800 });
     await gotoReady(page, "/");
-    await expect(page.getByRole("button", { name: "Ask Vishal", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ask GRID or run a command" })).toBeVisible();
   });
 });

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { ProjectSlugSchema, type ProjectSlug } from "@/lib/content/profile-schema";
+import { inputLimit } from "./agent/jd";
 import { LIMITS } from "./limits";
+import { isMode, type GridMode } from "./modes";
 import type { ChatMessage } from "./protocol";
 
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g;
@@ -13,10 +15,12 @@ const BodySchema = z.object({
     .max(60),
   /** "Ask about this project": retrieval puts this project's chunks first. */
   project: ProjectSlugSchema.optional(),
+  /** GRID's mode (recruiter, engineer…): changes the prompt and the suggestions, nothing else. */
+  mode: z.string().max(16).optional(),
 });
 
 export type ChatValidation =
-  | { ok: true; messages: ChatMessage[]; question: string; project?: ProjectSlug }
+  | { ok: true; messages: ChatMessage[]; question: string; project?: ProjectSlug; mode: GridMode }
   | { ok: false; error: string; status: number };
 
 /**
@@ -34,7 +38,7 @@ export function validateChatRequest(body: unknown): ChatValidation {
   const last = recent[recent.length - 1]!;
   if (last.role !== "user") return { ok: false, error: "last_message_must_be_user", status: 400 };
   if (last.content.length === 0) return { ok: false, error: "empty_message", status: 400 };
-  if (last.content.length > LIMITS.chatInputChars)
+  if (last.content.length > inputLimit(last.content))
     return { ok: false, error: "message_too_long", status: 400 };
 
   // history must start with a user turn and alternate sensibly for the model
@@ -49,7 +53,8 @@ export function validateChatRequest(body: unknown): ChatValidation {
           }
         : { ...m, content: m.content.slice(0, LIMITS.chatInputChars) },
     );
-  return { ok: true, messages, question: last.content, project: parsed.data.project };
+  const mode: GridMode = isMode(parsed.data.mode) ? parsed.data.mode : "default";
+  return { ok: true, messages, question: last.content, project: parsed.data.project, mode };
 }
 
 export const MatchBodySchema = z.object({ jd: z.string() });

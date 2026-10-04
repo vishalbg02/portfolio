@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { track } from "@/lib/analytics";
+import { WORK_GO_EVENT } from "@/lib/grid/events";
 import type { ViewerItem } from "./viewer-types";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "../identity";
@@ -269,8 +270,19 @@ export function ShowcaseController({
       }
     };
 
+    // GRID can ask to show a project ("walk me through Talnio"): same movement as the dots and keys.
+    const onWorkGo = (e: Event) => {
+      const d = (e as CustomEvent<{ slug?: string; beat?: number }>).detail;
+      const i = scenes.findIndex((s) => s.slug === d?.slug);
+      if (i < 0) return;
+      const j = d?.beat ?? 0;
+      goScene(i, j);
+      if (!pinnedMq.matches && j > 0) setBeat(i, j);
+    };
+
     el.addEventListener("click", onClick);
     el.addEventListener("keydown", onKey);
+    window.addEventListener(WORK_GO_EVENT, onWorkGo);
 
     /* ── observers ───────────────────────────────────────────────────────────────────────────── */
     // Read the page's scroll only while the section is near the viewport.
@@ -318,6 +330,7 @@ export function ShowcaseController({
     return () => {
       el.removeEventListener("click", onClick);
       el.removeEventListener("keydown", onKey);
+      window.removeEventListener(WORK_GO_EVENT, onWorkGo);
       nearIo.disconnect();
       deckIo.disconnect();
       listen(false);

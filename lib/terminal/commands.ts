@@ -242,12 +242,12 @@ const commands: Record<string, Command> = {
     }),
   },
   ask: {
-    summary: "ask the assistant a question",
+    summary: "ask GRID a question",
     usage: "ask <question>",
     run: (args) => {
       const question = args.join(" ").trim().slice(0, 1000);
       return {
-        lines: [out(question ? `asking: ${question}` : "opening Ask Vishal…", "muted")],
+        lines: [out(question ? `asking: ${question}` : "opening GRID…", "muted")],
         action: question ? { type: "ask", question } : { type: "ask" },
       };
     },

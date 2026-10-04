@@ -90,17 +90,36 @@ test.describe("jump to proof", () => {
     expect(await other.locator("img[src='x']").count()).toBe(0);
   });
 
-  test("in the sheet, using a source closes it so the page underneath is what scrolls", async ({ page }) => {
+  test("on a phone the chat is full screen, so using a source closes it and the page underneath scrolls", async ({
+    page,
+  }) => {
     await mockStatus(page);
     await mockChat(page);
-    await gotoHydrated(page, "/work/talnio"); // the Ask section isn't on this page, so the floating button opens the sheet
-    await page.getByRole("button", { name: "Ask Vishal" }).first().click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoHydrated(page, "/work/talnio"); // the Ask section isn't on this page, so the dock's GRID button opens the sheet
+    await page
+      .getByRole("navigation", { name: "Quick links" })
+      .getByRole("button", { name: "Ask GRID" })
+      .click();
     const dialog = page.getByRole("dialog");
     await dialog.getByRole("textbox").fill("How was it built?");
     await dialog.getByRole("textbox").press("Enter");
     await dialog.getByRole("button", { name: /Jump to .*Experience/ }).click();
     await expect(page).toHaveURL(/\/#(proof=)?experience$/);
     await expect(dialog).toHaveCount(0);
+  });
+
+  test("on a desktop the chat sits beside the page, so using a source leaves it open", async ({ page }) => {
+    await mockStatus(page);
+    await mockChat(page);
+    await gotoHydrated(page, "/work/talnio");
+    await page.keyboard.press("Control+k");
+    await page.keyboard.type("How was it built?");
+    await page.keyboard.press("Enter");
+    const dialog = page.getByRole("dialog", { name: "GRID, Vishal's AI" });
+    await dialog.getByRole("button", { name: /Jump to .*Experience/ }).click();
+    await expect(page).toHaveURL(/\/#(proof=)?experience$/);
+    await expect(dialog).toBeVisible();
   });
 });
 

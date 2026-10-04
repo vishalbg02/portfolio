@@ -3,7 +3,7 @@ import { gridFor, noise } from "@/lib/fx/dissolve";
 import { launchLiveTour } from "@/lib/work/live-tour";
 import { EMBED_ORIGINS } from "@/lib/security/embeds";
 import { profile } from "@/content/profile";
-import { kindOf } from "@/components/work/stage/Scene";
+import { kindOf } from "@/lib/content/kind";
 
 describe("pixel dissolve", () => {
   it("noise is stable, in [0, 1), and spread out (so the squares don't flip in a line)", () => {

@@ -1,7 +1,7 @@
 import { simulateReadableStream } from "ai";
 import { MockEmbeddingModelV4, MockLanguageModelV4 } from "ai/test";
 import { vi } from "vitest";
-import type { AiProvider } from "@/lib/ai/provider";
+import type { AiProvider, Route } from "@/lib/ai/provider";
 import { EventParser, type ChatEvent } from "@/lib/ai/protocol";
 
 const usage = {
@@ -67,10 +67,17 @@ export const jsonModel = (json: unknown) =>
     }),
   });
 
-export function mockProvider(chat: MockLanguageModelV4, match: MockLanguageModelV4 = chat): AiProvider {
+/** One route per model, in the order given (the first is tried first). */
+export const routes = (...models: MockLanguageModelV4[]): Route[] =>
+  models.map((model, i) => ({ name: `mock-${i + 1}`, model }));
+
+export function mockProvider(
+  chat: MockLanguageModelV4 | MockLanguageModelV4[],
+  match: MockLanguageModelV4 | MockLanguageModelV4[] = chat,
+): AiProvider {
   return {
-    chatModel: () => chat,
-    matchModel: () => match,
+    chatRoutes: () => routes(...[chat].flat()),
+    matchRoutes: () => routes(...[match].flat()),
     embeddingModel: () =>
       new MockEmbeddingModelV4({
         doEmbed: async () => ({ embeddings: [Array(768).fill(0.01)], warnings: [] }),

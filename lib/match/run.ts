@@ -4,6 +4,7 @@ import { consumeDaily } from "@/lib/ai/budget";
 import { LIMITS } from "@/lib/ai/limits";
 import { MATCH_INSTRUCTIONS } from "@/lib/ai/prompts";
 import { getProvider } from "@/lib/ai/provider";
+import { markFailed, markOk, orderRoutes } from "@/lib/ai/routes";
 import { getRetriever } from "@/lib/rag/store";
 import { extractRequirements, yearsRequired } from "./extract";
 import { gradeAll } from "./grade";
@@ -15,28 +16,43 @@ import {
   type Requirement,
 } from "./types";
 
-/** Model-assisted extraction. Returns null on ANY problem so the caller can fall back to keywords. */
+/**
+ * Model-assisted extraction. Tries each route in order (Gemini, then Groq) and returns null on ANY problem, so the
+ * caller falls back to keyword extraction.
+ */
 async function extractWithModel(jd: string): Promise<Requirement[] | null> {
   const provider = getProvider();
   if (!provider) return null;
   if (!(await consumeDaily()).ok) return null;
-  try {
-    const { output } = await generateText({
-      model: provider.matchModel(),
-      instructions: MATCH_INSTRUCTIONS,
-      // The job description is DATA: delimited, never concatenated into the instructions.
-      prompt: `<job_description>\n${jd}\n</job_description>`,
-      output: Output.object({ schema: RequirementsSchema }),
-      maxOutputTokens: LIMITS.matchMaxOutputTokens,
-      temperature: 0,
-      abortSignal: AbortSignal.timeout(LIMITS.requestTimeoutMs),
-    });
-    const parsed = RequirementsSchema.safeParse(output);
-    return parsed.success ? dedupe(parsed.data.requirements) : null;
-  } catch (err) {
-    console.error("[ai] match extraction failed, using keyword extraction:", (err as Error).message);
-    return null;
+  const deadline = AbortSignal.timeout(LIMITS.requestTimeoutMs);
+  for (const route of orderRoutes(provider.matchRoutes())) {
+    if (deadline.aborted) break;
+    try {
+      const { output } = await generateText({
+        model: route.model,
+        instructions: MATCH_INSTRUCTIONS,
+        // The job description is DATA: delimited, never concatenated into the instructions.
+        prompt: `<job_description>\n${jd}\n</job_description>`,
+        output: Output.object({ schema: RequirementsSchema }),
+        maxOutputTokens: LIMITS.matchMaxOutputTokens + (route.extraOutputTokens ?? 0),
+        temperature: 0,
+        ...(route.providerOptions ? { providerOptions: route.providerOptions } : {}),
+        abortSignal: deadline,
+        maxRetries: 0,
+      });
+      const parsed = RequirementsSchema.safeParse(output);
+      if (parsed.success) {
+        markOk(route.name);
+        return dedupe(parsed.data.requirements);
+      }
+      console.error(`[ai] match route ${route.name} returned the wrong shape`);
+    } catch (err) {
+      markFailed(route.name, err);
+      console.error(`[ai] match route ${route.name} failed:`, (err as Error).message);
+    }
   }
+  console.error("[ai] match extraction failed on every route, using keyword extraction");
+  return null;
 }
 
 const dedupe = (reqs: Requirement[]) => {

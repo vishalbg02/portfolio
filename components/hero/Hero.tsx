@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { profile } from "@/content/profile";
-import { ButtonLink } from "@/components/ui/Button";
+import { ButtonLink, buttonClass } from "@/components/ui/Button";
 import { StatusDot } from "@/components/ui/Chip";
 import { LocalTime } from "@/components/layout/LocalTime";
 import { resumeHref } from "@/lib/site";
@@ -61,6 +62,14 @@ export function Hero() {
             </Magnetic>
             <Magnetic>
               <span className="m-1.5 inline-block sm:m-2">
+                {/* A plain link: without JS it goes to the Ask section, with JS GridHost opens the chat. */}
+                <Link href="/#ask" data-grid-open="" className={buttonClass("outline")}>
+                  Ask GRID
+                </Link>
+              </span>
+            </Magnetic>
+            <Magnetic>
+              <span className="m-1.5 inline-block sm:m-2">
                 <ButtonLink
                   href={resumeHref}
                   variant="outline"
@@ -80,6 +89,9 @@ export function Hero() {
               </span>
             </Magnetic>
           </div>
+          <p className="needs-grid mt-4 text-sm text-muted">
+            Ask anything about my work, or let GRID show you around.
+          </p>
         </div>
 
         <div className="min-w-0 lg:self-center">

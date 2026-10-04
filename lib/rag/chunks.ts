@@ -186,8 +186,8 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     text: [
       `This portfolio website was designed and built by ${p.name}.`,
       "It uses Next.js (App Router, static pages), React, TypeScript and Tailwind CSS, and is deployed on Vercel.",
-      "The Ask Vishal assistant answers only from the site's own content using retrieval (keyword search plus embeddings) and a Gemini model; without an API key it falls back to showing relevant passages.",
-      "Other features: a job-description matcher on the résumé page, a one-page Recruiter Mode, a command palette (Ctrl or Cmd + K), live project status badges, a live GitHub contribution calendar, and a downloadable ATS-friendly résumé PDF.",
+      "GRID is the site's AI: it answers only from the site's own content using retrieval (keyword search plus embeddings) with a Gemini model, falling back to a Groq model if Gemini is unavailable, and without any model it falls back to showing relevant passages. It can also show projects, architecture diagrams and walkthroughs, match a pasted job description, and take a visitor to a section.",
+      "Other features: a job-description matcher on the résumé page, a one-page Recruiter Mode, an Omnibar for commands and questions (Ctrl or Cmd + K, or /), live project status badges, a live GitHub contribution calendar, and a downloadable ATS-friendly résumé PDF.",
     ].join(" "),
   });
 
