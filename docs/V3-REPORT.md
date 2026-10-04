@@ -40,7 +40,7 @@ Details live next to the code: [README](../README.md), [GRID-AGENT](GRID-AGENT.m
 | ---------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------ |
 | Home initial JS (gzip, budget 170 KB)                                              | 162.2 KB         | **161.2 KB**                                     |
 | Home CSS (gzip)                                                                    | 14.3 KB          | 18.1 KB                                          |
-| Unit tests                                                                         | 515              | **911**                                          |
+| Unit tests                                                                         | 515              | **913**                                          |
 | End-to-end tests (Playwright)                                                      | 296              | **467**                                          |
 | Production Lighthouse, mobile (performance / accessibility / best practices / SEO) | 0.97 / 1 / 1 / 1 | **0.95** / 1 / 1 / 1 (commit `4c20156`)          |
 | Static pages                                                                       | all              | all (a CI step now fails if one becomes dynamic) |
