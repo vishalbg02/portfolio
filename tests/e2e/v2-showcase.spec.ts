@@ -127,8 +127,13 @@ test.describe("swipe deck (mobile)", () => {
     await dots.nth(2).scrollIntoViewIfNeeded();
     await dots.nth(2).click();
     await expect(dots.nth(2)).toHaveAttribute("aria-current", "true", { timeout: 4000 });
-    const box = (await page.locator("#panel-lansymphony").boundingBox())!;
-    expect(Math.abs(box.x + box.width / 2 - 195)).toBeLessThan(40); // centred in a 390px viewport
+    // the smooth scroll settles with the card centred in the 390px viewport
+    await expect
+      .poll(async () => {
+        const box = (await page.locator("#panel-lansymphony").boundingBox())!;
+        return Math.abs(box.x + box.width / 2 - 195);
+      })
+      .toBeLessThan(40);
   });
 
   test("the home page has no horizontal scroll on a phone", async ({ page }) => {
