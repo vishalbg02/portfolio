@@ -1,84 +1,10 @@
 /*
- * Work showcase. Flat only: the stage background is an SVG pattern of tiny squares (the contribution-graph
- * language), the transition is a grid of squares flipping, no gradients anywhere.
+ * Shared bits of the Work showcase. Flat only: the stage background is an SVG pattern of tiny squares (the
+ * contribution-graph language). The layouts themselves are in work.css.
  */
 .stage-grid {
   background-color: var(--bg);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Crect x='9' y='9' width='2' height='2' fill='%2330363d'/%3E%3C/svg%3E");
-}
-
-/* Sketches in a panel play for a few seconds after it becomes the active one (see ShowcaseShell). */
-[data-play="true"] svg.sketch * {
-  animation-play-state: running;
-}
-
-/* Corner brackets framing the stage */
-.stage-corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-color: var(--border-2);
-  pointer-events: none;
-}
-.stage-corner[data-c="tl"] {
-  top: 10px;
-  left: 10px;
-  border-top: 2px solid;
-  border-left: 2px solid;
-}
-.stage-corner[data-c="tr"] {
-  top: 10px;
-  right: 10px;
-  border-top: 2px solid;
-  border-right: 2px solid;
-}
-.stage-corner[data-c="bl"] {
-  bottom: 10px;
-  left: 10px;
-  border-bottom: 2px solid;
-  border-left: 2px solid;
-}
-.stage-corner[data-c="br"] {
-  bottom: 10px;
-  right: 10px;
-  border-bottom: 2px solid;
-  border-right: 2px solid;
-}
-
-/* Grid wipe between projects: squares flash in and out, staggered diagonally. */
-.wipe {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: inherit;
-}
-.wipe > span {
-  opacity: 0;
-  background: var(--grid-2);
-  animation: wipe-flash 420ms ease-in-out both;
-  animation-delay: calc((var(--c) + var(--r)) * 20ms);
-}
-.wipe > span:nth-child(3n) {
-  background: var(--grid-3);
-}
-.wipe > span:nth-child(5n) {
-  background: var(--grid-1);
-}
-@keyframes wipe-flash {
-  0% {
-    opacity: 0;
-  }
-  45% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
 }
 
 /* The big index numerals: outline in the dark, solid green when active. */
