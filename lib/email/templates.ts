@@ -157,3 +157,29 @@ ${quote(sub.message)}
 export function canAutoReply(from: string | undefined): boolean {
   return Boolean(from) && !/@resend\.dev\b/i.test(from!);
 }
+
+/**
+ * Vishal's reply, emailed to a visitor who left the chat (see lib/live). Plain and short: his words in a quote, one
+ * button back to the thread, and a one-click way to stop. Like the other mail it can only go from a verified domain.
+ */
+export function replyEmail(
+  sub: { name: string },
+  reply: string,
+  links: { thread: string; unsubscribe: string },
+): Email {
+  const first = firstName(sub.name);
+  const subject = "Vishal replied to your message";
+  const host = esc(site.url.replace(/^https?:\/\//, ""));
+  const html = shell({
+    preheader: singleLine(reply).slice(0, 90),
+    title: subject,
+    body: `<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;color:${C.text};font-family:${SANS};">Hi ${esc(first)}, he replied.</h1>
+<p style="margin:0 0 20px 0;font-size:15px;line-height:1.65;color:${C.muted};font-family:${SANS};">You left the chat before he answered, so here it is.</p>
+${label("His reply")}
+${quote(reply)}
+<p style="margin:24px 0 0 0;">${button(links.thread, "Continue the conversation", true)}</p>`,
+    footer: `You're getting this because you left your email in the chat at ${host}. Threads are deleted after 30 days. <a href="${esc(links.unsubscribe)}" style="color:${C.muted};">Stop emails about this conversation</a>.`,
+  });
+  const text = `Hi ${first}, he replied.\n\nYou left the chat before he answered, so here it is.\n\nHis reply:\n${reply}\n\nContinue the conversation: ${links.thread}\n\nYou're getting this because you left your email in the chat at ${site.url}. Threads are deleted after 30 days.\nStop emails about this conversation: ${links.unsubscribe}`;
+  return { subject, html, text };
+}

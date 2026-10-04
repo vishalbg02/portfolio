@@ -1,5 +1,6 @@
 import { LetsBuildBanner } from "@/components/sections/LetsBuildBanner";
 import { ContactFormLoader } from "@/components/sections/ContactFormLoader";
+import { LiveContactButton } from "@/components/live/LiveContactButton";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { profile } from "@/content/profile";
@@ -28,6 +29,7 @@ export function Contact() {
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className="space-y-3">
+          <LiveContactButton />
           <CopyButton label="Email" noun="Email" text={contact.email} event="copy_email" />
           <CopyButton label="Phone" noun="Phone" text={contact.phone} event="copy_phone" />
           <ul className="grid grid-cols-2 gap-3 pt-1">

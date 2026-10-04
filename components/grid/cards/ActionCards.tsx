@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { UiPart } from "@/lib/ai/protocol";
+import { openLive } from "@/lib/grid/events";
 import { ConfirmCard } from "./ConfirmCard";
 import { card, primary, quiet } from "./styles";
 
@@ -96,5 +97,34 @@ export function InterviewCard({
         />
       ) : null}
     </div>
+  );
+}
+
+/** Hand-off to the live chat: where he is right now, and a button that opens the chat starting from GRID's summary. */
+export function LiveCard({ part }: { part: Extract<UiPart, { kind: "live" }> }) {
+  const text =
+    part.state === "online"
+      ? "He's online right now and usually answers within minutes."
+      : part.state === "away"
+        ? `He's away (it's ${part.time} in Bengaluru). Leave a message and your email, and he'll reply there.`
+        : "Live chat isn't switched on right now, but you can leave a message and he'll reply by email.";
+  return (
+    <section data-grid-card="live" aria-label="Message Vishal" className={`${card} p-3.5`}>
+      <p className="flex items-center gap-2 text-sm text-text">
+        <span
+          aria-hidden="true"
+          className={`size-2 shrink-0 rounded-pill ${part.state === "online" ? "bg-accent" : "border border-muted"}`}
+        />
+        {text}
+      </p>
+      <button type="button" className={`${primary} mt-3`} onClick={() => openLive(part.summary)}>
+        {part.state === "off" ? "Leave a message" : "Message Vishal"}
+      </button>
+      {part.summary ? (
+        <p className="mt-2.5 font-mono text-[11px] text-muted">
+          GRID will start your message from what you asked here.
+        </p>
+      ) : null}
+    </section>
   );
 }

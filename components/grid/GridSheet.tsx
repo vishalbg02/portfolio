@@ -3,7 +3,10 @@
 import { Dialog } from "radix-ui";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils/cn";
+import dynamic from "next/dynamic";
 import { GridChat } from "./GridChat";
+
+const LiveChat = dynamic(() => import("@/components/live/LiveChat"), { ssr: false });
 
 const MIN = 340;
 const MAX = 720;
@@ -56,10 +59,18 @@ export default function GridSheet({
   open,
   onOpenChange,
   onClosed,
+  view,
+  onView,
+  prefill,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onClosed: () => void;
+  /** GRID's chat, or "Message Vishal" (the live chat). */
+  view: "grid" | "live";
+  onView: (v: "grid" | "live") => void;
+  /** The start of a message handed to the live chat (a summary of what GRID was asked). */
+  prefill?: string;
 }) {
   const wide = useMedia("(min-width: 768px)");
   const canDock = useMedia(`(min-width: ${DOCK_MIN}px)`);
@@ -109,6 +120,31 @@ export default function GridSheet({
     update({ w: clamp(next, MIN, MAX) });
   };
 
+  const controls = (
+    <>
+      {canDock && wide ? (
+        <button
+          type="button"
+          aria-pressed={layout.dock}
+          aria-label={layout.dock ? "Float the panel over the page" : "Dock the panel beside the page"}
+          title={layout.dock ? "Float over the page" : "Dock beside the page"}
+          onClick={() => update({ dock: !layout.dock })}
+          className={cn(iconBtn, layout.dock && "border-accent text-accent")}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <rect x="1.5" y="2" width="11" height="10" stroke="currentColor" strokeWidth="1.3" />
+            <rect x="8" y="2" width="4.5" height="10" fill="currentColor" />
+          </svg>
+        </button>
+      ) : null}
+      <Dialog.Close aria-label="Close" className={iconBtn}>
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none">
+          <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+      </Dialog.Close>
+    </>
+  );
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} modal={!wide}>
       <Dialog.Portal>
@@ -153,39 +189,19 @@ export default function GridSheet({
               className="absolute inset-y-0 left-0 z-10 w-2 -translate-x-1/2 cursor-col-resize touch-none hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
             />
           ) : null}
-          <GridChat
-            variant="sheet"
-            autoFocus
-            onJump={() => {
-              if (!wide) onOpenChange(false);
-            }}
-            controls={
-              <>
-                {canDock && wide ? (
-                  <button
-                    type="button"
-                    aria-pressed={layout.dock}
-                    aria-label={
-                      layout.dock ? "Float the panel over the page" : "Dock the panel beside the page"
-                    }
-                    title={layout.dock ? "Float over the page" : "Dock beside the page"}
-                    onClick={() => update({ dock: !layout.dock })}
-                    className={cn(iconBtn, layout.dock && "border-accent text-accent")}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <rect x="1.5" y="2" width="11" height="10" stroke="currentColor" strokeWidth="1.3" />
-                      <rect x="8" y="2" width="4.5" height="10" fill="currentColor" />
-                    </svg>
-                  </button>
-                ) : null}
-                <Dialog.Close aria-label="Close" className={iconBtn}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none">
-                    <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" />
-                  </svg>
-                </Dialog.Close>
-              </>
-            }
-          />
+          {view === "live" ? (
+            <LiveChat onBack={() => onView("grid")} controls={controls} prefill={prefill} />
+          ) : (
+            <GridChat
+              variant="sheet"
+              autoFocus
+              onJump={() => {
+                if (!wide) onOpenChange(false);
+              }}
+              onLive={() => onView("live")}
+              controls={controls}
+            />
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

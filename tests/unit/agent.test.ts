@@ -203,8 +203,8 @@ describe("the tools (schemas are the guard)", () => {
     const { tools } = await load();
     const t = tools.buildTools({ sources: new SourceRegistry() });
     expect(Object.keys(t).sort()).toEqual([...TOOL_NAMES].sort());
-    // the live-chat and tour tools arrive with their phases
-    for (const later of ["start_live_chat", "start_tour"]) expect(Object.keys(t)).not.toContain(later);
+    // the tour tool arrives with its phase
+    for (const later of ["start_tour"]) expect(Object.keys(t)).not.toContain(later);
   });
 
   it("rejects what the schema does not allow: a slug, a navigation target, an empty query, a too-short job text", async () => {

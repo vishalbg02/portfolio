@@ -34,6 +34,20 @@ describe("Content-Security-Policy", () => {
     expect(prod).not.toMatch(/https:\/\/\*(?!\.pusher)/); // no wildcard hosts
   });
 
+  it("allows Cloudflare Turnstile only when its site key is set, and only its challenge origin, for scripts, frames and its own call", () => {
+    const cf = "https://challenges.cloudflare.com";
+    const withKey = buildCsp({ isDev: false, isPreview: false, turnstile: true });
+    const directive = (csp: string, name: string) => csp.split("; ").find((d) => d.startsWith(name))!;
+    expect(prod).not.toContain("cloudflare");
+    for (const d of ["script-src", "connect-src", "frame-src"])
+      expect(directive(withKey, d), d).toContain(cf);
+    for (const d of ["default-src", "style-src", "img-src", "font-src", "media-src", "form-action"])
+      expect(directive(withKey, d), d).not.toContain(cf);
+    expect(withKey).not.toMatch(/\*\.cloudflare/);
+    // everything else is exactly as strict as before
+    expect(withKey.replaceAll(` ${cf}`, "")).toBe(prod);
+  });
+
   it("preview builds additionally allow Vercel's preview toolbar — and nothing else changes", () => {
     expect(preview).toContain(
       "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vercel.live",

@@ -3,6 +3,8 @@ import type { GridMode } from "@/lib/ai/modes";
 /** Window events that open GRID's surfaces. Tiny and dependency-free, so any component can use them. */
 export const OPEN_GRID_EVENT = "app:open-grid";
 export const OPEN_OMNIBAR_EVENT = "app:open-omnibar";
+/** Opens the panel on "Message Vishal" (the live chat). */
+export const OPEN_LIVE_EVENT = "app:open-live";
 export const WORK_GO_EVENT = "app:work-go";
 /** The store announces each card GRID produces live, so the page can act on it (take you there, open the demo). */
 export const ACT_EVENT = "app:grid-act";
@@ -21,6 +23,10 @@ export const openGrid = (detail: OpenGridDetail = {}) =>
 
 /** Back-compat name used by the terminal, the dock and "Ask about this project". */
 export const openChat = (question?: string, project?: string) => openGrid({ question, project });
+
+/** Opens the live chat, optionally with the start of a message (GRID hands over a summary of the conversation). */
+export const openLive = (prefill?: string) =>
+  window.dispatchEvent(new CustomEvent<{ prefill?: string }>(OPEN_LIVE_EVENT, { detail: { prefill } }));
 
 /** Focuses the Omnibar (commands and questions in one input). */
 export const openOmnibar = (prefill = "") =>

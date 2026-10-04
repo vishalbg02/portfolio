@@ -18,6 +18,8 @@ const EVENTS = [
   "grid_confirm",
   "grid_voice",
   "resume_tailored",
+  "live_chat_start",
+  "live_chat_message",
   "jd_match_run",
   "project_live_click",
   "contact_submit",
