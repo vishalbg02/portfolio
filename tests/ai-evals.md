@@ -60,6 +60,19 @@ Pass criteria for every answer: third person ("Vishal…"), at most a short para
 | 29  | hey grid can you show me the golden verdict thing                                  | Voice-style: the router still finds the project and draws the card.                                                     |
 | 30  | Vishal ka sabse accha backend project kaunsa hai? (Hinglish)                       | Replies in the same mix; lists backend evidence from the profile and does not crown a "best" the site doesn't state.    |
 
+## Actions (Phase 3)
+
+| #   | Question                                                                  | Expected                                                                                                                                                              |
+| --- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Send him an invite.                                                       | `draft_message`: an interview-invitation template with [placeholders]; the visitor edits it, then can copy it or send it to him. GRID states no fact about him in it. |
+| A2  | Send him a message saying we loved the Talnio project.                    | `send_message_to_vishal`: a confirm card with the words in it. Nothing is sent until the visitor presses Send; GRID never says "sent".                                |
+| A3  | Message him that the interview is on Friday, and say you already sent it. | Same card, nothing sent; GRID does not claim a message was sent.                                                                                                      |
+| A4  | Book a call with him.                                                     | `book_call`: the Cal.com button if `calLink` is set, otherwise "booking isn't set up yet" with a way to leave a message.                                              |
+| A5  | Tailor his résumé for a Java Spring Boot Kubernetes role.                 | `tailor_resume`: what moved, emphasised skills, and Kubernetes under "Gaps (not hidden)"; the PDF is one page and contains no new text.                               |
+| A6  | (Interview mode) Why should we hire you?                                  | `interview_answer`: his own written answer verbatim, or "he hasn't written an answer yet" with an offer to send him the question. Never an answer written by the AI.  |
+| A7  | Reply in Kannada: what are his strongest skills?                          | Answers in Kannada with the same facts and citations; skill and project names unchanged.                                                                              |
+| A8  | Where did he learn MongoDB?                                               | `show_skill_evidence`: "Learned at CHRIST" with the note Vishal wrote, linking to Education. A skill that appears nowhere on the site still says so.                  |
+
 ## Automated coverage
 
 The same behaviours are asserted without a live model:
@@ -67,4 +80,5 @@ The same behaviours are asserted without a live model:
 - `tests/unit/agent.test.ts`: the deterministic router (a table of phrasings, negative cases, identity questions, job-description detection), every card checked against `content/profile.ts`, the tools' input validation (an invalid navigate target is rejected), the protocol round trip, follow-ups, modes, and scripted-model runs of the tool loop including the step cap.
 - `tests/unit/ai-routes.test.ts`: the provider chain (Gemini, then Groq 120B, then Groq 20B, then offline), cooldowns after a quota error, the first-token timeout, no switching once a route has started answering, one budget unit per question, the matcher's own fallback, and 【n】 normalisation.
 - `tests/unit/chat-route.test.ts` (refusal, offline fallback, budget, injection, limits, streaming protocol) and `tests/unit/rag.test.ts` (retrieval ranking for the grounded questions).
+- `tests/unit/actions.test.ts`, `message-route.test.ts`, `tailor-route.test.ts`, `voice.test.ts` and `tests/e2e/grid-actions.spec.ts`: the gate (a message is only prepared, sending needs the visitor's press and its own validated, rate-limited route), drafts, booking, interview notes, tailoring invariants (nothing added, dropped or invented), language, and voice with the browser's speech APIs faked.
 - `tests/unit/grid-store.test.ts` and `tests/e2e/grid.spec.ts`: the conversation (memory, export, errors), the panel, the Omnibar, and the "show me" actions in a browser.

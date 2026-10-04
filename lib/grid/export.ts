@@ -19,6 +19,18 @@ const describe = (p: UiPart): string => {
       return `[card] Went to: ${p.label}`;
     case "match":
       return "[card] Job-description match";
+    case "confirm":
+      return "[card] A message to Vishal, for the visitor to confirm";
+    case "draft":
+      return `[card] Draft: ${p.subject}`;
+    case "resume":
+      return `[card] Tailored résumé${p.role ? ` for ${p.role}` : ""}`;
+    case "book":
+      return p.calLink ? "[card] Book a call" : "[card] Book a call (not set up yet)";
+    case "interview":
+      return p.answer
+        ? `[card] In his own words: ${p.question}`
+        : `[card] No written answer yet: ${p.question}`;
   }
 };
 

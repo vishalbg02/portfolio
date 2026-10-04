@@ -218,6 +218,23 @@ export function skillEvidence(raw: string): UiPart {
   return { kind: "skill", skill, found: where.length > 0, where };
 }
 
+/** "Book a call": the Cal.com link when Vishal has set one, otherwise the card offers a message instead. */
+export const bookPart = (): UiPart => ({
+  kind: "book",
+  calLink: profile.contact.calLink,
+  mailto: profile.contact.email,
+});
+
+/** A message for the visitor to review. The fields are only a proposal: nothing is sent until they confirm. */
+export const confirmPart = (m: { name?: string; email?: string; message?: string }): UiPart => ({
+  kind: "confirm",
+  action: "send_message",
+  name: (m.name ?? "").slice(0, 80),
+  email: (m.email ?? "").slice(0, 200),
+  message: (m.message ?? "").slice(0, 1500),
+  mailto: profile.contact.email,
+});
+
 export function demoPart(slug: string, beat?: number): UiPart | null {
   const p = projectBySlug(slug);
   const scene = sceneFor(slug);

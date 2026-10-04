@@ -199,18 +199,12 @@ describe("the cards (built from content, never from the model)", () => {
 });
 
 describe("the tools (schemas are the guard)", () => {
-  it("lists exactly the nine read-only tools, with no side-effect tool", async () => {
+  it("offers exactly the tools it names, and none of them sends or books anything by itself", async () => {
     const { tools } = await load();
     const t = tools.buildTools({ sources: new SourceRegistry() });
     expect(Object.keys(t).sort()).toEqual([...TOOL_NAMES].sort());
-    for (const side of [
-      "send_message_to_vishal",
-      "tailor_resume",
-      "draft_message",
-      "book_call",
-      "start_live_chat",
-    ])
-      expect(Object.keys(t)).not.toContain(side);
+    // the live-chat and tour tools arrive with their phases
+    for (const later of ["start_live_chat", "start_tour"]) expect(Object.keys(t)).not.toContain(later);
   });
 
   it("rejects what the schema does not allow: a slug, a navigation target, an empty query, a too-short job text", async () => {

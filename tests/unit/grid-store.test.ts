@@ -302,6 +302,62 @@ describe("GRID store: memory", () => {
   });
 });
 
+describe("GRID store: language and decisions", () => {
+  it("sends the chosen language with each question, and nothing for auto", async () => {
+    const { store, calls } = make();
+    await store.send("one");
+    store.setLang("kn");
+    await store.send("two");
+    expect(calls[0]!.opts).toMatchObject({ lang: undefined });
+    expect(calls[1]!.opts).toMatchObject({ lang: "kn" });
+  });
+
+  it("remembers the language across a reload, and ignores one it does not know", () => {
+    const storage = memory();
+    storage.setItem(STORAGE_KEY, JSON.stringify({ v: 1, mode: "default", lang: "hi", messages: [] }));
+    const ok = createGridStore({ storage: () => storage });
+    ok.hydrate();
+    expect(ok.getState().lang).toBe("hi");
+    storage.setItem(STORAGE_KEY, JSON.stringify({ v: 1, lang: "klingon", messages: [] }));
+    const bad = createGridStore({ storage: () => storage });
+    bad.hydrate();
+    expect(bad.getState().lang).toBe("auto");
+  });
+
+  it("a message card stays sent or cancelled after a reload, so it is not offered twice", async () => {
+    const confirm: UiPart = {
+      kind: "confirm",
+      action: "send_message",
+      name: "",
+      email: "",
+      message: "hi there you",
+      mailto: "a@b.co",
+    };
+    const a = make([
+      { t: "meta", mode: "ai", sources: [] },
+      { t: "tool", id: "c1", name: "send_message_to_vishal", state: "running" },
+      { t: "part", id: "c1", part: confirm },
+      { t: "text", d: "Please check it." },
+      { t: "done" },
+    ]);
+    await a.store.send("message him");
+    const bot = a.store.getState().messages.at(-1)!;
+    a.store.resolvePart(bot.id, "c1", "sent");
+    expect(a.store.getState().messages.at(-1)!.parts[0]!.done).toBe("sent");
+    a.store.flush();
+    const again = createGridStore({ storage: () => a.storage });
+    again.hydrate();
+    expect(again.getState().messages.at(-1)!.parts[0]!.done).toBe("sent");
+    // anything else in that field is dropped
+    const raw = JSON.parse(a.storage.data.get(STORAGE_KEY)!);
+    raw.messages.at(-1).parts[0].done = "hacked";
+    a.storage.data.set(STORAGE_KEY, JSON.stringify(raw));
+    const third = createGridStore({ storage: () => a.storage });
+    third.hydrate();
+    expect(third.getState().messages.at(-1)!.parts[0]!.done).toBeUndefined();
+  });
+});
+
 describe("GRID store: modes and status", () => {
   it("counts a mode change once and ignores choosing the same mode again", () => {
     const { store, track } = make();

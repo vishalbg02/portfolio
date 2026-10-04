@@ -50,6 +50,14 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
     ],
   },
   {
+    id: "messages",
+    title: "Messages to Vishal",
+    body: [
+      `If you choose to send a message to ${profile.name} from GRID (you always review it and press Send first), your name, email, the message and the page you were on are delivered to his phone through Telegram and to his inbox through email, so he can reply. They are not kept in a database on this site.`,
+      "Please do not send sensitive information.",
+    ],
+  },
+  {
     id: "abuse",
     title: "Abuse protection",
     body: [

@@ -113,13 +113,18 @@ test.describe("/privacy", () => {
     await page.locator("footer").getByRole("link", { name: "Privacy" }).click();
     await expect(page).toHaveURL(/\/privacy$/);
     await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
-    for (const h of ["Analytics", "Contact form", "GRID (AI assistant)", "Abuse protection"]) {
+    for (const h of [
+      "Analytics",
+      "Contact form",
+      "GRID (AI assistant)",
+      "Messages to Vishal",
+      "Abuse protection",
+    ]) {
       await expect(page.getByRole("heading", { level: 2, name: h })).toBeVisible();
     }
-    // no feature that is not live yet may be described
+    // no feature that is not live yet may be described (messages from GRID go through Telegram since Phase 3)
     const text = (await page.locator("main").innerText()).toLowerCase();
-    for (const word of ["telegram", "live chat", "company link", "turnstile"])
-      expect(text).not.toContain(word);
+    for (const word of ["live chat", "company link", "turnstile"]) expect(text).not.toContain(word);
     const xml = await (await request.get("/sitemap.xml")).text();
     expect(xml).toContain("/privacy</loc>");
   });

@@ -1,8 +1,10 @@
+import { interviewReady } from "@/content/interview";
 import { shipped } from "@/lib/site";
 
 /**
  * GRID's modes. A mode only changes the system prompt and the suggestions; it never unlocks a tool or a fact.
- * Interview and Tour arrive with the features they depend on (curated interview notes, the guided tour).
+ * Interview appears once Vishal has written at least a few interview notes (content/interview.ts); Tour arrives
+ * with the guided tour.
  */
 export type GridMode = "default" | "recruiter" | "engineer" | "interview" | "tour";
 
@@ -19,7 +21,7 @@ export const availableModes = (): GridMode[] => [
   "default",
   "recruiter",
   "engineer",
-  ...(shipped.interview ? (["interview"] as const) : []),
+  ...(interviewReady() ? (["interview"] as const) : []),
   ...(shipped.tour ? (["tour"] as const) : []),
 ];
 
@@ -34,7 +36,7 @@ export const MODE_PROMPT: Record<GridMode, string> = {
   engineer:
     "The visitor is an engineer. Lead with architecture, technology choices, trade-offs and where the code or the diagram can be seen. Prefer show_diagram and show_project over long prose, and name the exact technologies from the context.",
   interview:
-    "The visitor is practising or running an interview. Answer only from the curated interview notes and the profile; if a question has no note, say it hasn't been answered yet.",
+    "The visitor is interviewing Vishal. Call interview_answer for every interview-style question and give his answer only as the tool returns it, in his own words; add facts from the profile only when the tool result or <context> states them. If there is no note for a question, say he has not told you yet and offer to send him the question (send_message_to_vishal). Never write an answer for him.",
   tour: "The visitor is on a guided tour. Keep answers to one or two sentences.",
 };
 
@@ -58,7 +60,11 @@ export const MODE_SUGGESTIONS: Record<GridMode, string[]> = {
     "Why Firestore transactions for request tracking?",
     "Show me the Talnio project",
   ],
-  interview: ["Tell me about a project he is proud of", "What is his strongest technical skill?"],
+  interview: [
+    "Tell me about yourself.",
+    "Which project are you most proud of, and why?",
+    "Why should we hire you?",
+  ],
   tour: ["Start the tour"],
 };
 

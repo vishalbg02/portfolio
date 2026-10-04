@@ -2,6 +2,7 @@ import "server-only";
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ProjectSlugSchema } from "@/lib/content/profile-schema";
+import { DRAFT_KINDS } from "../protocol";
 import { NAV_TARGET_IDS, resolveTarget } from "@/lib/grid/targets";
 import { runMatch } from "@/lib/match/run";
 import { getRetriever } from "@/lib/rag/store";
@@ -9,6 +10,8 @@ import { getStatuses } from "@/lib/status/cache";
 import { LIMITS } from "../limits";
 import type { ToolName, UiPart } from "../protocol";
 import {
+  bookPart,
+  confirmPart,
   contactCard,
   demoPart,
   diagramPart,
@@ -17,6 +20,9 @@ import {
   skillEvidence,
   statsPart,
 } from "./cards";
+import { draftPart } from "./drafts";
+import { interviewCard } from "./interview";
+import { cleanRole, requirementsFor, resumeCard } from "./resume";
 import { embedQuery, inScope, SCOPES } from "./retrieval";
 import type { SourceRegistry } from "./sources";
 
@@ -165,6 +171,107 @@ export function buildTools(ctx: ToolContext) {
       execute: async (): Promise<ToolResult> => {
         const part = await statsPart(await getStatuses().catch(() => []));
         return result({ part, summary: "Showed Lighthouse scores, last deploy and live status." });
+      },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    draft_message: tool({
+      description:
+        "Draft a short message for the VISITOR to edit and send to Vishal or copy: an interview invitation, an introduction, a project inquiry, or a hackathon-team invitation. Use when asked to draft, write or compose one. Fill only what the visitor told you.",
+      inputSchema: z.object({
+        kind: z.enum(DRAFT_KINDS),
+        senderName: z.string().trim().max(80).optional(),
+        company: z.string().trim().max(80).optional(),
+        role: z.string().trim().max(80).optional(),
+        topic: z.string().trim().max(80).optional(),
+        when: z.string().trim().max(80).optional(),
+      }),
+      execute: async ({ kind, ...context }): Promise<ToolResult> =>
+        result({
+          part: draftPart(kind, context),
+          summary: `Showed an editable ${kind.replace("_", " ")} draft with [placeholders] for anything unknown. The visitor can edit, copy, or send it to Vishal. Do not repeat the draft.`,
+        }),
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    // THE GATE: this tool sends nothing. It only prepares a card; the visitor reads it, edits it and presses Send,
+    // and that press goes to /api/grid/message, which validates and rate-limits it. The model has no way to send.
+    send_message_to_vishal: tool({
+      description:
+        "Prepare a message from the visitor to Vishal. This does NOT send anything: it shows a card where the visitor reviews, edits and confirms. Use when they want to message him, send him an invite, or pass on a question you could not answer. Put only what the visitor said into the fields.",
+      inputSchema: z.object({
+        name: z.string().trim().max(80).optional(),
+        email: z.string().trim().max(200).optional(),
+        message: z.string().trim().min(1).max(1500),
+      }),
+      execute: async (input): Promise<ToolResult> =>
+        result({
+          part: confirmPart(input),
+          summary:
+            "Prepared a message for the visitor to review. NOTHING has been sent. Tell them to check it and press Send (or edit or cancel).",
+        }),
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    book_call: tool({
+      description:
+        "Show how to book a call with Vishal: a booking link when he has one, otherwise an offer to leave a message. Use for 'book a call', 'schedule a meeting'.",
+      inputSchema: z.object({}),
+      execute: async (): Promise<ToolResult> => {
+        const part = bookPart();
+        return result({
+          part,
+          summary:
+            part.kind === "book" && part.calLink
+              ? "Showed a button to book a call."
+              : "Booking is not set up yet; showed an offer to leave a message instead.",
+        });
+      },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    tailor_resume: tool({
+      description:
+        "Re-order Vishal's one-page résumé for a role: from a pasted job description or a short focus (such as 'backend Java'). It only re-orders what the résumé already says, never writes new text, and lists the gaps. Returns a card with a PDF download.",
+      inputSchema: z.object({
+        jdText: z.string().trim().min(40).max(LIMITS.jdInputChars).optional(),
+        focus: z.string().trim().min(2).max(200).optional(),
+        role: z.string().trim().max(60).optional(),
+      }),
+      execute: async ({ jdText, focus, role }): Promise<ToolResult> => {
+        const requirements = await requirementsFor({ jdText, focus });
+        if (requirements.length === 0)
+          return result({
+            part: null,
+            summary:
+              "No skills could be recognised. Ask the visitor for the role, the key skills, or the job description.",
+            error: true,
+          });
+        const part = resumeCard(requirements, cleanRole(role));
+        return result({
+          part,
+          summary:
+            part.kind === "resume"
+              ? `Tailored résumé ready (re-ordered only). Gaps, not hidden: ${part.gaps.join(", ") || "none"}.`
+              : "Tailored résumé ready.",
+        });
+      },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    interview_answer: tool({
+      description:
+        "Look up Vishal's own written answer to an interview question (about yourself, a proud project, weaknesses, why hire, and so on). Returns his answer verbatim or says he has not written one yet.",
+      inputSchema: z.object({ question: z.string().trim().min(3).max(200) }),
+      execute: async ({ question }): Promise<ToolResult> => {
+        const part = interviewCard(question);
+        const answer = part.kind === "interview" ? part.answer : null;
+        return result({
+          part,
+          summary: answer
+            ? "Showed Vishal's own answer in a quote card. Do not repeat or rephrase it; add at most one short sentence."
+            : "He has not written an answer to this yet. Say that plainly and offer to send him the question (send_message_to_vishal).",
+        });
       },
       toModelOutput: ({ output }) => modelText(output),
     }),

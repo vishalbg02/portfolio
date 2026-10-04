@@ -11,7 +11,12 @@ import { ACT_EVENT } from "@/lib/grid/store";
 import type { ContactAction, UiPart } from "@/lib/ai/protocol";
 import type { ArchitectureGraph } from "@/components/diagram/types";
 import type { MatchResult } from "@/lib/match/types";
+import { BookCard, InterviewCard } from "./ActionCards";
+import { ConfirmCard } from "./ConfirmCard";
+import { DraftCard } from "./DraftCard";
 import { ProjectCardBody } from "./ProjectCardBody";
+import { ResumeCard, TailorFromMatch } from "./ResumeCard";
+import { card, chip } from "./styles";
 
 const ArchitectureDiagram = dynamic(
   () => import("@/components/diagram/ArchitectureDiagram").then((m) => m.ArchitectureDiagram),
@@ -30,10 +35,6 @@ const MatchResultView = dynamic(() => import("@/components/match/MatchTool").the
   ssr: false,
 });
 const diagrams = () => import("@/components/diagram/graphs");
-
-const card = "rounded-card border border-border bg-bg";
-const chip =
-  "inline-flex min-h-8 items-center rounded-pill border border-border-2 px-3 font-mono text-xs text-text transition-colors hover:border-accent hover:text-accent pointer-coarse:min-h-11";
 
 /** Re-run a part's side effect ("Open again"). */
 const act = (part: UiPart) =>
@@ -75,7 +76,18 @@ const when = (iso: string | null) => (iso ? relativeTime(iso, Date.now()) : "unk
  * Renders what a tool returned. Every card is built on the server from content (see lib/ai/agent/cards.ts); this
  * only draws it. `onAsk` lets a card offer a next step ("Show the diagram") that goes back into the conversation.
  */
-export function PartView({ part, onAsk }: { part: UiPart; onAsk?: (q: string) => void }) {
+export function PartView({
+  part,
+  onAsk,
+  done,
+  onResolve,
+}: {
+  part: UiPart;
+  onAsk?: (q: string) => void;
+  /** What the visitor did with a card that asks for a decision, so it is not offered again after a reload. */
+  done?: "sent" | "cancelled";
+  onResolve?: (d: "sent" | "cancelled") => void;
+}) {
   switch (part.kind) {
     case "project":
       return (
@@ -272,10 +284,26 @@ export function PartView({ part, onAsk }: { part: UiPart; onAsk?: (q: string) =>
 
     case "match":
       return (
-        <div data-grid-card="match" className={cn(card, "p-3")}>
+        <div data-grid-card="match" className={cn(card, "space-y-3 p-3")}>
           <MatchResultView result={part.result as MatchResult} />
+          <TailorFromMatch result={part.result as MatchResult} />
         </div>
       );
+
+    case "confirm":
+      return <ConfirmCard part={part} done={done} onResolve={onResolve} />;
+
+    case "draft":
+      return <DraftCard part={part} mailto={part.mailto} />;
+
+    case "resume":
+      return <ResumeCard part={part} />;
+
+    case "book":
+      return <BookCard part={part} mailto={part.mailto} />;
+
+    case "interview":
+      return <InterviewCard part={part} mailto={part.mailto} />;
   }
 }
 

@@ -3,9 +3,11 @@ import { resumeConfig } from "@/content/resume";
 import type { ProjectSlug } from "@/lib/content/profile-schema";
 import { runMatch } from "@/lib/match/run";
 import { getStatuses } from "@/lib/status/cache";
-import { BRIEF_PROMPT } from "../modes";
+import { BRIEF_PROMPT, type GridMode } from "../modes";
 import type { Source, ToolName, UiPart } from "../protocol";
 import {
+  bookPart,
+  confirmPart,
   contactCard,
   demoPart,
   diagramPart,
@@ -17,6 +19,9 @@ import {
   type ContactKind,
 } from "./cards";
 import { looksLikeJobDescription, norm } from "./jd";
+import { draftPart, type DraftContext } from "./drafts";
+import { findInterviewNote, interviewCard } from "./interview";
+import { cleanRole, requirementsFor, resumeCard } from "./resume";
 import { SourceRegistry } from "./sources";
 
 export { looksLikeJobDescription, norm };
@@ -135,9 +140,115 @@ const contactKind = (q: string): ContactKind =>
             ? "phone"
             : "all";
 
+/* ── actions ─────────────────────────────────────────────────────────────────────────────────────── */
+
+const BOOK =
+  /\b(?:book|schedule|set up|arrange|fix|plan)\b.{0,30}\b(?:call|meeting|chat|slot|session|catch ?up|interview)\b|\b15 ?(?:min|minutes?)\b.{0,20}\b(?:call|chat|meeting)\b/;
+const DRAFT =
+  /\b(?:draft|write|compose|prepare|help me (?:write|draft))\b.{0,40}\b(?:invite|invitation|intro|introduction|message|email|note|inquiry|enquiry|hackathon)\b|\bsend (?:him|vishal) an? (?:invite|invitation)\b/;
+const MESSAGE =
+  /\b(?:send|leave|drop|pass|forward)\b.{0,25}\b(?:message|note|msg|question)\b.{0,25}\b(?:vishal|him)\b|\b(?:message|text|dm|ping)\b (?:vishal|him)\b|\bsend (?:vishal|him) (?:a |an |this |the )?(?:message|note|question)\b|\bi (?:want|would like|d like|wanna) to (?:message|write to|reach out to|talk to|speak to|chat with) (?:vishal|him)\b|\btell (?:vishal|him)\b/;
+const TAILOR =
+  /\b(?:tailor|customi[sz]e|adapt|re-?order|re-?arrange|optimi[sz]e|personali[sz]e)\b.{0,40}\b(?:resume|cv)\b|\b(?:resume|cv)\b.{0,30}\btailored\b/;
+
+const draftKindOf = (q: string) =>
+  /\b(?:interview|invite|invitation)\b/.test(q)
+    ? ("interview_invite" as const)
+    : /\bhackathon|team ?mate|teammate\b/.test(q)
+      ? ("hackathon_team" as const)
+      : /\binquiry|enquiry|project|hire|work with\b/.test(q)
+        ? ("project_inquiry" as const)
+        : ("intro" as const);
+
+/** "for the Backend Engineer role at Infosys" → { role, company } (from the original text, so capitals survive). */
+function draftContext(text: string): DraftContext {
+  const role = /\bfor (?:the |a |an )?(.+?)(?: role| position| job)?(?= at |[,.?!]|$)/i.exec(text)?.[1];
+  const company = /\bat ((?:[A-Z][\w&.-]*)(?: [A-Z][\w&.-]*){0,3})/.exec(text)?.[1];
+  return {
+    role: role && role.length <= 60 && !/^(?:me|him|vishal|us)$/i.test(role) ? role : undefined,
+    company,
+  };
+}
+
+/** The message after "saying" / "that" / a colon, for "send him a message saying …". */
+const messageBody = (text: string) => {
+  const m =
+    /(?:\bsaying\b|\bthat says\b|\bwith the message\b|\btell (?:him|vishal)(?: that)?\b)\s*:?\s*([\s\S]+)$|:\s*([\s\S]+)$/i.exec(
+      text,
+    );
+  return (m?.[1] ?? m?.[2] ?? "").trim();
+};
+
+async function routeAction(text: string, q: string, mode?: GridMode): Promise<Routed | null> {
+  const lead = q.slice(0, 140);
+
+  if (mode === "interview") {
+    const hit = findInterviewNote(text);
+    if (hit) {
+      const part = interviewCard(text);
+      return {
+        parts: [{ tool: "interview_answer", part }],
+        text: hit.entry.answer
+          ? "In his own words, from his interview notes."
+          : "He hasn't written an answer to that yet, so I won't make one up. I can send him the question.",
+        sources: [],
+      };
+    }
+  }
+
+  if (BOOK.test(lead)) {
+    const part = bookPart();
+    return {
+      parts: [{ tool: "book_call", part }],
+      text:
+        part.kind === "book" && part.calLink
+          ? "You can book a call with him below."
+          : "Booking isn't set up yet, but you can leave a message and he'll reply with times.",
+      sources: [],
+    };
+  }
+
+  if (DRAFT.test(lead)) {
+    const part = draftPart(draftKindOf(lead), draftContext(text));
+    return {
+      parts: [{ tool: "draft_message", part }],
+      text: "Here's a draft to edit. Anything in [brackets] is for you to fill in; you can copy it or send it to him from here.",
+      sources: [],
+    };
+  }
+
+  if (MESSAGE.test(lead)) {
+    const part = confirmPart({ message: messageBody(text) });
+    return {
+      parts: [{ tool: "send_message_to_vishal", part }],
+      text: "Here's your message to him for review. Nothing is sent until you press Send.",
+      sources: [],
+    };
+  }
+
+  if (TAILOR.test(lead)) {
+    const focus = /\bfor\s+(?:the |a |an |this |my )?(.+)$/i.exec(text)?.[1]?.trim();
+    const requirements = await requirementsFor({ focus });
+    if (requirements.length === 0)
+      return {
+        parts: [],
+        text: "Tell me the role or the key skills (or paste the job description) and I'll re-order his résumé for it.",
+        sources: [],
+      };
+    const part = resumeCard(requirements, cleanRole(focus));
+    return {
+      parts: [{ tool: "tailor_resume", part }],
+      text: "Here's his résumé re-ordered for that. It only moves what he already wrote, and the gaps are listed, not hidden.",
+      sources: [],
+    };
+  }
+
+  return null;
+}
+
 /* ── the router ──────────────────────────────────────────────────────────────────────────────────── */
 
-export async function routeIntent(raw: string): Promise<Routed | null> {
+export async function routeIntent(raw: string, opts: { mode?: GridMode } = {}): Promise<Routed | null> {
   const text = raw.trim();
   if (!text) return null;
 
@@ -154,6 +265,12 @@ export async function routeIntent(raw: string): Promise<Routed | null> {
   }
 
   const q = norm(text);
+
+  // Actions (book a call, draft, message him, tailor the résumé, interview notes) are recognised from how the request
+  // starts, so they work even with a long message after them.
+  const action = await routeAction(text, q, opts.mode);
+  if (action) return action;
+
   if (q.length > 160) return null; // commands are short; anything long is a real question
 
   if (q === norm(BRIEF_PROMPT) || BRIEF.test(q)) return briefing();
