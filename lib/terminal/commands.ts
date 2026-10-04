@@ -84,9 +84,9 @@ const commands: Record<string, Command> = {
     run: () => ({
       lines: [
         out(
-          ws.currentRole
-            ? `Working: ${ws.currentRole.role} at ${ws.currentRole.company} (${ws.currentRole.period}).`
-            : `Not in a full-time job or internship right now.${ws.ongoing.length ? ` Working on: ${ws.ongoingText.join(", ")}.` : ""}${ws.lastRole ? ` Most recent internship: ${ws.lastRole.role} at ${ws.lastRole.company.split(",")[0]} (${ws.lastRole.period}).` : ""}`,
+          ws.employed
+            ? `Working: ${ws.employed.role} at ${ws.employed.company} (${ws.employed.period}).`
+            : `Not in a full-time job or internship right now.${ws.freelance ? ` Freelancing: ${ws.freelance.role} at ${ws.freelance.company.split(",")[0]} (${ws.freelance.period}).` : ""}${ws.lastRole ? ` Most recent internship: ${ws.lastRole.role} at ${ws.lastRole.company.split(",")[0]} (${ws.lastRole.period}).` : ""}`,
         ),
         out(`Looking for: ${profile.workPreferences.roles.join("; ")}.`),
         out(

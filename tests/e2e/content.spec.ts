@@ -84,18 +84,19 @@ test.describe("résumé", () => {
 });
 
 test.describe("experience", () => {
-  test("shows each role with its first bullet, and expandable details", async ({ page }) => {
+  test("shows each role with its first commit, and expandable details", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
     const exp = page.locator("#experience");
     await expect(exp.getByRole("heading", { name: "Full-Stack & App Developer Intern" })).toBeVisible();
     await expect(exp.getByText("Jun 2025 – Mar 2026")).toBeVisible();
-    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(0); // no current role
-    const second = exp.locator("li", { hasText: "Implemented geolocation- and NFC-based attendance" });
-    await expect(second.getByText("Implemented geolocation- and NFC-based attendance")).toBeHidden();
-    await exp.getByText("Show details").first().click();
-    await expect(second.getByText("Implemented geolocation- and NFC-based attendance")).toBeVisible();
-    await expect(exp.getByText("Hide details").first()).toBeVisible();
+    await expect(exp.locator(".animate-pulse-dot")).toHaveCount(1); // one open branch: the ongoing freelance role
+    const hidden = exp.getByText("Implemented geolocation- and NFC-based attendance");
+    await expect(hidden).toBeHidden();
+    const details = exp.locator("details", { hasText: "Implemented geolocation- and NFC-based attendance" });
+    await details.getByText("Show details").click();
+    await expect(hidden).toBeVisible();
+    await expect(details.getByText("Hide details")).toBeVisible();
   });
 
   test("details toggle works from the keyboard", async ({ page }) => {
@@ -107,12 +108,14 @@ test.describe("experience", () => {
     await expect(page.locator("#experience details").first()).toHaveAttribute("open", "");
   });
 
-  test("education appears as two compact rows", async ({ page }) => {
+  test("education appears as tags on main", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
-    const edu = page.locator("#experience").getByText("Education").locator("xpath=..");
-    await expect(edu.getByText("Master of Computer Applications (MCA)")).toBeVisible();
-    await expect(edu.getByText("CGPA 8.45 / 10")).toBeVisible();
+    const exp = page.locator("#experience");
+    await expect(exp.getByText("tag: MCA (in progress)")).toBeVisible();
+    await expect(exp.getByText("Master of Computer Applications (MCA)")).toBeVisible();
+    await expect(exp.getByText("tag: BCA", { exact: true })).toBeVisible();
+    await expect(exp.getByText("CGPA 8.45 / 10")).toBeVisible();
   });
 });
 
@@ -168,17 +171,18 @@ test.describe("live GitHub", () => {
     await expect(svg.locator("path[data-level]")).toHaveCount(5); // one path per level, not 371 elements
     await gh.scrollIntoViewIfNeeded();
     const box = (await svg.boundingBox())!;
-    const [, , vbW] = (await svg.getAttribute("viewBox"))!.split(" ").map(Number);
+    const [, , vbW, vbH] = (await svg.getAttribute("viewBox"))!.split(" ").map(Number);
+    const top = vbH! - 7 * 14; // the label row above the grid grows with the milestone pins
     const scale = box.width / vbW!;
-    // week 30, Wednesday → centre of that cell (LEFT=30, TOP=18, PITCH=14, CELL=11)
-    await page.mouse.move(box.x + (30 + 30 * 14 + 5.5) * scale, box.y + (18 + 3 * 14 + 5.5) * scale);
-    await expect(gh.getByRole("status")).toContainText(/contribution/);
-    await page.mouse.move(box.x + (30 + 30 * 14 + 12.5) * scale, box.y + (18 + 3 * 14 + 5.5) * scale); // in the gap
-    await expect(gh.getByRole("status")).toHaveCount(0);
+    // week 30, Wednesday → centre of that cell (LEFT=30, PITCH=14, CELL=11)
+    await page.mouse.move(box.x + (30 + 30 * 14 + 5.5) * scale, box.y + (top + 3 * 14 + 5.5) * scale);
+    await expect(gh.getByTestId("day-tooltip")).toContainText(/contribution/);
+    await page.mouse.move(box.x + (30 + 30 * 14 + 12.5) * scale, box.y + (top + 3 * 14 + 5.5) * scale); // in the gap
+    await expect(gh.getByTestId("day-tooltip")).toHaveCount(0);
     const links = gh.locator("ul").last().getByRole("link");
     expect(await links.count()).toBeGreaterThanOrEqual(3);
     for (const href of await links.evaluateAll((els) => els.map((e) => e.getAttribute("href")))) {
-      expect(href).toMatch(/^https:\/\/github\.com\/vishalbg02\//);
+      expect(href).toMatch(/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/);
     }
   });
 
@@ -187,20 +191,23 @@ test.describe("live GitHub", () => {
     await page.goto("/");
     await expect(
       page.locator("#github").getByRole("img", {
-        name: /contributions in the last year\. \d+ active days, longest streak \d+ days?/,
+        name: /\d+ contributions, last year\. \d+ active days, longest streak \d+ days?/,
       }),
     ).toBeVisible();
   });
 });
 
 test.describe("recognition", () => {
-  test("shows the four awards and the GATEWAYS line, low-key", async ({ page }) => {
+  test("is no longer a separate home section; the awards are pinned on the calendar, with the GATEWAYS line under it", async ({
+    page,
+  }) => {
     await mockStatus(page);
     await page.goto("/");
-    const rec = page.getByRole("region", { name: "Recognition" });
-    await expect(rec.getByRole("listitem")).toHaveCount(4);
-    await expect(rec.getByText("Gamecraft")).toBeVisible();
-    await expect(rec.getByText(/GATEWAYS 2026/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Recognition" })).toHaveCount(0);
+    await expect(page.locator("#recognition")).toHaveCount(0);
+    const gh = page.locator("#github");
+    await expect(gh.getByText(/GATEWAYS 2026/)).toBeVisible();
+    await expect(gh.locator("[data-milestone]")).toHaveCount(3); // Jan 2026 role, Feb and Jun 2026 awards
   });
 });
 
@@ -404,6 +411,6 @@ test.describe("full home page", () => {
     const ids = await page.evaluate(() =>
       [...document.querySelectorAll("main section[id]")].map((s) => s.id),
     );
-    expect(ids).toEqual(["work", "experience", "stack", "github", "recognition", "ask", "contact"]);
+    expect(ids).toEqual(["work", "experience", "stack", "github", "ask", "contact"]);
   });
 });

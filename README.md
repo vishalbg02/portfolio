@@ -27,7 +27,7 @@ No environment variables are required. Every integration degrades gracefully whe
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Shared rate limits / daily AI cap     | Per-instance in-memory limiter     |
 | `NEXT_PUBLIC_SITE_URL`                               | Canonical URLs, sitemap, OG           | `https://vishalbg.vercel.app`      |
 | `NEXT_PUBLIC_GSC_VERIFICATION`                       | Google Search Console meta tag        | Omitted                            |
-| `SHOW_RECOGNITION`                                   | Recognition strip                     | `true`                             |
+| `SHOW_RECOGNITION`                                   | Award pins on the calendar            | `true`                             |
 | `AI_DAILY_LIMIT`                                     | Global daily cap on AI calls          | `400`                              |
 | `SHOW_DRAFTS`                                        | Show Ship Log drafts in a build       | Hidden in production               |
 

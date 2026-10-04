@@ -11,6 +11,8 @@ export function monthLabels(weeks: ContributionDay[][]): Array<{ week: number; l
     if (!first) return;
     const m = Number(first.date.slice(5, 7)) - 1;
     if (m !== prev) {
+      // A label in the last couple of columns would be clipped at the edge; the month is obvious anyway.
+      if (weeks.length > 8 && weeks.length - i < 3) return;
       const last = out[out.length - 1];
       // A short partial month would crowd its neighbour: let the newer month take its place.
       if (last && i - last.week < 3) out[out.length - 1] = { week: i, label: MONTHS[m]! };

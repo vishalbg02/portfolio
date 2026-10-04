@@ -55,14 +55,26 @@ const data = {
 
   experience: [
     {
+      role: "Full-Stack Developer",
+      company: "Golden Verdict, Bengaluru",
+      period: "Jan 2026 – Present",
+      current: true,
+      kind: "freelance",
+      points: [
+        "Built and deployed a production legal and tax compliance SaaS (goldenverdict.com) with role-based access for four user roles.",
+        "Engineered purchase, document upload and request-ID tracking workflows on Firestore; built admin dashboards for 50+ services; integrated Brevo APIs for invoicing and email.",
+      ],
+    },
+    {
       role: "Full-Stack & App Developer Intern",
       company: "Social Agent (Bricstal Pvt. Ltd.), Bengaluru",
       period: "Jun 2025 – Mar 2026",
       current: false,
+      kind: "internship",
       points: [
         "Built and shipped Talnio, an employee management platform on web (React 19, Tailwind CSS) and mobile (Flutter/Dart) with Firebase Authentication and Cloud Firestore real-time sync — live on Google Play.",
-        "Implemented geolocation- and NFC-based attendance with automated PDF/Excel reports powering workforce analytics.",
-        "Integrated Google Generative AI APIs to automate productivity workflows, and the Agora SDK for live video/audio meetings.",
+        "Implemented geolocation- and NFC-based attendance with automated PDF/Excel reports for workforce analytics.",
+        "Integrated Google Generative AI APIs for productivity workflows and the Agora SDK for live video/audio meetings.",
       ],
     },
     {
@@ -70,10 +82,10 @@ const data = {
       company: "Kaha Technologies Pvt. Ltd. (Cove IoT), Bengaluru",
       period: "May 2024 – Jul 2024",
       current: false,
+      kind: "internship",
       points: [
         "Optimised Java Spring Boot backend services for boAt's IoT devices, handling real-time data across concurrent connections.",
-        "Designed secure REST APIs in Java with Spring Data JPA (SQL) and Spring Security on a Spring Cloud microservices architecture.",
-        "Enhanced device-management dashboards using AngularJS and TypeScript.",
+        "Designed secure REST APIs in Java (Spring Data JPA, Spring Security) on Spring Cloud microservices; enhanced device dashboards in AngularJS and TypeScript.",
       ],
     },
   ],

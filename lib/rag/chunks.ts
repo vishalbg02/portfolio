@@ -152,7 +152,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
   chunks.push({
     id: "recognition",
     title: "Hackathon wins and recognition",
-    url: "/#recognition",
+    url: "/#github",
     text: join([
       ...p.recognition.map(
         (r) => `${r.place} — ${r.event}, ${r.org}${r.detail ? ` (${r.detail})` : ""}, ${r.date}.`,

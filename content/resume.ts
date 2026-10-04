@@ -24,16 +24,6 @@ export const resumeConfig = ResumeConfigSchema.parse({
 
   projects: [
     {
-      slug: "golden-verdict",
-      title: "Golden Verdict – Legal & Tax Compliance SaaS",
-      stack: "Next.js, TypeScript, Firebase",
-      date: "Jan 2026 – Present",
-      bullets: [
-        "Built and deployed a production SaaS (goldenverdict.com) with role-based access for Customers, Legal Partners, Managers and Admins.",
-        "Engineered purchase, document upload and request-ID tracking workflows on Firestore; built admin dashboards for 50+ services and integrated Brevo REST APIs for automated invoicing and email.",
-      ],
-    },
-    {
       slug: "lansymphony",
       title: "LAN Communication System – Offline P2P",
       stack: "Python, Sockets, AES-256",
@@ -53,8 +43,11 @@ export const resumeConfig = ResumeConfigSchema.parse({
     },
   ],
 
-  // Talnio is described under Work Experience instead of Projects.
-  omittedProjects: [{ slug: "talnio", reason: "Already covered under Work Experience" }],
+  // Talnio (Social Agent internship) and Golden Verdict (freelance role) are described under Work Experience.
+  omittedProjects: [
+    { slug: "talnio", reason: "Already covered under Work Experience" },
+    { slug: "golden-verdict", reason: "Already covered under Work Experience (freelance role)" },
+  ],
 
   // Grouped by what recruiters and ATS filters search for. Items mirror content/profile.ts (stack).
   skills: [

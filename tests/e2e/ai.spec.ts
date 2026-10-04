@@ -98,7 +98,7 @@ test.describe("Ask Vishal — inline section (offline mode: the e2e server has n
       .split("\n")
       .map((l) => JSON.parse(l));
     expect(lines[0]).toMatchObject({ t: "meta", mode: "offline", reason: "no_key" });
-    expect(lines[0].sources[0].url).toBe("/#recognition");
+    expect(lines[0].sources[0].url).toBe("/#github");
     expect(lines.at(-1)).toEqual({ t: "done" });
     expect(
       lines

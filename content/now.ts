@@ -6,18 +6,15 @@ import { workStatus } from "@/lib/content/work-status";
  * this page can't contradict the rest of the site. Bump `updatedAt` whenever you edit it.
  * Fields set to null are hidden.
  */
-const current = profile.experience.find((e) => e.current);
 const mca = profile.education[0];
 const ws = workStatus(profile);
 
 export const now = {
   updatedAt: "2026-10-03",
   // Shown only while a role is marked current in profile.ts (the Social Agent internship ended Mar 2026).
-  working: current
-    ? `${current.role} at ${current.company} (${current.period}).`
-    : ws.ongoing.length
-      ? `Freelance full-stack developer on ${ws.ongoing.map((x) => `${x.name} (${x.period})`).join(" and ")}.`
-      : null,
+  working: ws.currentRole
+    ? `${ws.freelance ? "Freelance " : ""}${ws.currentRole.role} at ${ws.currentRole.company.split(",")[0]} (${ws.currentRole.period}).`
+    : null,
   studying: mca ? `${mca.degree} at ${mca.school}, ${mca.period}.` : null,
   building:
     "This portfolio: a static Next.js site with an assistant that answers only from its own content, a résumé matcher, and a Ship Log.",

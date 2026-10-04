@@ -36,6 +36,8 @@ export const ExperienceSchema = z.object({
   company: nonEmpty,
   period: nonEmpty,
   current: z.boolean(),
+  /** How he worked there; drives the wording ("internship", "freelance") on the site, in the AI and in the terminal. */
+  kind: z.enum(["internship", "freelance", "full-time"]),
   points: z.array(nonEmpty).min(1),
 });
 export type Experience = z.infer<typeof ExperienceSchema>;

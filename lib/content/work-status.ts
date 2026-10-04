@@ -2,25 +2,22 @@ import type { Profile } from "./profile-schema";
 
 /**
  * What Vishal is doing right now, derived from profile.ts so the AI, the terminal and /now can never
- * disagree with the timeline. An employment/internship is "current" only if it is flagged current;
- * a project whose period ends in "Present" counts as ongoing freelance/side work.
+ * disagree with the timeline. A role is "current" only if it is flagged current; a current freelance
+ * role means "not in a full-time job or internship, but working as a freelancer".
  */
 export function workStatus(p: Profile) {
   const currentRole = p.experience.find((e) => e.current) ?? null;
+  /** Most recent role that has ended (internships), newest first as listed in profile.ts. */
   const lastRole = p.experience.find((e) => !e.current) ?? null;
-  const ongoing = p.projects
-    .filter((x) => /present/i.test(x.period ?? ""))
-    .filter((x) => !currentRole || !x.type.includes("Internship"));
-  const start = (period: string | null) => (period ?? "").split(/\s*[–—-]\s*/)[0] ?? "";
+  const freelance = currentRole?.kind === "freelance" ? currentRole : null;
+  const employed = currentRole && currentRole.kind !== "freelance" ? currentRole : null;
 
-  const ongoingText = ongoing.map(
-    (x) => `${x.name} (${x.type.split(" · ")[0]!.toLowerCase()}, since ${start(x.period)})`,
-  );
-  /** One plain sentence about employment, safe to quote. */
-  const sentence = currentRole
-    ? `He currently works as ${currentRole.role} at ${currentRole.company} (${currentRole.period}).`
+  const sentence = employed
+    ? `He currently works as ${employed.role} at ${employed.company} (${employed.period}).`
     : `He is not currently in a full-time job or internship.${
-        ongoing.length ? ` He is working on ${ongoingText.join(" and ")}.` : ""
+        freelance
+          ? ` He currently works as a freelance ${freelance.role} at ${freelance.company.split(",")[0]} (${freelance.period}).`
+          : ""
       }${lastRole ? ` His most recent internship was ${lastRole.role} at ${lastRole.company}, ${lastRole.period}.` : ""}`;
-  return { currentRole, lastRole, ongoing, ongoingText, sentence };
+  return { currentRole, lastRole, freelance, employed, sentence };
 }

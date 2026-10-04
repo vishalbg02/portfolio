@@ -165,7 +165,7 @@ describe("generated/embeddings.json", () => {
 
 describe("keyword retrieval ranking", () => {
   it.each([
-    ["What has he built with Spring Boot?", "experience-1"],
+    ["What has he built with Spring Boot?", "experience-2"],
     ["Tell me about Golden Verdict", "project-golden-verdict"],
     ["How can I contact him?", "contact"],
     ["What is his email address?", "contact"],
@@ -311,7 +311,10 @@ describe("current-status questions (the Social Agent internship ended Mar 2026)"
     const text = profileChunks()
       .map((c) => c.text)
       .join("\n");
-    expect(text).not.toMatch(/\(current role\)/);
-    expect(text).not.toMatch(/Present/);
+    // only the ongoing freelance role is "current"; the finished internship never is
+    const chunks = profileChunks();
+    expect(chunks.find((c) => c.id === "experience-1")!.text).not.toMatch(/\(current role\)/);
+    expect(chunks.filter((c) => /\(current role\)/.test(c.text)).map((c) => c.id)).toEqual(["experience-0"]);
+    expect(text).not.toMatch(/Social Agent[^.]*Present/);
   });
 });

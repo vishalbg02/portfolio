@@ -80,7 +80,7 @@ test.describe("now", () => {
     // The Social Agent internship ended (Mar 2026); the only "Working" line is the ongoing freelance project.
     await expect(page.getByText("Working", { exact: true })).toBeVisible();
     await expect(
-      page.getByText(/Freelance full-stack developer on Golden Verdict \(Jan 2026 – Present\)/),
+      page.getByText(/Freelance Full-Stack Developer at Golden Verdict \(Jan 2026 – Present\)/),
     ).toBeVisible();
     // Unset TODO(vishal) fields stay hidden.
     await expect(page.getByText("Reading", { exact: true })).toHaveCount(0);

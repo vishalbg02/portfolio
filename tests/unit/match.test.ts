@@ -164,15 +164,17 @@ describe("years of experience is computed honestly from profile.ts", () => {
     expect(periodMonths("May 2025 – Present", NOW)).toBe(18); // inclusive of both months
     expect(periodMonths("garbage", NOW)).toBeNull();
   });
-  it("sums internships into years", () => {
+  it("counts internships and freelance work once, even where they overlap", () => {
     const s = experienceSummary(profile, NOW);
-    expect(s.months).toBe(13); // Jun 2025 – Mar 2026 (10) + May – Jul 2024 (3)
-    expect(s.years).toBe(1.1);
+    // May–Jul 2024 (3) + Jun 2025 – Oct 2026 (17: the Jan 2026 – Present freelance role overlaps the internship)
+    expect(s.months).toBe(20);
+    expect(s.years).toBe(1.7);
     expect(s.text).toContain("internship");
+    expect(s.text).toContain("freelance");
   });
   it.each([
     ["1+ years of experience", "strong"],
-    ["2+ years of experience", "gap"], // 1.1 years is under 75% of 2
+    ["2+ years of experience", "partial"], // 1.7 years is at least 75% of 2
     ["3+ years of experience", "gap"],
     ["5 years of experience", "gap"],
   ])("%s → %s", (skill, expected) => {
