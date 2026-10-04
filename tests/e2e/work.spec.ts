@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { gotoHydrated, settleAnimations } from "./helpers";
+import { gotoHydrated, gotoReady, settleAnimations } from "./helpers";
 
 const SLUGS = ["golden-verdict", "talnio", "lansymphony", "virtual-tour"] as const;
 const NAMES: Record<(typeof SLUGS)[number], string> = {
@@ -27,53 +27,68 @@ const mockStatus = (page: Page, body = statusBody(), delayMs = 0) =>
     await route.fulfill({ json: body });
   });
 
+/** Desktop stage: select a project on the index and wait for its panel (the grid wipe swaps it in). */
+const showProject = async (page: Page, slug: string) => {
+  await page.locator(`#tab-${slug}`).click();
+  await expect(page.locator(`#panel-${slug}`)).toBeVisible();
+};
+
 const axe = async (page: Page) =>
   (
     await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()
   ).violations.filter((v) => v.impact === "serious" || v.impact === "critical");
 
 test.describe("work cards & status", () => {
-  test("home shows four project cards with code-drawn visuals and the right actions", async ({ page }) => {
+  test("home shows the four projects on a stage with code-drawn visuals and the right actions", async ({
+    page,
+  }) => {
     await mockStatus(page);
-    await page.goto("/");
+    await gotoHydrated(page, "/");
     const work = page.locator("#work");
     for (const slug of SLUGS) {
-      const card = work.locator("article", { hasText: NAMES[slug] });
-      await expect(card.getByRole("img")).toBeVisible();
-      await expect(card.getByRole("link", { name: /Case study/ })).toHaveAttribute("href", `/work/${slug}`);
+      await showProject(page, slug);
+      const panel = page.locator(`#panel-${slug}`);
+      await expect(panel.getByRole("img")).toBeVisible();
+      await expect(panel.getByRole("link", { name: /Case study/ })).toHaveAttribute("href", `/work/${slug}`);
     }
-    // Live ↗ only where a live URL exists; Code ↗ only where a repo exists
-    await expect(work.getByRole("link", { name: /^Live/ })).toHaveCount(2);
-    await expect(work.getByRole("link", { name: /^Code/ })).toHaveCount(1);
+    // Live ↗ only where a live URL exists; Code ↗ only where a repo exists; Google Play only for Talnio
+    const has = async (slug: string, name: RegExp) => {
+      await showProject(page, slug);
+      return page.locator(`#panel-${slug}`).getByRole("link", { name }).count();
+    };
+    expect([await has("golden-verdict", /^Live/), await has("golden-verdict", /^Code/)]).toEqual([1, 0]);
+    expect([await has("talnio", /^Live/), await has("talnio", /^Google Play/)]).toEqual([0, 1]);
+    expect([await has("lansymphony", /^Live/), await has("lansymphony", /^Code/)]).toEqual([0, 0]);
+    expect([await has("virtual-tour", /^Live/), await has("virtual-tour", /^Code/)]).toEqual([1, 1]);
     await expect(work.getByRole("link", { name: /^Code/ })).toHaveAttribute(
       "href",
       "https://github.com/vishalbg02/virtual_tour",
     );
   });
 
-  test("cards show at most 5 stack chips plus a +N overflow", async ({ page }) => {
+  test("a project shows at most 6 stack chips plus a +N overflow", async ({ page }) => {
     await mockStatus(page);
-    await page.goto("/");
-    const talnio = page.locator("#work article", { hasText: "Talnio" });
-    await expect(talnio.getByRole("list", { name: "Stack" }).getByRole("listitem")).toHaveCount(6); // 5 + "+3"
-    await expect(talnio.getByText("+3")).toBeVisible();
+    await gotoHydrated(page, "/");
+    await showProject(page, "talnio");
+    const talnio = page.locator("#panel-talnio");
+    await expect(talnio.getByRole("list", { name: "Stack" }).getByRole("listitem")).toHaveCount(7); // 6 + "+2"
+    await expect(talnio.getByText("+2")).toBeVisible();
   });
 
   test("status badges: skeleton first, then Live · ms / Degraded / static badges", async ({ page }) => {
     await mockStatus(page, statusBody(), 700);
-    await page.goto("/");
-    const gv = page.locator("#work article", { hasText: "Golden Verdict" });
+    await gotoReady(page, "/"); // not networkidle: we want to see the skeleton before the status arrives
+    const gv = page.locator("#panel-golden-verdict");
     await expect(gv.getByRole("status").getByText("Checking status")).toBeVisible();
     await expect(gv.getByText("Live · 142 ms")).toBeVisible();
+    await showProject(page, "virtual-tour");
+    await expect(page.locator("#panel-virtual-tour").getByText("Degraded")).toBeVisible();
+    await showProject(page, "talnio");
     await expect(
-      page.locator("#work article", { hasText: "CHRIST University Virtual Tour" }).getByText("Degraded"),
+      page.locator("#panel-talnio").getByText("Live on Google Play", { exact: true }),
     ).toBeVisible();
-    await expect(
-      page.locator("#work article", { hasText: "Talnio" }).getByText("Live on Google Play", { exact: true }),
-    ).toBeVisible();
-    await expect(
-      page.locator("#work article", { hasText: "LanSymphony" }).getByText("2nd place · OpenBuild"),
-    ).toBeVisible();
+    await showProject(page, "lansymphony");
+    await expect(page.locator("#panel-lansymphony").getByText("2nd place · OpenBuild")).toBeVisible();
   });
 
   test("offline and fetch-error states render", async ({ page }) => {
@@ -159,7 +174,7 @@ test.describe("work cards & status", () => {
 
   test("palette lists case studies and live sites", async ({ page }) => {
     await mockStatus(page);
-    await page.goto("/");
+    await gotoReady(page, "/");
     await page.keyboard.press("Control+k");
     await expect(page.getByRole("combobox")).toBeFocused();
     await page.keyboard.type("golden");

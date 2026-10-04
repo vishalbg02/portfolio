@@ -5,13 +5,11 @@ import { shipped } from "@/lib/site";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "./identity";
 import { ProjectStatus } from "./ProjectStatus";
+import { ProjectLinks } from "./ProjectLinks";
 import { Sketch } from "./Sketch";
 import { SketchPlayer } from "./SketchPlayer";
 
 const MAX_CHIPS = 5;
-const action =
-  "relative z-10 inline-flex items-center gap-1 rounded-sm font-mono text-sm text-link underline-offset-4 hover:underline";
-
 export function ProjectCard({
   project,
   showSummary = false,
@@ -73,38 +71,7 @@ export function ProjectCard({
         ) : null}
       </ul>
 
-      <div className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-5">
-        {shipped.caseStudies ? (
-          <Link href={href} className={action}>
-            Case study <span aria-hidden="true">→</span>
-          </Link>
-        ) : null}
-        {project.live ? (
-          <a
-            href={project.live}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={action}
-            data-track="project_live_click"
-            data-track-project={project.slug}
-          >
-            Live <span aria-hidden="true">↗</span>
-            <span className="sr-only"> ({project.name}, opens in a new tab)</span>
-          </a>
-        ) : null}
-        {project.store ? (
-          <a href={project.store} target="_blank" rel="noopener noreferrer" className={action}>
-            Google Play <span aria-hidden="true">↗</span>
-            <span className="sr-only"> ({project.name} on Google Play, opens in a new tab)</span>
-          </a>
-        ) : null}
-        {project.repo ? (
-          <a href={project.repo} target="_blank" rel="noopener noreferrer" className={action}>
-            Code <span aria-hidden="true">↗</span>
-            <span className="sr-only"> ({project.name} repository, opens in a new tab)</span>
-          </a>
-        ) : null}
-      </div>
+      <ProjectLinks project={project} className="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-5" />
     </article>
   );
 }

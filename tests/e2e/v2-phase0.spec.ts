@@ -32,24 +32,25 @@ test.describe("section rhythm", () => {
 });
 
 test.describe("project sketches", () => {
-  test("play when the card scrolls into view, then idle, and replay on tap", async ({ page }) => {
+  test("play when their project is shown, then idle; a swipe to the next card plays that one", async ({
+    page,
+  }) => {
     await mockStatus(page);
     await page.setViewportSize({ width: 390, height: 800 });
     await page.goto("/");
-    const card = page.locator("#work article").first();
-    const player = card.locator("[data-sketch-play]");
-    await expect(player).toHaveAttribute("data-sketch-play", "false");
-    await card.scrollIntoViewIfNeeded();
-    await expect(player).toHaveAttribute("data-sketch-play", "true");
+    const first = page.locator("#panel-golden-verdict");
+    const second = page.locator("#panel-talnio");
+    await first.scrollIntoViewIfNeeded();
+    await expect(first).toHaveAttribute("data-play", "true");
     // the svg is genuinely running while playing
     expect(
-      await player
+      await first
         .locator("svg.sketch *")
         .evaluateAll((els) => els.some((e) => getComputedStyle(e).animationPlayState === "running")),
     ).toBe(true);
-    await expect(player).toHaveAttribute("data-sketch-play", "false", { timeout: 9000 });
-    await player.dispatchEvent("pointerdown");
-    await expect(player).toHaveAttribute("data-sketch-play", "true");
+    await expect(first).toHaveAttribute("data-play", "false", { timeout: 9000 });
+    await second.scrollIntoViewIfNeeded();
+    await expect(second).toHaveAttribute("data-play", "true");
   });
 });
 
