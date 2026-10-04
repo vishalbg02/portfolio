@@ -17,7 +17,7 @@ describe("profile (single source of truth)", () => {
   });
 
   it("keeps unknown values null instead of inventing them", () => {
-    expect(profile.contact.calLink).toBeNull();
+    expect(profile.contact.calLink).toBe("https://cal.com/vishal-b-g-02/15min"); // his public Cal.com page
     expect(projectBySlug("talnio")?.live).toBeNull();
     expect(projectBySlug("lansymphony")?.repo).toBeNull();
     expect(projectBySlug("golden-verdict")?.period).toBe("Jan 2026 – May 2026"); // he confirmed it ended in May 2026

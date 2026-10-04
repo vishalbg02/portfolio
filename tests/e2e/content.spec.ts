@@ -233,7 +233,7 @@ test.describe("contact", () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("+91 96639 72259");
   });
 
-  test("quick links point at the right places and 'Book a call' stays hidden until set", async ({ page }) => {
+  test("quick links point at the right places, including the Cal.com booking page", async ({ page }) => {
     await mockStatus(page);
     await page.goto("/");
     const c = page.locator("#contact");
@@ -250,7 +250,10 @@ test.describe("contact", () => {
       "href",
       "https://github.com/vishalbg02",
     );
-    await expect(c.getByRole("link", { name: /Book a 15-min call/ })).toHaveCount(0);
+    const book = c.getByRole("link", { name: /Book a 15-min call/ });
+    await expect(book).toHaveAttribute("href", "https://cal.com/vishal-b-g-02/15min");
+    await expect(book).toHaveAttribute("target", "_blank");
+    await expect(book).toHaveAttribute("rel", /noopener/);
   });
 
   test("validates on submit, focuses the first problem, and clears errors as you type", async ({ page }) => {

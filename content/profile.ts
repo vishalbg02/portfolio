@@ -35,7 +35,7 @@ const data = {
     collegeEmail: "vishal.bg@mca.christuniversity.in",
     linkedin: "https://linkedin.com/in/vishalbg",
     github: "https://github.com/vishalbg02",
-    calLink: null, // TODO(vishal): Cal.com 15-min link — "Book a call" stays hidden until set
+    calLink: "https://cal.com/vishal-b-g-02/15min", // his public 15-minute booking page (verified 2026-10-04)
   },
 
   education: [
