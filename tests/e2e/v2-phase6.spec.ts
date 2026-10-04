@@ -30,7 +30,11 @@ function watch(page: Page) {
     if (m.type() === "error" || m.type() === "warning") problems.push(`console.${m.type()}: ${m.text()}`);
   });
   page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
-  page.on("requestfailed", (r) => problems.push(`requestfailed: ${r.url()} ${r.failure()?.errorText}`));
+  page.on("requestfailed", (r) => {
+    // a clip that was paused or scrolled away while loading is aborted by the browser: normal, not a failure
+    if (/\/media\/.*\.(webm|mp4)$/.test(r.url()) && r.failure()?.errorText === "net::ERR_ABORTED") return;
+    problems.push(`requestfailed: ${r.url()} ${r.failure()?.errorText}`);
+  });
   return problems;
 }
 

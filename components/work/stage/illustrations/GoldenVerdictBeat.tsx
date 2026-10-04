@@ -10,7 +10,7 @@ function Window({ title, children }: { title: string; children: React.ReactNode 
       <rect width="960" height="600" fill="var(--bg)" />
       <rect width="220" height="600" fill="var(--surface)" />
       <line x1="220" y1="0" x2="220" y2="600" stroke="var(--border)" />
-      <text x="28" y="48" fontSize="13" letterSpacing="1.6" fill="var(--muted)" style={mono}>
+      <text x="28" y="48" fontSize="17" letterSpacing="1.6" fill="var(--muted)" style={mono}>
         CUSTOMER
       </text>
       {["Services", "Documents", "Requests"].map((item, i) => (
@@ -21,7 +21,7 @@ function Window({ title, children }: { title: string; children: React.ReactNode 
           <text
             x="30"
             y={94 + i * 44}
-            fontSize="15"
+            fontSize="20"
             fill={item === title ? "var(--text)" : "var(--muted)"}
             style={mono}
           >
@@ -44,7 +44,7 @@ function Upload() {
       className="ill block size-full"
     >
       <Window title="Documents">
-        <text x="270" y="70" fontSize="16" fill="var(--muted)" style={mono}>
+        <text x="270" y="70" fontSize="21" fill="var(--muted)" style={mono}>
           Upload documents
         </text>
         <rect
@@ -58,7 +58,7 @@ function Upload() {
           strokeWidth="2"
           strokeDasharray="8 8"
         />
-        <text x="590" y="178" fontSize="17" fill="var(--muted)" textAnchor="middle" style={mono}>
+        <text x="590" y="178" fontSize="22" fill="var(--muted)" textAnchor="middle" style={mono}>
           Drop documents here
         </text>
         {[
@@ -66,7 +66,7 @@ function Upload() {
           { y: 360, w: 0.62, label: "document-2", pct: "62%" },
         ].map((f, i) => (
           <g key={f.label}>
-            <text x="270" y={f.y + 6} fontSize="16" fill="var(--text)" style={mono}>
+            <text x="270" y={f.y + 6} fontSize="21" fill="var(--text)" style={mono}>
               {f.label}
             </text>
             <rect x="430" y={f.y - 6} width="400" height="12" rx="6" fill="var(--surface-2)" />
@@ -80,13 +80,13 @@ function Upload() {
               fill={GOLD}
               style={{ transformOrigin: "430px 0" }}
             />
-            <text x="850" y={f.y + 6} fontSize="15" fill="var(--muted)" style={mono}>
+            <text x="850" y={f.y + 6} fontSize="20" fill="var(--muted)" style={mono}>
               {f.pct}
             </text>
           </g>
         ))}
         <rect x="270" y="430" width="130" height="44" rx="8" fill="none" stroke={GOLD} strokeWidth="2" />
-        <text x="335" y="458" fontSize="16" fill="var(--text)" textAnchor="middle" style={mono}>
+        <text x="335" y="458" fontSize="21" fill="var(--text)" textAnchor="middle" style={mono}>
           Submit
         </text>
       </Window>
@@ -106,7 +106,7 @@ function Track() {
       className="ill block size-full"
     >
       <Window title="Requests">
-        <text x="270" y="70" fontSize="16" fill="var(--muted)" style={mono}>
+        <text x="270" y="70" fontSize="21" fill="var(--muted)" style={mono}>
           Your request
         </text>
         <rect
@@ -119,7 +119,7 @@ function Track() {
           stroke="var(--border-2)"
           strokeWidth="2"
         />
-        <text x="355" y="125" fontSize="20" fill="var(--text)" textAnchor="middle" style={mono}>
+        <text x="365" y="130" fontSize="26" fill="var(--text)" textAnchor="middle" style={mono}>
           REQ-····
         </text>
         {phases.map((p, i) => {
@@ -149,7 +149,7 @@ function Track() {
               <text
                 x={x}
                 y="306"
-                fontSize="15"
+                fontSize="20"
                 fill={i <= at ? "var(--text)" : "var(--muted)"}
                 textAnchor="middle"
                 style={mono}
@@ -159,9 +159,9 @@ function Track() {
             </g>
           );
         })}
-        <rect x="270" y="372" width="360" height="46" rx="8" fill="none" stroke={GOLD} strokeWidth="2" />
-        <circle cx="296" cy="395" r="6" fill={GOLD} />
-        <text x="314" y="401" fontSize="16" fill="var(--text)" style={mono}>
+        <rect x="270" y="372" width="440" height="52" rx="8" fill="none" stroke={GOLD} strokeWidth="2" />
+        <circle cx="298" cy="398" r="7" fill={GOLD} />
+        <text x="318" y="405" fontSize="21" fill="var(--text)" style={mono}>
           Status updated · email sent
         </text>
       </Window>

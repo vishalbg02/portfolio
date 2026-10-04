@@ -117,8 +117,8 @@
     height: 44px;
   }
   .expand-inline {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -397,6 +397,9 @@
   }
   .scene-copy {
     padding: 18px 18px 20px;
+  }
+  .scene-eyebrow {
+    font-size: 11px;
   }
   .scene-index {
     margin-bottom: 4px;

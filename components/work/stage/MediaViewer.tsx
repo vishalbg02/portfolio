@@ -31,6 +31,7 @@ export function MediaViewer({
         <Dialog.Overlay className="fixed inset-0 z-[80] bg-bg" />
         <Dialog.Content
           aria-describedby={undefined}
+          onCloseAutoFocus={(e) => e.preventDefault()}
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") go(1);
             else if (e.key === "ArrowLeft") go(-1);
@@ -71,7 +72,7 @@ export function MediaViewer({
             <picture key={item.id} className="flex max-h-full max-w-full items-center justify-center">
               <source type="image/avif" srcSet={item.avifSet} />
               <source type="image/webp" srcSet={item.webpSet} />
-              {/* eslint-disable-next-line @next/next/no-img-element -- the pre-encoded capture, shown as it was captured */}
+              {/* the pre-encoded capture, shown as it was captured */}
               <img
                 src={item.src}
                 alt={item.alt}

@@ -42,6 +42,8 @@ export function ShowcaseController({
   const root = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [viewing, setViewing] = useState<{ slug: string; index: number } | null>(null);
+  /** What to give focus back to when the viewer closes: the button that opened it. */
+  const opener = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const el = root.current;
@@ -234,6 +236,8 @@ export function ShowcaseController({
         const slug = scenes[i]!.slug;
         if (!viewer[slug]?.length) return;
         const start = scenes[i]!.beatItem[beat[i]!] ?? -1;
+        // a tap on the media has no button to return to: use the card's full-screen button
+        opener.current = open ?? card.querySelector<HTMLElement>("[data-viewer-open]");
         setViewing({ slug, index: Math.max(0, start) });
         track("media_fullscreen", { project: slug });
       }
@@ -326,7 +330,13 @@ export function ShowcaseController({
     };
   }, [scenes, viewer]);
 
-  const close = useCallback(() => setViewing(null), []);
+  const close = useCallback(() => {
+    setViewing(null);
+    const back = opener.current;
+    opener.current = null;
+    // after the dialog has unmounted
+    window.requestAnimationFrame(() => back?.focus());
+  }, []);
 
   return (
     <>

@@ -4,7 +4,18 @@
  * palette, a coarse grid, 220–320 ms. Shared by the Work scenes, route changes and modals.
  * Reduced motion (or no Web Animations) = an instant swap.
  */
-const LEVELS = ["var(--grid-1)", "var(--grid-2)", "var(--grid-3)", "var(--grid-4)"];
+/** Mostly the dark and middle greens, now and then a bright one: it reads as activity, not as a flash. */
+const LEVELS = [
+  "var(--grid-1)",
+  "var(--grid-1)",
+  "var(--grid-1)",
+  "var(--grid-2)",
+  "var(--grid-2)",
+  "var(--grid-2)",
+  "var(--grid-3)",
+  "var(--grid-3)",
+  "var(--grid-4)",
+];
 
 export type DissolveOptions = {
   /** Square size in px (the grid is as many as fit). */

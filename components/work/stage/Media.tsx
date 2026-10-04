@@ -23,7 +23,7 @@ export function MediaStill({
     <picture>
       <source type="image/avif" srcSet={s.avifSet} sizes={sizes} />
       <source type="image/webp" srcSet={s.webpSet} sizes={sizes} />
-      {/* eslint-disable-next-line @next/next/no-img-element -- pre-encoded AVIF/WebP at 1× and 2×: a re-encode through next/image would only cost quality */}
+      {/* pre-encoded AVIF/WebP at 1× and 2×: a re-encode through next/image would only cost quality */}
       <img
         src={s.fallback}
         alt={asset.alt}
@@ -74,6 +74,35 @@ export function MediaClip({ asset, className }: { asset: MediaClip; className?: 
         <span data-clip-label>Play</span>
       </button>
     </div>
+  );
+}
+
+/** A clip's poster frame as a still: for places that show a capture without playing anything (cards, headers). */
+export function MediaPoster({
+  asset,
+  priority = false,
+  className,
+}: {
+  asset: MediaClip;
+  priority?: boolean;
+  className?: string;
+}) {
+  const s = clipSources(asset).poster;
+  return (
+    <picture>
+      <source type="image/avif" srcSet={s.avifSet} />
+      <source type="image/webp" srcSet={s.webpSet} />
+      {/* pre-encoded poster at 1× and 2× */}
+      <img
+        src={s.fallback}
+        alt={asset.alt}
+        width={s.width}
+        height={s.height}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        className={cn("block size-full object-cover object-top", className)}
+      />
+    </picture>
   );
 }
 
