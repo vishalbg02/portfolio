@@ -36,7 +36,7 @@ describe("terminal commands", () => {
     const t = text("status");
     expect(t).toMatch(/Not working anywhere right now/);
     expect(t).toContain("Golden Verdict");
-    expect(t).toContain("Jan 2026 – Jun 2026");
+    expect(t).toContain("Jan 2026 – May 2026");
     expect(t).toContain(profile.workPreferences.startDate);
   });
 

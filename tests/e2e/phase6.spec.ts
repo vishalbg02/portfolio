@@ -77,7 +77,7 @@ test.describe("now", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("What I'm doing now");
     await expect(page.getByText("Available for SDE / Full Stack roles")).toBeVisible();
     await expect(page.getByText("Studying", { exact: true })).toBeVisible();
-    // Nothing is current (Social Agent ended Mar 2026, Golden Verdict Jun 2026): there is no "Working" line.
+    // Nothing is current (Social Agent ended Mar 2026, Golden Verdict May 2026): there is no "Working" line.
     await expect(page.getByText("Working", { exact: true })).toHaveCount(0);
     await expect(page.getByText(/Golden Verdict/)).toHaveCount(0);
     // Unset TODO(vishal) fields stay hidden.

@@ -57,7 +57,7 @@ const data = {
     {
       role: "Full-Stack Developer",
       company: "Golden Verdict, Bengaluru",
-      period: "Jan 2026 – Jun 2026",
+      period: "Jan 2026 – May 2026",
       current: false,
       kind: "freelance",
       points: [
@@ -96,7 +96,7 @@ const data = {
       name: "Golden Verdict",
       tagline: "Legal & tax compliance SaaS",
       type: "Freelance · Production",
-      period: "Jan 2026 – Jun 2026",
+      period: "Jan 2026 – May 2026",
       badge: null,
       live: "https://goldenverdict.com",
       repo: null,
