@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { profile } from "@/content/profile";
 import { getAllCaseStudySlugs } from "@/lib/content/work";
 import { OG_SIZE, OG_TYPE, renderOg } from "@/lib/seo/og";
+import { ogImageFor } from "@/lib/seo/og-media";
 
 export const size = OG_SIZE;
 export const contentType = OG_TYPE;
@@ -27,5 +28,6 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     kicker: `Case study · ${project.tagline}`,
     path: `/work/${slug}`,
     accent: ACCENT[slug],
+    image: await ogImageFor(slug),
   });
 }

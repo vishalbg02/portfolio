@@ -1,3 +1,4 @@
+import "./zod-csp";
 import { z } from "zod";
 
 /** Frontmatter of content/log/<slug>.mdx. */

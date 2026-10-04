@@ -163,7 +163,7 @@ export function Scene({
               <Framed scene={scene} project={project} openable={openable}>
                 {scene.beats.map((b, j) => (
                   <div key={b.id} data-beat={j} data-active={j === 0 ? "" : undefined} className="beat">
-                    <Content media={b.media} priority={index === 0 && j === 0} />
+                    <Content media={b.media} />
                   </div>
                 ))}
                 {isTour && project.live ? (

@@ -44,7 +44,10 @@ No environment variables are required. Every integration degrades gracefully whe
 | `pnpm test`             | Vitest unit tests                                                                                                         |
 | `pnpm build`            | Production build (all pages static)                                                                                       |
 | `pnpm check:bundle`     | Fails if the home route's initial JS is over **170 KB gzipped** (run after build)                                         |
+| `pnpm check:static`     | Fails if any page is dynamic (only `/api/*` may be); reads the build output, so run it after `pnpm build`                 |
 | `pnpm e2e`              | Playwright e2e + axe against the production build                                                                         |
+| `pnpm media`            | Re-captures product stills and clips for Work (see docs/MEDIA.md; never run in the Vercel build)                          |
+| `pnpm telegram:setup`   | Registers the live-chat webhook with Telegram (see docs/LIVE-CHAT-SETUP.md)                                               |
 | `pnpm resume`           | Validates and builds the résumé PDF (`--open` to view); see docs/UPDATING-RESUME.md                                       |
 | `pnpm embeddings`       | Re-embeds changed content chunks (needs `GEMINI_API_KEY`); commit `generated/embeddings.json`                             |
 | `pnpm check:embeddings` | Warns if the committed embeddings are stale. Never fails, never calls the API                                             |
@@ -73,6 +76,57 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 - **Embeddings** are generated locally and committed. After editing `profile.ts` or a case study, run `pnpm embeddings` and commit `generated/embeddings.json`. CI only warns when they are stale, and the Vercel build never calls the API.
 - Evaluation questions: [tests/ai-evals.md](tests/ai-evals.md). Unit tests blank all API keys, so they are hermetic.
 
+The full V3 write-up (before/after, numbers, environment variables, what still needs Vishal): [docs/V3-REPORT.md](docs/V3-REPORT.md).
+
+## How the V3 pieces fit together
+
+Pages are static. Only `/api/*` runs on demand, and `pnpm check:static` (also a CI step) fails the build if a page stops being static. Every integration is optional and the site builds and runs with no environment variables.
+
+```mermaid
+flowchart LR
+  V([Visitor])
+  subgraph Static["Static pages (CDN)"]
+    P["Home, Work, Resume, Log, Now"]
+    Z["GRID chat · Tour · Commit City · Stack map"]
+  end
+  subgraph API["/api (on demand)"]
+    C["/api/chat"]
+    L["/api/live/*"]
+    K["/api/link, /api/link/event"]
+    H["/api/here"]
+    W["/api/telegram/webhook"]
+  end
+  subgraph Agent["GRID agent (lib/ai/agent)"]
+    R["Router: deterministic first"]
+    G["Refusal gate"]
+    O["Offline answer from content"]
+    M["Model + tools (Gemini, Groq)"]
+  end
+  V --> P
+  P --> Z
+  Z -->|"NDJSON stream"| C
+  C --> R --> G --> O
+  G --> M
+  M -->|"tools only prepare: show, tour, draft"| Z
+  Z -->|"visitor reviews, then sends"| L
+  L -->|"message"| T[(Telegram)]
+  T -->|"Vishal replies"| W
+  W --> S[(Upstash Redis)]
+  L <--> S
+  Z -.->|"polls for replies"| L
+  V -->|"?c=id.signature"| K
+  K --> S
+  K -->|"alert"| T
+  Z -->|"heartbeat"| H
+  H --> S
+```
+
+- **GRID** (`lib/ai/agent`): a deterministic router answers what it can (navigation, projects, tour), a refusal gate stops anything outside the corpus before any model call, an offline answer is built from the same content when no key is set, and only then does a model run, with tools that can _prepare_ an action but never perform it. Parts the visitor sees (cards, diagrams, the tour) are built server-side from `content/*.ts`, so the model cannot invent a fact into a card.
+- **Live chat** (`lib/live`): visitor messages go to Telegram, replies come back through the webhook into Redis, and the page polls. Presence (`/online`, `/away`, hours), signed thread links and the daily digest are in the same store.
+- **Personal links** (`lib/links`): `/link <Company> [Role]` in Telegram returns `?c=<id>.<hmac>`; the page verifies it, shows a banner and ranks what is relevant for the role, and opens, résumé downloads and chat starts alert Vishal once each (`claimOnce`). Links expire after 90 days.
+- **Visitor wall** (`lib/presence`): a heartbeat every 30 s from each visible tab, one square per visitor, keyed by a random id made for that tab (not a cookie, not linked to an IP address, kept 75 s; see `/privacy`).
+- **Truth**: every fact comes from `content/*.ts` (Zod-validated). Unknown values are `null` with a `TODO(vishal)`, and the UI hides them.
+
 ## What V3 added to the page (Phase 5)
 
 Everything here is a lazy chunk, keyboard-operable, flat-coloured (no gradients) and has a reduced-motion variant. Details: [docs/SIGNATURE.md](docs/SIGNATURE.md).
@@ -93,6 +147,14 @@ Everything here is a lazy chunk, keyboard-operable, flat-coloured (no gradients)
 - **Night mode and a nav ticker**: the hero says GRID is on duty between midnight and 7 in Bengaluru; the nav shows the latest GitHub activity.
 - **Visitor wall** (`/api/here`, `components/layout/PresenceWall.tsx`): one square per visitor on the site now; dim without Redis.
 - **Personal links** (`/link <Company> [Role]` in Telegram, `components/links`): a signed `?c=` link per company with a banner, a role-ranked "what's relevant", and Telegram alerts for opens, résumé downloads and chat starts. See [docs/SIGNATURE.md](docs/SIGNATURE.md) and [docs/LIVE-CHAT-SETUP.md](docs/LIVE-CHAT-SETUP.md).
+
+## What V3 added to the page (Phase 7)
+
+- **Static-pages guard** (`lib/check/static-routes.ts`, `pnpm check:static`, a CI step): reads the build manifests and fails if any page is dynamic; the API routes are the only allowed exceptions.
+- **Open Graph cards for case studies** carry a real capture of the product (`lib/seo/og-media.ts` turns the committed still into a data URL at build time) instead of a drawing; LanSymphony has no public UI, so it keeps its protocol diagram.
+- **Accessibility and layout of the new states** (`tests/e2e/phase7-qa.spec.ts`): axe on the tour, a personal link's banner and panel, the achievements dialog, the footer wall and the 3D city; the same components measured at 360, 390, 768, 1280, 1440 and 1920 px for overflow and tap-target size; and a flow through every Phase 6 feature that fails on any console error or CSP violation.
+- **Performance**: nothing heavy is requested before the first paint for a card that is not yet near. A `poster` attribute is fetched at once even with `preload="none"`, so the Work clips carry `data-poster` and the Work controller sets it when the card is about to be seen; the desktop stage's first image is no longer eager. That took a local mobile Lighthouse run from 0.90 to 0.94 to 0.97 (production had slipped to 0.94 at Phase 6).
+- **CSP**: the content schemas run Zod without its `new Function` fast path in the browser (`lib/content/zod-csp.ts`), so a lazy chunk that pulls them in no longer trips `script-src` (there is no `'unsafe-eval'`).
 
 ## What V2 added (and where it comes from)
 

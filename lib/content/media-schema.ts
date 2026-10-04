@@ -1,3 +1,4 @@
+import "./zod-csp";
 import { z } from "zod";
 import { ProjectSlugSchema } from "./profile-schema";
 

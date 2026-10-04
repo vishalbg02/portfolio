@@ -28,11 +28,14 @@ export function renderOg({
   kicker,
   path,
   accent = GREEN,
+  image,
 }: {
   title: string;
   kicker?: string;
   path: string;
   accent?: string;
+  /** A real capture (a data URL) shown in a flat frame beside the title. */
+  image?: string | null;
 }) {
   const cols = 16;
   const rows = 6;
@@ -55,26 +58,52 @@ export function renderOg({
         <div style={{ display: "flex", width: 14, height: 30, background: GREEN }} />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {kicker ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 28, color: MUTED }}>
-            <div style={{ display: "flex", width: 16, height: 16, borderRadius: 8, background: accent }} />
-            {kicker}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 40 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: image ? 560 : 1000 }}>
+          {kicker ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 28, color: MUTED }}>
+              <div style={{ display: "flex", width: 16, height: 16, borderRadius: 8, background: accent }} />
+              {kicker}
+            </div>
+          ) : null}
+          <div
+            style={{
+              display: "flex",
+              fontSize: image ? (title.length > 18 ? 56 : 68) : title.length > 28 ? 68 : 84,
+              fontWeight: 700,
+              lineHeight: 1.05,
+              letterSpacing: -2,
+              maxWidth: image ? 560 : 1000,
+            }}
+          >
+            {title}
+          </div>
+          <div
+            style={{ display: "flex", fontSize: image ? 26 : 32, color: MUTED, maxWidth: image ? 560 : 900 }}
+          >
+            {profile.headline}
+          </div>
+        </div>
+        {image ? (
+          <div
+            style={{
+              display: "flex",
+              border: `2px solid ${BORDER}`,
+              background: SURFACE,
+              borderRadius: 16,
+              padding: 12,
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image}
+              width={440}
+              height={275}
+              style={{ borderRadius: 8, objectFit: "cover", objectPosition: "top" }}
+              alt=""
+            />
           </div>
         ) : null}
-        <div
-          style={{
-            display: "flex",
-            fontSize: title.length > 28 ? 68 : 84,
-            fontWeight: 700,
-            lineHeight: 1.05,
-            letterSpacing: -2,
-            maxWidth: 1000,
-          }}
-        >
-          {title}
-        </div>
-        <div style={{ display: "flex", fontSize: 32, color: MUTED, maxWidth: 900 }}>{profile.headline}</div>
       </div>
 
       <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
