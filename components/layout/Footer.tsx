@@ -22,6 +22,7 @@ const footerLinks = [
   { label: "Résumé", href: "/resume", external: false },
   { label: "Recruiter mode", href: "/recruiter", external: false },
   { label: "Now", href: "/now", external: false },
+  { label: "Privacy", href: "/privacy", external: false },
 ];
 
 export function Footer() {
