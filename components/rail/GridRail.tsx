@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ACHIEVEMENTS } from "@/lib/achievements";
 import { track } from "@/lib/analytics";
+import { TOUR_STEP_EVENT, type TourStepDetail } from "@/lib/tour/events";
+import { useAchievements } from "@/lib/use-achievements";
 import { activeSection, railLevels, scrollProgress, spreadTicks, tickFractions } from "@/lib/utils/rail";
 
 export type RailSection = { id: string; label: string };
@@ -19,6 +22,7 @@ export default function GridRail({ sections }: { sections: RailSection[] }) {
   const ticks = useRef<Array<HTMLAnchorElement | null>>([]);
   const bar = useRef<HTMLDivElement>(null);
   const railEl = useRef<HTMLElement>(null);
+  const { found } = useAchievements();
 
   useEffect(() => {
     let tops: number[] = [];
@@ -99,6 +103,20 @@ export default function GridRail({ sections }: { sections: RailSection[] }) {
     };
   }, [sections]);
 
+  // the tour marks the section it is at on the rail
+  useEffect(() => {
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<TourStepDetail>).detail;
+      ticks.current.forEach((t, n) => {
+        if (!t) return;
+        if (d.sectionId && sections[n]?.id === d.sectionId) t.setAttribute("data-tour", "true");
+        else t.removeAttribute("data-tour");
+      });
+    };
+    window.addEventListener(TOUR_STEP_EVENT, on);
+    return () => window.removeEventListener(TOUR_STEP_EVENT, on);
+  }, [sections]);
+
   const jump = (e: React.MouseEvent<HTMLAnchorElement>, s: RailSection) => {
     const el = document.getElementById(s.id);
     if (!el) return;
@@ -138,6 +156,20 @@ export default function GridRail({ sections }: { sections: RailSection[] }) {
             />
           ))}
         </div>
+        {/* what has been found (the footer's "discovered" chip lists them): a square lights for each */}
+        <ul
+          aria-hidden="true"
+          data-testid="rail-found"
+          className="absolute top-full left-0 mt-4 grid w-[22px] grid-cols-2 gap-1"
+        >
+          {ACHIEVEMENTS.map((a) => (
+            <li
+              key={a.id}
+              data-found={found.includes(a.id) ? "true" : undefined}
+              className="block size-2.5 rounded-[2px] border border-border bg-transparent data-[found=true]:border-accent data-[found=true]:bg-accent"
+            />
+          ))}
+        </ul>
         {sections.map((s, i) => (
           <a
             key={s.id}

@@ -1,4 +1,5 @@
 import { mediaById } from "@/content/media";
+import { TOUR } from "@/content/tour";
 import { profile, projectBySlug } from "@/content/profile";
 import { sceneFor } from "@/content/scenes";
 import { graphs } from "@/components/diagram/graphs";
@@ -235,6 +236,9 @@ export const livePart = (
   state: presence.configured ? presence.state : "off",
   time: presence.time,
 });
+
+/** The 60-second tour: a card with a button (and the page starts it when GRID produces it live). */
+export const tourPart = (): UiPart => ({ kind: "tour", stops: TOUR.length });
 
 /** A message for the visitor to review. The fields are only a proposal: nothing is sent until they confirm. */
 export const confirmPart = (m: { name?: string; email?: string; message?: string }): UiPart => ({

@@ -20,6 +20,7 @@ import {
   projectCard,
   skillEvidence,
   statsPart,
+  tourPart,
 } from "./cards";
 import { currentPresence } from "@/lib/live/read";
 import { draftPart } from "./drafts";
@@ -284,6 +285,19 @@ export function buildTools(ctx: ToolContext) {
                 : "Live chat is not switched on; showed an offer to leave a message instead.",
         });
       },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    start_tour: tool({
+      description:
+        "Start the 60-second guided tour of the home page: it scrolls through six stops (who he is, work, experience, stack, activity, how to reach him) with a short caption each. Use when the visitor asks for a tour or to be shown around.",
+      inputSchema: z.object({ mode: z.enum(["60s"]).default("60s") }),
+      execute: async (): Promise<ToolResult> =>
+        result({
+          part: tourPart(),
+          summary:
+            "Started the 60-second tour (it plays on the page). Add one short sentence; do not describe the stops.",
+        }),
       toModelOutput: ({ output }) => modelText(output),
     }),
 

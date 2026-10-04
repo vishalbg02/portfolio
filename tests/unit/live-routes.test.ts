@@ -375,7 +375,7 @@ describe("POST /api/telegram/webhook", () => {
     await hook(r, update("/frobnicate"));
     expect(r.telegram.at(-1)!.text).toContain("/stats");
     await hook(r, update("/link Infosys SDE"));
-    expect(r.telegram.at(-1)!.text).toContain("later update");
+    expect(r.telegram.at(-1)!.text).toContain("/?c="); // personal links are covered in company-links.test.ts
   });
 
   it("/block stops that visitor and their address, and says if the id is unknown", async () => {

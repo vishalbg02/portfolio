@@ -7,6 +7,7 @@ import { WORK_GO_EVENT } from "@/lib/grid/events";
 import type { ViewerItem } from "./viewer-types";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "../identity";
+import { play } from "@/lib/sound";
 
 const MediaViewer = dynamic(() => import("./MediaViewer").then((m) => m.MediaViewer), { ssr: false });
 
@@ -110,7 +111,10 @@ export function ShowcaseController({
       });
       setActive(i);
       syncClips();
-      if (changed && announce) track("scene_view", { project: scenes[i]!.slug });
+      if (changed && announce) {
+        track("scene_view", { project: scenes[i]!.slug });
+        play("click");
+      }
     };
 
     /* ── scroll → scene and beat (desktop) ───────────────────────────────────────────────────── */

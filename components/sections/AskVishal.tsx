@@ -78,6 +78,7 @@ export async function AskVishal() {
                 <li key={c.label}>
                   <Link
                     href="/#ask"
+                    prefetch={false}
                     data-grid-open=""
                     data-grid-question={c.question}
                     data-cursor="ask"

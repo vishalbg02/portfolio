@@ -67,6 +67,21 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
     ],
   },
   {
+    id: "links",
+    title: "Personal links",
+    body: [
+      `Some links to this site carry a code (…/?c=…) that ${profile.name} made for one company. Opening one shows a banner with the company and role he typed, and the page lights the projects most relevant to that role. Nothing from the address is ever shown, only what he typed.`,
+      "It also tells him, on Telegram, that the link was opened, that the résumé was downloaded from it, or that a chat with GRID was started, so he knows which application got attention. Only the link's id and the time are recorded: no name, email or IP address. The code is kept in your tab (session storage) and removed from the address bar.",
+    ],
+  },
+  {
+    id: "wall",
+    title: "Visitor wall",
+    body: [
+      "The footer shows how many people are on the site right now and lights one square for each. While the page is visible, your browser sends a random id made for that tab to this site every 30 seconds. It is kept for 75 seconds and then deleted, it is not a cookie, and it is not linked to your IP address or to anything about you. It stops after 30 minutes. Without the Redis database the wall simply stays dim.",
+    ],
+  },
+  {
     id: "abuse",
     title: "Abuse protection",
     body: [
@@ -77,7 +92,7 @@ const SECTIONS: ReadonlyArray<{ id: string; title: string; body: string[] }> = [
     id: "device",
     title: "On your device",
     body: [
-      "A few small conveniences use your browser's local storage or session storage: your GRID conversation and the width of the chat panel, your best score in the games, whether you have already tried the hero terminal, and whether the intro line has played. They never leave your browser and you can clear them any time.",
+      "A few small conveniences use your browser's local storage or session storage: your GRID conversation and the width of the chat panel, your best score in the games, whether you have already tried the hero terminal, whether the intro line has played, which hidden things you have found (the footer\u2019s \u201cdiscovered\u201d count), and whether you turned sound on (it is off unless you do). They never leave your browser and you can clear them any time.",
     ],
   },
   {

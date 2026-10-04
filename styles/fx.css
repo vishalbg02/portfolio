@@ -132,3 +132,32 @@ html[data-cursor-active] [data-cursor] * {
 .island-activity:has([data-testid="city"]) {
   min-height: 0;
 }
+
+/* ── the guided tour ──────────────────────────────────────────────────────────────────────────── */
+/* the heading the tour is on: a flat accent outline, no glow (it is removed when the tour moves on) */
+[data-tour-hit] {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+  border-radius: 2px;
+}
+/* a stop's countdown: a thin bar that fills over the stop's time (a still bar under reduced motion: the tour waits for Next) */
+@media (prefers-reduced-motion: no-preference) {
+  .tour-progress {
+    animation-name: tour-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+}
+@keyframes tour-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+/* the Grid Rail's tick for the section the tour is at */
+.rail-tick[data-tour="true"] .rail-tick-dot {
+  width: 1.25rem;
+  background: var(--accent);
+}

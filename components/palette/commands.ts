@@ -13,7 +13,7 @@ export type PaletteAction =
   | { type: "download"; href: string; filename?: string; event?: AnalyticsEvent }
   | { type: "tel"; href: string }
   | { type: "copy"; text: string; label: string; event?: AnalyticsEvent }
-  | { type: "event"; name: "open-terminal" | "open-grid" | "open-live" };
+  | { type: "event"; name: "open-terminal" | "open-grid" | "open-live" | "start-tour" };
 
 export type PaletteItem = {
   id: string;
@@ -108,6 +108,17 @@ export function buildPaletteGroups(): PaletteGroup[] {
             hint: "live chat",
             keywords: ["chat", "talk", "contact", "message", "reach"],
             action: { type: "event", name: "open-live" },
+          } satisfies PaletteItem,
+        ]
+      : []),
+    ...(shipped.tour
+      ? [
+          {
+            id: "act-tour",
+            label: "Take the 60-second tour",
+            hint: "t",
+            keywords: ["tour", "guide", "walkthrough", "show me around"],
+            action: { type: "event", name: "start-tour" },
           } satisfies PaletteItem,
         ]
       : []),

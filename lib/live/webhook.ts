@@ -3,6 +3,7 @@ import { env } from "@/lib/env";
 import { cleanText } from "@/lib/notify/message";
 import { claimOnce } from "@/lib/notify/once";
 import { escapeHtml } from "@/lib/notify/telegram";
+import { createCompanyLink, linksText } from "@/lib/links/service";
 import { parseHours } from "./presence";
 import {
   blockConversation,
@@ -36,7 +37,8 @@ export const HELP = [
   "/hours 10-22: online between those Bengaluru hours (/hours off to clear)",
   "/stats: today's counts and who's waiting",
   "/block &lt;id&gt;: block a visitor (the id looks like #a1b2c3)",
-  "/link &lt;Company&gt; [Role]: personal links (coming in a later update)",
+  "/link &lt;Company&gt; [Role]: a personal link for that company (/link Infosys SDE; use | for a longer name: /link Tata Consultancy | Java Developer)",
+  "/links: your last ten links and how often each was opened",
   "/help: this list",
 ].join("\n");
 
@@ -120,10 +122,25 @@ export async function handleUpdate(update: TelegramUpdate, deps: Deps = defaultD
         );
         return conv ? "block" : "block_unknown";
       }
-      case "link":
+      case "link": {
         await noteOwnerActivity(deps);
-        await say(deps, "Personal company links arrive in a later update. Nothing was created.");
-        return "link";
+        const made = await createCompanyLink(command.arg, deps);
+        await say(
+          deps,
+          made.ok
+            ? [
+                `🔗 Link for <b>${escapeHtml(made.link.company)}</b>${made.link.role ? ` · ${escapeHtml(made.link.role)}` : ""} (works for 90 days):`,
+                `<code>${escapeHtml(made.url)}</code>`,
+                "I'll tell you here when it's opened, when the résumé is downloaded and when they start a chat.",
+              ].join("\n")
+            : "Use /link Company Role, like /link Infosys SDE. For a longer name use |: /link Tata Consultancy | Java Developer.",
+        );
+        return made.ok ? "link" : "link_invalid";
+      }
+      case "links":
+        await noteOwnerActivity(deps);
+        await say(deps, await linksText(deps));
+        return "links";
       default:
         await noteOwnerActivity(deps);
         await say(deps, HELP);

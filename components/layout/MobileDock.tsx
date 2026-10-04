@@ -132,6 +132,7 @@ export function MobileDock() {
       <div className="flex h-16">
         <Link
           href="/#work"
+          prefetch={false}
           onClick={() => tap("work")}
           className={cn(item, tone("work"))}
           aria-current={active === "work" ? "true" : undefined}
@@ -182,6 +183,7 @@ export function MobileDock() {
         </Link>
         <Link
           href="/#contact"
+          prefetch={false}
           onClick={() => tap("contact")}
           className={cn(item, tone("contact"))}
           aria-current={active === "contact" ? "true" : undefined}

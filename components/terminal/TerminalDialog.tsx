@@ -9,6 +9,8 @@ import { applyTab, historyStep } from "@/lib/terminal/input";
 import { cn } from "@/lib/utils/cn";
 import { performAction } from "./perform";
 import { useRevealRef } from "@/lib/fx/use-reveal";
+import { unlock } from "@/lib/achievements";
+import { play } from "@/lib/sound";
 
 type Entry = { id: number; command: string | null; lines: Line[] };
 
@@ -56,7 +58,10 @@ export default function TerminalDialog({
     const command = value;
     setValue("");
     cursor.current = null;
-    if (command.trim()) history.current = [...history.current, command];
+    if (command.trim()) {
+      history.current = [...history.current, command];
+      unlock("command");
+    }
     const result = run(command);
     if (result.egg) track("easter_egg_found", { name: result.egg });
     if (result.action?.type !== "clear") {
@@ -66,6 +71,7 @@ export default function TerminalDialog({
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key.length === 1 || e.key === "Backspace") play("tick");
     if (e.key === "Enter") {
       e.preventDefault();
       submit();

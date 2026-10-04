@@ -73,6 +73,7 @@ Pass criteria for every answer: third person ("Vishal…"), at most a short para
 | A7  | Reply in Kannada: what are his strongest skills?                          | Answers in Kannada with the same facts and citations; skill and project names unchanged.                                                                                                                                            |
 | A8  | Where did he learn MongoDB?                                               | `show_skill_evidence`: "Learned at CHRIST" with the note Vishal wrote, linking to Education. A skill that appears nowhere on the site still says so.                                                                                |
 | A9  | Can I talk to him live?                                                   | `start_live_chat`: whether he is online (or away, or that live chat isn't switched on) and a button that opens the live chat, starting from a short summary of what the visitor asked. GRID never claims a message was sent to him. |
+| A10 | Take me on a tour / show me around                                        | `start_tour`: a card with a "Start the tour" button; the page starts the 60-second tour (it plays on the home page, Esc stops it). No model is needed for the plain request. GRID does not describe the stops itself.               |
 
 ## Automated coverage
 

@@ -13,6 +13,7 @@ import { LIVE, type LiveMessage, type PresenceInfo } from "@/lib/live/types";
 import { cn } from "@/lib/utils/cn";
 import { PresenceChip } from "./PresenceChip";
 import { Turnstile, turnstileEnabled } from "./Turnstile";
+import { play } from "@/lib/sound";
 
 const NOTICE =
   "Messages go to Vishal's phone. Don't share sensitive information. Threads are deleted after 30 days.";
@@ -127,7 +128,9 @@ export default function LiveChat({
         if (!r.changed || r.messages.length === 0) return false;
         after.current = Math.max(after.current, ...r.messages.map((m) => m.n));
         setMessages((prev) => mergeMessages(prev, r.messages));
-        return r.messages.some((m) => m.from === "vishal");
+        const fromVishal = r.messages.some((m) => m.from === "vishal");
+        if (fromVishal) play("chime");
+        return fromVishal;
       },
     });
     poller.current = p;
@@ -193,6 +196,8 @@ export default function LiveChat({
     if (v.data.email) setEmailSaved(v.data.email);
     if (r.presence?.state === "away" && !v.data.email) setNeedEmail(true);
     setPhase("thread");
+    play("chime");
+    window.dispatchEvent(new Event("app:chat-started"));
     track("live_chat_start");
   };
 
@@ -221,6 +226,7 @@ export default function LiveChat({
     );
     setDraft("");
     poller.current?.activity();
+    play("chime");
     track("live_chat_message");
   };
 

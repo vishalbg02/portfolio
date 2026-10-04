@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { track } from "@/lib/analytics";
 import { OPEN_GAME_EVENT, OPEN_TERMINAL_EVENT, konamiProgress } from "@/lib/delight";
 import { isTypingTarget } from "@/lib/shortcuts";
+import { unlock } from "@/lib/achievements";
 
 const TerminalDialog = dynamic(() => import("@/components/terminal/TerminalDialog"), { ssr: false });
 const CosmoStrikeDialog = dynamic(() => import("@/components/games/CosmoStrikeDialog"), { ssr: false });
@@ -22,6 +23,7 @@ export function DelightHost() {
 
   const show = useCallback((which: Exclude<Overlay, null>) => {
     openRef.current = which;
+    unlock(which === "terminal" ? "terminal" : "cosmostrike");
     setLoaded((l) => ({ ...l, [which]: true }));
     setOpen(which);
   }, []);

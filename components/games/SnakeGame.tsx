@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { track } from "@/lib/analytics";
 import { newGame, step, tickMs, turn, type Dir, type SnakeState } from "@/lib/games/snake";
+import { unlock } from "@/lib/achievements";
 
 const COLS = 20;
 const ROWS = 20;
@@ -114,6 +115,7 @@ export default function SnakeGame() {
     if (!announced.current) {
       announced.current = true;
       track("easter_egg_found", { name: "snake" });
+      unlock("snake");
     }
     timer.current = window.setTimeout(loop, tickMs(0));
   }, [loop, render, setPhaseBoth, stop]);

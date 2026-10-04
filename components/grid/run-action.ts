@@ -1,4 +1,5 @@
 import type { useRouter } from "next/navigation";
+import { unlock } from "@/lib/achievements";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "@/lib/toast";
@@ -6,6 +7,7 @@ import type { PaletteAction } from "@/components/palette/commands";
 
 /** Carries out a command from the Omnibar (route, external link, download, call, copy, or an app event). */
 export async function runAction(action: PaletteAction, router: ReturnType<typeof useRouter>) {
+  unlock("omnibar");
   switch (action.type) {
     case "route":
       router.push(action.href);

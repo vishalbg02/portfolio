@@ -69,7 +69,14 @@ export function ButtonLink({
     );
   }
   return (
-    <Link href={href} className={cls} {...rest}>
+    // a link to the page you are probably already on (the home page or a section of it) is not worth prefetching: the
+    // whole page's data would be fetched a second time before the visitor has done anything
+    <Link
+      href={href}
+      prefetch={href === "/" || href.startsWith("/#") ? false : undefined}
+      className={cls}
+      {...rest}
+    >
       {children}
     </Link>
   );

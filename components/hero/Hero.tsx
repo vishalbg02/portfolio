@@ -5,6 +5,7 @@ import { StatusDot } from "@/components/ui/Chip";
 import { LocalTime } from "@/components/layout/LocalTime";
 import { resumeHref } from "@/lib/site";
 import { Greeting } from "./Greeting";
+import { NightStatus } from "./NightStatus";
 import { Magnetic } from "./Magnetic";
 import { TrailLoader } from "./TrailLoader";
 import { ShipConsole } from "./ShipConsole";
@@ -43,7 +44,7 @@ export function Hero() {
           <div className="mt-6 flex flex-col gap-1 text-sm text-muted sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
             <p className="flex items-center gap-2">
               <StatusDot />
-              <span className="text-text">{profile.status}</span>
+              <NightStatus day={profile.status} />
             </p>
             <span aria-hidden="true" className="hidden sm:inline">
               ·
@@ -63,7 +64,7 @@ export function Hero() {
             <Magnetic>
               <span className="m-1.5 inline-block sm:m-2">
                 {/* A plain link: without JS it goes to the Ask section, with JS GridHost opens the chat. */}
-                <Link href="/#ask" data-grid-open="" className={buttonClass("outline")}>
+                <Link href="/#ask" prefetch={false} data-grid-open="" className={buttonClass("outline")}>
                   Ask GRID
                 </Link>
               </span>
@@ -91,6 +92,16 @@ export function Hero() {
           </div>
           <p className="needs-grid mt-4 text-sm text-muted">
             Ask anything about my work, or let GRID show you around.
+          </p>
+          <p className="mt-2 text-sm">
+            <Link
+              href="/?tour=1"
+              prefetch={false}
+              data-tour-open=""
+              className="tap-slop inline-flex items-center gap-1.5 rounded-sm font-mono text-xs text-link underline-offset-4 hover:underline"
+            >
+              <span aria-hidden="true">▶</span> Take the 60-second tour
+            </Link>
           </p>
         </div>
 

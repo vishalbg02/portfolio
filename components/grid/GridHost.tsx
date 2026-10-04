@@ -9,6 +9,7 @@ import { parseThreadParam, saveSession } from "@/lib/live/session";
 import { flashProof, jumpTarget } from "@/lib/proof";
 import type { UiPart } from "@/lib/ai/protocol";
 import { SelectionAsk } from "./SelectionAsk";
+import { startTour } from "@/lib/tour/events";
 
 const loadSheet = () => import("./GridSheet");
 const GridSheet = dynamic(loadSheet, { ssr: false });
@@ -65,10 +66,11 @@ export function GridHost() {
     /** What GRID did: move the visitor. On a phone the full-screen chat steps away first so they can see it. */
     const onAct = (e: Event) => {
       const part = (e as CustomEvent<{ part: UiPart }>).detail?.part;
-      if (!part || (part.kind !== "navigate" && part.kind !== "demo")) return;
+      if (!part || (part.kind !== "navigate" && part.kind !== "demo" && part.kind !== "tour")) return;
       const reveal = wide() ? 0 : 160;
       if (!wide()) setOpen(false);
       window.setTimeout(() => {
+        if (part.kind === "tour") return startTour();
         if (part.kind === "demo") {
           if (pathRef.current === "/") workGo(part.slug, part.beat ?? undefined);
           else router.push(`/work/${part.slug}`);

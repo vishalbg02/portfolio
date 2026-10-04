@@ -36,6 +36,7 @@ export default function MobileSheet({
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={link.href.startsWith("/#") ? false : undefined}
                 onClick={() => onOpenChange(false)}
                 className="flex items-baseline gap-4 rounded-sm px-2 py-3 text-2xl font-semibold text-text hover:bg-surface"
               >

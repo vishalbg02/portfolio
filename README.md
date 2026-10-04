@@ -84,6 +84,16 @@ Everything here is a lazy chunk, keyboard-operable, flat-coloured (no gradients)
 - **Contact**: a static vCard (`/vishal-b-g.vcf`, from `content/profile.ts` only) with a Save contact link, and a build-time QR code for it on desktops (`lib/contact/qr.ts`; a test decodes it back).
 - **Experience**: a code-drawn monogram square per employer.
 
+## What V3 added to the page (Phase 6)
+
+- **Keyboard navigation**: `j` / `k` between sections, `g` then a letter to jump, `t` for the tour, `?` lists them.
+- **The 60-second tour** (`content/tour.ts`, `components/tour`): six stops with captions written from the profile; started from the hero, `t`, the Omnibar or GRID.
+- **Explorer achievements** (`lib/achievements.ts`): eight hidden things, counted in the footer and lit under the Grid Rail; local to the browser.
+- **Sound** (`lib/sound.ts`): off by default, synthesised, never before a gesture.
+- **Night mode and a nav ticker**: the hero says GRID is on duty between midnight and 7 in Bengaluru; the nav shows the latest GitHub activity.
+- **Visitor wall** (`/api/here`, `components/layout/PresenceWall.tsx`): one square per visitor on the site now; dim without Redis.
+- **Personal links** (`/link <Company> [Role]` in Telegram, `components/links`): a signed `?c=` link per company with a banner, a role-ranked "what's relevant", and Telegram alerts for opens, résumé downloads and chat starts. See [docs/SIGNATURE.md](docs/SIGNATURE.md) and [docs/LIVE-CHAT-SETUP.md](docs/LIVE-CHAT-SETUP.md).
+
 ## What V2 added (and where it comes from)
 
 Everything is derived from `content/profile.ts` or the MDX, never typed into a component:

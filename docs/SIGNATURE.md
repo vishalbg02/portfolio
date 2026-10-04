@@ -39,3 +39,37 @@ Skills (grouped by area) on the left, projects on the right. `lib/stack/usage.ts
 ## When a placeholder's height changes
 
 The lazy sections hold their place with a skeleton that is as tall as the real thing. After changing the content or layout of Activity, Stack, the Contact form or the GRID chat, re-measure: `pnpm build && pnpm start --port 3300`, then `pnpm islands --write` (and, for the chat, update the `h-[…]` classes of `ChatSkeleton` in `components/grid/LazyGridChat.tsx`). `tests/e2e/islands.spec.ts` and the layout-shift test fail when they drift.
+
+---
+
+# Phase 6: the page that notices you
+
+## Keyboard navigation
+
+`lib/keys.ts` (pure, tested) and `components/palette/ShortcutsHost.tsx`. `j` and `k` move to the next and previous section (`main > section`) and put keyboard focus on it so a screen reader says where you are; a second press while the page is still gliding goes one further. `g` then a letter jumps (`g w` Work, `g e` Experience, `g a` Activity, `g s` Stack, `g g` GRID, `g c` Contact, `g h` top); `t` starts the tour. None of it runs while you are typing or while a dialog has the keyboard. Listed in the `?` overlay.
+
+## The 60-second tour
+
+`content/tour.ts` is the script: six stops, each caption a function of `content/profile.ts` (a test checks that every name, role, period, count and contact detail in it comes from the profile). `components/tour/Tour.tsx` scrolls to each stop, outlines its heading (`data-tour-hit`), shows the caption while GRID's face "speaks" and marks the section on the Grid Rail. Each stop stays 10 s; Pause, Previous, Next and Exit are buttons and keys (Space, left and right arrows, Esc). Voice is optional and off. Under reduced motion it starts paused and the page jumps. Started by the hero link, `t`, the Omnibar, `/?tour=1`, or GRID (`start_tour`: a card with a button, and "take me on a tour" works with no model). `TourHost` is always mounted but only listens; the tour's code loads when it starts.
+
+## Explorer achievements
+
+`lib/achievements.ts`: eight things to find (terminal, a terminal command, Snake, CosmoStrike, the tour, asking GRID, the 3D city, an Omnibar command). Stored in this browser's localStorage only; the one thing sent is the anonymous `secret_found` event with the id. They light squares under the Grid Rail and count in the footer chip ("3/8 discovered"), which opens the list with a hint for each one not yet found.
+
+## Sound
+
+`lib/sound.ts`: off by default, synthesised with Web Audio (no audio files), quiet (no cue above 0.05 gain), rate-limited per cue. The audio context is only made inside a click or key press, so nothing plays before you have interacted, even when the choice from an earlier visit is "on". Cues: a key tick in the terminal, a click when a Work scene changes, a two-note chime when a message to Vishal is delivered or he replies. Switch in the footer.
+
+## Night mode and the nav ticker
+
+Between midnight and 7 in Bengaluru (UTC+5:30) the hero's availability line says "Vishal's probably asleep, GRID is on duty" (`lib/night.ts`; the page is still static, the line swaps after hydration). The nav shows the latest GitHub activity under the wordmark from lg up: the text comes from the GitHub data the page already has, cleaned and shortened (`lib/github/ticker.ts`); only "2 hours ago" is worked out in the browser.
+
+## Visitor wall
+
+The footer lights one square per visitor on the site right now. A visible tab sends `POST /api/here` with a random id made for that tab every 30 seconds (a sorted set in Redis, kept 75 s; two commands per beat, and the list is re-read at most every 15 s per instance). It stops after 30 minutes. Without Redis the route says "not configured" and the wall stays dim at the same size. Nothing but the random id is sent; see `/privacy`.
+
+## Personal links
+
+`/link Infosys SDE` in the Telegram bot makes `https://vishalbg.vercel.app/?c=<id>.<signature>` (the signature is an HMAC of the random id, so a made-up code is refused before anything is looked up; the label is stored in Redis for 90 days). For a longer company name use `|`: `/link Tata Consultancy | Java Developer`. `/links` lists the last ten with how often each was opened.
+
+Opening one (`components/links/`): the code is taken out of the address bar and kept for the tab; `GET /api/link` returns only the company and role Vishal typed; a banner says "Hi Infosys team" and, under "What's relevant", ranks the projects and skills for that role with plain rules over the profile (`lib/links/role.ts`: no model, nothing invented) and outlines the matching project cards. It also offers "Ask GRID about fit" and "Tailored résumé". Vishal is told on Telegram when the link is first opened (once per 6 hours), when the résumé is downloaded from it and when a chat with GRID starts (once an hour each). No name, email or IP is part of any of it. The page stays static; everything happens after hydration, over the page (a fixed banner) so nothing moves.

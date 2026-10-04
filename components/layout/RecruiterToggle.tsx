@@ -13,6 +13,7 @@ export function RecruiterToggle({ className, onNavigate }: { className?: string;
   return (
     <Link
       href={inRecruiter ? "/" : "/recruiter"}
+      prefetch={inRecruiter ? false : undefined}
       onClick={onNavigate}
       className={cn(className)}
       data-track={inRecruiter ? undefined : "recruiter_mode_on"}
