@@ -72,6 +72,10 @@ const link = (reg: SourceRegistry, id: string, title: string, url: string) =>
 
 /* ── briefing ────────────────────────────────────────────────────────────────────────────────────── */
 
+/** "A, B and C". */
+const sentenceList = (items: string[]) =>
+  items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+
 export function briefing(): Routed {
   const reg = new SourceRegistry();
   const c = {
@@ -89,12 +93,13 @@ export function briefing(): Routed {
     (e) => `${e.degree.replace(/\s*\(.*$/, "")}, ${e.period}${e.note ? ` — ${e.note}` : ""}`,
   );
   const live = profile.projects.filter((p) => p.live || p.store).map((p) => p.name);
+  const more = profile.projects.length - live.length;
   const text = [
     `- **${profile.name}**, a ${profile.shortRole.toLowerCase()} in ${profile.location.split(",")[0]}: ${profile.targetRole.coreSkills.slice(0, 4).join(", ")}. ${c.about}`,
     `- ${profile.status}. ${profile.workPreferences.startDate}. ${c.status}`,
-    `- Shipped: ${live.join(" and ")} (live), plus ${profile.projects.length - live.length} more projects. ${c.work}`,
+    `- Shipped: ${sentenceList(live)} (live)${more > 0 ? `, plus ${more} more ${more === 1 ? "project" : "projects"}` : ""}. ${c.work}`,
     `- Experience: ${jobs}. ${c.exp}`,
-    `- Recognition: ${profile.recognition.length} hackathon podium finishes. ${c.awards}`,
+    `- Recognition: ${profile.recognition.length} hackathon podium ${profile.recognition.length === 1 ? "finish" : "finishes"}. ${c.awards}`,
     `- Education: ${edu.join("; ")}. ${c.edu}`,
   ].join("\n");
   return { parts: [], text, sources: reg.all() };

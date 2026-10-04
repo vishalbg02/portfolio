@@ -77,13 +77,16 @@ export function GridChat({
     if (autoFocus) field.current?.focus();
   }, [autoFocus]);
 
-  // keep the newest text in view while streaming, unless the visitor has scrolled up to read
+  // Keep the newest text in view while streaming, unless the visitor has scrolled up to read. "Stuck to the bottom"
+  // is remembered from scroll events: measuring after the content grew would call a tall new card "scrolled up".
+  const stuck = useRef(true);
   useEffect(() => {
     const el = log.current;
-    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 160) el.scrollTop = el.scrollHeight;
+    if (el && stuck.current) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   const ask = (q: string) => {
+    stuck.current = true; // asking brings you to the answer
     void gridStore.send(q);
     field.current?.focus();
   };
@@ -130,23 +133,6 @@ export function GridChat({
             {ai === null ? "checking…" : ai ? "online" : "offline mode"}
           </p>
         </div>
-        {messages.length > 0 ? (
-          <>
-            <button type="button" onClick={download} className={small}>
-              Export
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                gridStore.reset();
-                setInput("");
-              }}
-              className={small}
-            >
-              New chat
-            </button>
-          </>
-        ) : null}
         {controls}
       </div>
 
@@ -183,6 +169,10 @@ export function GridChat({
 
       <div
         ref={log}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          stuck.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+        }}
         role="log"
         aria-live="polite"
         aria-relevant="additions text"
@@ -306,16 +296,35 @@ export function GridChat({
             </Button>
           )}
         </div>
-        <p
-          id={`${uid}-hint`}
-          className={cn("mt-2 font-mono text-[11px]", tooLong ? "text-danger" : "text-muted")}
-        >
-          {tooLong
-            ? `Too long: ${input.length}/${limit} characters.`
-            : input.length > limit - 200
-              ? `${input.length}/${limit}`
-              : "Enter to send · Shift+Enter for a new line"}
-        </p>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <p
+            id={`${uid}-hint`}
+            className={cn("font-mono text-[11px]", tooLong ? "text-danger" : "text-muted")}
+          >
+            {tooLong
+              ? `Too long: ${input.length}/${limit} characters.`
+              : input.length > limit - 200
+                ? `${input.length}/${limit}`
+                : "Enter to send · Shift+Enter for a new line"}
+          </p>
+          {messages.length > 0 ? (
+            <span className="flex items-center gap-3">
+              <button type="button" onClick={download} className={small}>
+                Export
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  gridStore.reset();
+                  setInput("");
+                }}
+                className={small}
+              >
+                New chat
+              </button>
+            </span>
+          ) : null}
+        </div>
       </form>
     </div>
   );

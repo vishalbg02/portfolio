@@ -113,6 +113,13 @@ describe("the router (obvious commands, no model)", () => {
     expect(b.text.split("\n").every((l) => /\[\d+\]/.test(l))).toBe(true);
   });
 
+  it("the brief reads as English: a list with commas and 'and', and no '1 more projects'", () => {
+    const { text } = briefing();
+    expect(text).not.toMatch(/\b1 more projects\b/);
+    expect(text).not.toMatch(/ and [^.\n]* and [^.\n]*\(live\)/); // not "A and B and C"
+    expect(text).toMatch(/Shipped: .+ \(live\)/);
+  });
+
   it("finds a project by any common name", () => {
     expect(findProject(norm("the LAN symphony app"))).toBe("lansymphony");
     expect(findProject(norm("GV"))).toBe("golden-verdict");

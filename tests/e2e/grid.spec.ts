@@ -246,6 +246,20 @@ test.describe("GRID: the conversation", () => {
     await expect(sheet(page).locator('[data-grid-card="diagram"]')).toBeVisible({ timeout: 10_000 });
   });
 
+  test("the newest message stays in view, even right after a tall card", async ({ page }) => {
+    await mockStatus(page);
+    await gotoReady(page, "/");
+    await openSheet(page);
+    await ask(page, "Show me Talnio"); // a tall card
+    await expect(sheet(page).locator('[data-grid-card="project"]')).toBeVisible();
+    await ask(page, "How can I contact him?");
+    await expect(sheet(page).locator('[data-grid-card="contact"]')).toBeVisible();
+    const log = sheet(page).getByRole("log");
+    await expect
+      .poll(() => log.evaluate((el) => el.scrollHeight - el.scrollTop - el.clientHeight))
+      .toBeLessThan(8);
+  });
+
   test("a skill question shows the evidence, each item linking to where it is", async ({ page }) => {
     await mockStatus(page);
     await gotoReady(page, "/");
