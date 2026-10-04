@@ -8,9 +8,9 @@ const LEVELS: Record<string, ContributionLevel> = {
   FOURTH_QUARTILE: 4,
 };
 
-const QUERY = `query($login: String!) {
+const QUERY = `query($login: String!, $from: DateTime, $to: DateTime) {
   user(login: $login) {
-    contributionsCollection {
+    contributionsCollection(from: $from, to: $to) {
       contributionCalendar {
         totalContributions
         weeks { contributionDays { date contributionCount contributionLevel } }
@@ -21,11 +21,15 @@ const QUERY = `query($login: String!) {
 
 type Init = RequestInit & { next?: { revalidate: number } };
 
-/** GraphQL contribution calendar for the last year. Requires a token (read-only public data is enough). */
+/**
+ * GraphQL contribution calendar: the last year by default, or a custom range of at most one year
+ * (`range`, ISO date-times). Requires a token (read-only public data is enough).
+ */
 export async function fetchContributionCalendar(
   login: string,
   token: string,
   init: Init = {},
+  range: { from?: string; to?: string } = {},
 ): Promise<ContributionCalendar> {
   const res = await fetch("https://api.github.com/graphql", {
     ...init,
@@ -35,7 +39,7 @@ export async function fetchContributionCalendar(
       "Content-Type": "application/json",
       "User-Agent": "vishalbg-portfolio",
     },
-    body: JSON.stringify({ query: QUERY, variables: { login } }),
+    body: JSON.stringify({ query: QUERY, variables: { login, from: range.from, to: range.to } }),
   });
   if (!res.ok) throw new Error(`GitHub GraphQL ${res.status}`);
   const json = (await res.json()) as {

@@ -44,7 +44,7 @@ export default function RecruiterPage() {
   const facts: Array<[string, string]> = [
     ["Role", profile.shortRole],
     ["Location", profile.location],
-    ["Internships", `~${exp.years} years`],
+    ["Experience", `~${exp.years} years`],
     [
       "Education",
       `${profile.education[0]!.degree.replace(/^Master of Computer Applications \(MCA\)$/, "MCA")} (${profile.education[0]!.period})`,

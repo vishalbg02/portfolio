@@ -69,7 +69,7 @@ export function buildResumeModel(p: Profile = defaultProfile, c: ResumeConfig = 
     experience: p.experience.map((e) => ({
       org: e.company,
       period: e.period,
-      role: e.role,
+      role: e.kind === "freelance" ? `${e.role} (Freelance)` : e.role,
       bullets: e.points,
     })),
     projects: c.projects.map(({ title, stack, date, bullets }) => ({ title, stack, date, bullets })),

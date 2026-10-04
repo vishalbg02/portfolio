@@ -21,7 +21,7 @@ test.describe("grid rail (desktop)", () => {
     await gotoReady(page, "/");
     await expect(rail(page)).toBeVisible();
     const ticks = rail(page).getByRole("link");
-    await expect(ticks).toHaveCount(7);
+    await expect(ticks).toHaveCount(6);
     await expect(ticks.first()).toHaveAttribute("aria-label", "Jump to Work");
     expect(await page.locator("nav[aria-label='Page progress'] .rail-sq").count()).toBe(30);
     // squares are hidden from assistive tech and from the tab order

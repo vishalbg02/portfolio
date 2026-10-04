@@ -6,7 +6,6 @@ import { AskVishal } from "@/components/sections/AskVishal";
 import { Contact } from "@/components/sections/Contact";
 import { Experience } from "@/components/sections/Experience";
 import { LiveGitHub } from "@/components/sections/LiveGitHub";
-import { Recognition } from "@/components/sections/Recognition";
 import { SelectedWork } from "@/components/sections/SelectedWork";
 import { Stack } from "@/components/sections/Stack";
 
@@ -15,13 +14,12 @@ const RAIL_SECTIONS = [
   { id: "experience", label: "Experience" },
   { id: "stack", label: "Stack" },
   { id: "github", label: "Activity" },
-  { id: "recognition", label: "Recognition" },
   { id: "ask", label: "Ask" },
   { id: "contact", label: "Contact" },
 ];
 
 /**
- * Home: Hero → Work → Experience → Stack → Live GitHub → Recognition → (Ask Vishal, Phase 5) → Contact.
+ * Home: Hero → Work → Experience → Stack → Live GitHub (with award and role milestones on the calendar) → Ask Vishal → Contact.
  */
 export default function HomePage() {
   return (
@@ -37,8 +35,6 @@ export default function HomePage() {
       <Stack />
 
       <LiveGitHub />
-
-      <Recognition />
 
       <AskVishal />
 

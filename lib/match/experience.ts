@@ -19,15 +19,34 @@ export function periodMonths(period: string, now: Date): number | null {
   return start === null || end === null || end < start ? null : end - start + 1;
 }
 
-/** Total professional (internship) experience from profile.ts — computed, never typed in by hand. */
+/** First and last month index of a period ("May 2025 – Present"), or null if it can't be parsed. */
+function monthRange(period: string, now: Date): [number, number] | null {
+  const [a, b] = period.split(/\s*[–—-]\s*/);
+  if (!a || !b) return null;
+  const start = parseMonth(a, now);
+  const end = parseMonth(b, now);
+  return start === null || end === null || end < start ? null : [start, end];
+}
+
+/**
+ * Total professional experience (internships and freelance) from profile.ts: computed, never typed in by
+ * hand. Months are counted once even when roles overlap (the freelance role runs alongside an internship).
+ */
 export function experienceSummary(p: Profile, now: Date) {
   const parts = p.experience.map((e) => ({
     role: e.role,
     period: e.period,
+    kind: e.kind,
     months: periodMonths(e.period, now),
   }));
-  const months = parts.reduce((n, x) => n + (x.months ?? 0), 0);
+  const covered = new Set<number>();
+  for (const e of p.experience) {
+    const r = monthRange(e.period, now);
+    if (r) for (let m = r[0]; m <= r[1]; m++) covered.add(m);
+  }
+  const months = covered.size;
   const years = Math.round((months / 12) * 10) / 10;
-  const text = `${parts.map((x) => `${x.role} (${x.period})`).join(" and ")} — about ${years} year${years === 1 ? "" : "s"} of internship experience in total.`;
+  const label = (k: string) => (k === "freelance" ? "freelance" : k === "internship" ? "internship" : "");
+  const text = `${parts.map((x) => `${x.role}${label(x.kind) ? ` (${label(x.kind)})` : ""}, ${x.period}`).join("; ")} — about ${years} year${years === 1 ? "" : "s"} of professional experience in total (internships and freelance, overlapping months counted once).`;
   return { months, years, text };
 }

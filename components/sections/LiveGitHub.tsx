@@ -1,11 +1,12 @@
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { profile } from "@/content/profile";
-import { monthTotals } from "@/lib/github/calendar";
 import { getGithubData } from "@/lib/github/data";
-import { computeStreaks } from "@/lib/github/streaks";
+import { activityYears } from "@/lib/github/years";
+import { milestones } from "@/lib/content/milestones";
+import { features } from "@/lib/env";
 import { nowMs } from "@/lib/utils/now";
 import { relativeTime } from "@/lib/utils/relative-time";
-import { ContributionCalendar } from "./ContributionCalendar";
+import { ActivityPanel } from "./ActivityPanel";
 
 const dateFmt = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -14,64 +15,39 @@ const dateFmt = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-const Stat = ({ value, label }: { value: string; label: string }) => (
-  <div className="min-w-0 p-4 sm:p-5">
-    <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">{label}</dt>
-    <dd className="mt-1.5 text-2xl font-semibold text-text tabular-nums">{value}</dd>
-  </div>
-);
-
 /** Live GitHub: native contribution calendar, streaks, latest activity. ISR hourly; snapshot fallback. */
 export async function LiveGitHub() {
   const data = await getGithubData();
   const now = nowMs();
-  const days = data.calendar.weeks.flat();
   const asOf =
     data.source === "live" ? new Date(now).toISOString().slice(0, 10) : data.generatedAt.slice(0, 10);
-  const { longest } = computeStreaks(days, asOf);
-  const activeDays = days.filter((d) => d.count > 0).length;
-  const unit = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
+  // Award pins can be switched off with SHOW_RECOGNITION=false; roles stay.
+  const pins = milestones().filter((m) => features.recognition || m.kind !== "award");
+  const years = activityYears(now, Math.min(...pins.map((m) => Number(m.date.slice(0, 4)))));
 
   return (
     <section id="github" aria-labelledby="github-label" className="container-page section-y">
       <SectionHeader prefix=">_" label="Activity" id="github-label" title="Live from GitHub" />
 
-      <dl className="grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l">
-        <Stat value={data.calendar.total.toLocaleString("en-US")} label="Contributions, last year" />
-        <Stat value={activeDays.toLocaleString("en-US")} label="Active days, last year" />
-        <Stat value={unit(longest)} label="Longest streak" />
-      </dl>
-
-      <div className="mt-4 rounded-card border border-border bg-surface p-4 sm:p-5">
-        <ContributionCalendar
-          weeks={data.calendar.weeks}
-          label={`${data.calendar.total} contributions in the last year. ${activeDays} active days, longest streak ${unit(longest)}.`}
-        />
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-muted">
-          <span>
-            {data.source === "live"
+      <ActivityPanel
+        initial={{
+          calendar: data.calendar,
+          asOf,
+          scrollTo: "end",
+          updated:
+            data.source === "live"
               ? "Live · refreshed hourly"
-              : `Updated ${relativeTime(data.generatedAt, now)}`}
-          </span>
-          <span aria-hidden="true" className="flex items-center gap-1">
-            less
-            {["bg-grid-0", "bg-grid-1", "bg-grid-2", "bg-grid-3", "bg-grid-4"].map((c) => (
-              <span
-                key={c}
-                className={`size-2.5 rounded-[2px] ${c} ${c === "bg-grid-0" ? "border border-border" : ""}`}
-              />
-            ))}
-            more
-          </span>
-        </div>
-        <ul className="sr-only">
-          {monthTotals(data.calendar.weeks).map((m) => (
-            <li key={m.key}>
-              {m.label}: {m.total} contributions
-            </li>
-          ))}
-        </ul>
-      </div>
+              : `Updated ${relativeTime(data.generatedAt, now)}`,
+        }}
+        years={years}
+        milestones={pins}
+      />
+
+      {profile.leadership.map((l) => (
+        <p key={l} className="mt-4 max-w-3xl text-sm text-muted">
+          {l}
+        </p>
+      ))}
 
       <h3 className="mt-10 mb-3 font-mono text-xs tracking-[0.12em] text-muted uppercase">Latest activity</h3>
       <ul className="divide-y divide-border rounded-card border border-border bg-surface">
