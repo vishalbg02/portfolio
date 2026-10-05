@@ -32,6 +32,8 @@ export function suggestFollowUps(opts: {
 
   if (slug) {
     const name = projectBySlug(slug)!.name;
+    // after "show me his best backend work" (a role and a project): go there, or see how it is built
+    if (kinds.has("role")) push(`Open the ${name} case study`);
     if (!kinds.has("project")) push(`Show me ${name}`);
     if (!kinds.has("diagram") && slug in graphs) push(`Show the ${name} architecture`);
     push(`What were the key decisions in ${name}?`);

@@ -20,23 +20,24 @@ The model never writes a card. A tool returns `{ part, summary }`: `part` is a c
 
 ## Tools (`lib/ai/agent/tools.ts`, names in `lib/ai/protocol.ts`)
 
-| Tool                     | Card      | What it does                                                               |
-| ------------------------ | --------- | -------------------------------------------------------------------------- |
-| `search_profile`         | none      | hybrid retrieval; the only source of facts for the model                   |
-| `show_project`           | project   | the project, with the real capture                                         |
-| `show_diagram`           | diagram   | the architecture diagram, interactive                                      |
-| `play_demo`              | demo      | moves the Work showcase to the project (or opens its case study)           |
-| `show_skill_evidence`    | skill     | where a skill is shown: projects, roles, leadership, this site, or CHRIST  |
-| `match_job`              | match     | deterministic strong / partial / gap against a pasted job description      |
-| `navigate`               | navigate  | scrolls to / opens a page of THIS site (a fixed list of targets)           |
-| `get_contact`            | contact   | email, phone, WhatsApp, LinkedIn, GitHub as copy / call / open buttons     |
-| `get_site_stats`         | stats     | real Lighthouse scores, last deploy, live status                           |
-| `draft_message`          | draft     | a template for the VISITOR to edit: interview invite, intro, inquiry, team |
-| `send_message_to_vishal` | confirm   | **prepares** a message; nothing is sent (see the gate)                     |
-| `book_call`              | book      | the Cal.com button when `calLink` is set, else an offer to leave a message |
-| `tailor_resume`          | resume    | re-orders his résumé for a role (see below) with a PDF download            |
-| `interview_answer`       | interview | his own written answer from `content/interview.ts`, or "not written yet"   |
-| `start_live_chat`        | live      | whether he is online, and a button that opens the live chat from a summary |
+| Tool                     | Card      | What it does                                                                                                            |
+| ------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `search_profile`         | none      | hybrid retrieval; the only source of facts for the model                                                                |
+| `show_project`           | project   | the project, with the real capture                                                                                      |
+| `show_diagram`           | diagram   | the architecture diagram, interactive                                                                                   |
+| `show_role`              | role      | one of his roles (internship / freelance): title, dates, first line, stack                                              |
+| `play_demo`              | demo      | moves the Work showcase to the project (or opens its case study)                                                        |
+| `show_skill_evidence`    | skill     | where a skill is shown: projects, roles, leadership, this site, or CHRIST                                               |
+| `match_job`              | match     | deterministic strong / partial / gap against a pasted job description                                                   |
+| `navigate`               | navigate  | scrolls to / opens a page of THIS site (a fixed list of targets)                                                        |
+| `get_contact`            | contact   | email, phone, WhatsApp, LinkedIn, GitHub as copy / call / open buttons                                                  |
+| `get_site_stats`         | stats     | real Lighthouse scores, last deploy, live status                                                                        |
+| `draft_message`          | draft     | a template for the VISITOR to edit: interview invite, intro, inquiry, team                                              |
+| `send_message_to_vishal` | confirm   | **prepares** a message, pre-filled from what the visitor said (name, email, company, role; `slots.ts`); nothing is sent |
+| `book_call`              | book      | the Cal.com button when `calLink` is set, else an offer to leave a message                                              |
+| `tailor_resume`          | resume    | re-orders his résumé for a role (see below) with a PDF download                                                         |
+| `interview_answer`       | interview | his own written answer from `content/interview.ts`, or "not written yet"                                                |
+| `start_live_chat`        | live      | whether he is online, and a button that opens the live chat from a summary                                              |
 
 To add a tool: add its name to `TOOL_NAMES`, a card kind to `UiPart` / `PART_KINDS`, build the card in `cards.ts` (or its
 own module), register it in `buildTools`, draw it in `components/grid/cards/PartView.tsx`, describe it in

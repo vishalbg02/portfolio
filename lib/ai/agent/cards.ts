@@ -7,7 +7,7 @@ import { kindOf } from "@/lib/content/kind";
 import { LIGHTHOUSE_FILE, readLighthouse, displayScore } from "@/lib/lighthouse";
 import { resolveTarget } from "@/lib/grid/targets";
 import { clipSources, stillSources } from "@/lib/media/paths";
-import { elsewhere, projectsUsing, roleNodes, usesSkill } from "@/lib/stack/usage";
+import { elsewhere, projectsUsing, roleId, roleNodes, usesSkill } from "@/lib/stack/usage";
 import { site } from "@/lib/site";
 import type { ContactAction, ProjectImage, UiPart } from "../protocol";
 
@@ -221,6 +221,27 @@ export function skillEvidence(raw: string): UiPart {
       href: "/#experience",
     });
   return { kind: "skill", skill, found: where.length > 0, where };
+}
+
+/** The roles that can be shown as a card: every entry in profile.experience, by its short name ("Cove IoT"). */
+export const ROLE_NAMES = profile.experience.map((e) => e.short) as [string, ...string[]];
+
+/** A role as a card: title, company, dates, its first line, and what it used. Built from profile.ts only. */
+export function rolePart(short: string): UiPart | null {
+  const e = profile.experience.find((x) => x.short.toLowerCase() === short.toLowerCase());
+  if (!e) return null;
+  return {
+    kind: "role",
+    id: roleId(e),
+    title: e.role,
+    company: e.company,
+    short: e.short,
+    period: e.period,
+    jobKind: e.kind,
+    impact: e.points[0]!,
+    stack: e.stack,
+    href: "/#experience",
+  };
 }
 
 /** "Book a call": the Cal.com link when Vishal has set one, otherwise the card offers a message instead. */

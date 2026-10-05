@@ -21,6 +21,8 @@ import {
   skillEvidence,
   statsPart,
   tourPart,
+  ROLE_NAMES,
+  rolePart,
 } from "./cards";
 import { currentPresence } from "@/lib/live/read";
 import { draftPart } from "./drafts";
@@ -104,6 +106,19 @@ export function buildTools(ctx: ToolContext) {
           part,
           summary: `Showed the ${slug} project card (cite as [${n}] if you describe it).`,
         });
+      },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    show_role: tool({
+      description:
+        "Show one of his roles (an internship or freelance job) as a card: title, company, dates, what he did and the stack. Use with show_project when someone asks to SEE his work in an area (backend, frontend, mobile).",
+      inputSchema: z.object({ role: z.enum(ROLE_NAMES).describe("The role, by its short name") }),
+      execute: async ({ role }): Promise<ToolResult> => {
+        const part = rolePart(role);
+        if (!part) return result({ part: null, summary: "No such role.", error: true });
+        const n = ctx.sources.addLink(`role-${role}`, `${role} — experience`, "/#experience");
+        return result({ part, summary: `Showed the ${role} role card (cite as [${n}] if you describe it).` });
       },
       toModelOutput: ({ output }) => modelText(output),
     }),
