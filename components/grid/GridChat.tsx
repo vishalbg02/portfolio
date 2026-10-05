@@ -6,7 +6,7 @@ import { LANGS, LANG_LABEL, type Lang } from "@/lib/ai/lang";
 import { MODE_LABEL, MODE_SUGGESTIONS, BRIEF_PROMPT, availableModes } from "@/lib/ai/modes";
 import type { ChatMode } from "@/lib/ai/protocol";
 import { inputLimit } from "@/lib/ai/agent/jd";
-import { TOOL_DONE, TOOL_WORKING, type DemoScene } from "@/lib/grid/demo";
+import { TOOL_DONE, TOOL_WORKING } from "@/lib/grid/demo";
 import { gridStore, type Msg } from "@/lib/grid/store";
 import { toTranscript } from "@/lib/grid/export";
 import { useGridStore } from "@/lib/grid/use-store";
@@ -15,11 +15,20 @@ import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils/cn";
 import { AnswerText } from "./AnswerText";
 import { PartView } from "./cards/PartView";
-import { DemoReel } from "./DemoReel";
 import { GridFace, type FaceState } from "./GridFace";
 import { SourcesRow } from "./SourcesRow";
 import { usePresence } from "@/lib/live/use-presence";
 import { useVoice } from "./voice/useVoice";
+import { emitFace } from "@/lib/grid/stages";
+
+/** What a screen reader hears when GRID's state changes (politely, once per change). */
+const FACE_SAY: Record<FaceState, string> = {
+  idle: "",
+  listening: "",
+  thinking: "GRID is thinking…",
+  acting: "GRID is using a tool…",
+  speaking: "GRID is answering…",
+};
 
 const MODE_NOTE: Partial<Record<ChatMode, string>> = {
   offline: "Offline mode — answered straight from this site's content, no AI.",
@@ -57,7 +66,6 @@ export function GridChat({
   controls,
   onJump,
   onLive,
-  demo,
 }: {
   variant: "inline" | "sheet";
   autoFocus?: boolean;
@@ -67,8 +75,6 @@ export function GridChat({
   onJump?: () => void;
   /** Opens "Message Vishal" (the live chat) in the same panel. */
   onLive?: () => void;
-  /** Scripted exchanges to play in the empty chat (the Ask section); the sheet has none. */
-  demo?: DemoScene[];
 }) {
   const { messages, mode, lang, busy, ai } = useGridStore();
   const presence = usePresence();
@@ -79,7 +85,7 @@ export function GridChat({
   const uid = useId();
   const last = messages.at(-1);
   const empty = messages.length === 0;
-  const showDemo = Boolean(demo?.length);
+  const inline = variant === "inline";
   const limit = inputLimit(input);
   const tooLong = input.length > limit;
 
@@ -155,6 +161,8 @@ export function GridChat({
     listening: voice.listening,
     speaking: voice.speaking,
   });
+  // every GRID face on the page (Omnibar, puck, dock, the Meet GRID stage) mirrors this one
+  useEffect(() => emitFace(face), [face]);
   const small =
     "shrink-0 rounded-sm font-mono text-xs whitespace-nowrap text-muted transition-colors hover:text-text pointer-coarse:min-h-11 pointer-coarse:px-2";
 
@@ -172,6 +180,9 @@ export function GridChat({
           </span>
         ) : null}
         <GridFace state={face} size={36} label={`GRID is ${face === "idle" ? "ready" : face}`} />
+        <span aria-live="polite" aria-atomic="true" className="sr-only">
+          {FACE_SAY[face]}
+        </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-mono text-sm text-text">GRID</p>
           <p className="flex items-center gap-1.5 truncate font-mono text-[11px] whitespace-nowrap text-muted">
@@ -208,7 +219,7 @@ export function GridChat({
         {controls}
       </div>
 
-      <div className="space-y-2.5 border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5 border-b border-border px-4 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -272,51 +283,39 @@ export function GridChat({
         aria-label="Conversation with GRID"
         className={cn(
           "overflow-y-auto px-4 py-4",
-          variant === "sheet"
-            ? "min-h-0 flex-1"
-            : empty && showDemo
-              ? "min-h-[260px]"
-              : "max-h-[520px] min-h-[260px]",
+          // inline, the log has one fixed height whatever it holds, so the section never moves as a chat runs
+          variant === "sheet" ? "min-h-0 flex-1" : "h-[400px]",
         )}
       >
-        <div ref={inner} className="space-y-5">
+        <div ref={inner} className={cn("space-y-5", inline && "mx-auto max-w-[720px]")}>
           {empty ? (
             <div className="space-y-4">
-              {demo && showDemo ? (
-                <DemoReel scenes={demo} onTry={ask} />
-              ) : (
-                <p className="text-sm text-muted">
-                  I&apos;m GRID, Vishal&apos;s AI. Ask about his work, skills or experience (answers come only
-                  from this site, with sources), or ask me to show you something: a project, an architecture
-                  diagram, where he used a skill. Paste a job description and I&apos;ll match it.
+              <p className="text-sm text-muted">
+                I&apos;m GRID, Vishal&apos;s AI. Ask about his work, skills or experience (answers come only
+                from this site, with sources), or ask me to show you something: a project, an architecture
+                diagram, where he used a skill. Paste a job description and I&apos;ll match it.
+              </p>
+              <ul
+                className={cn(inline ? "grid gap-2 sm:grid-cols-2" : "flex flex-wrap gap-2")}
+                aria-label="Suggested questions"
+              >
+                {MODE_SUGGESTIONS[mode].map((s) => (
+                  <li key={s}>
+                    <button
+                      type="button"
+                      onClick={() => ask(s)}
+                      className={cn(chip, inline && "min-h-11 w-full rounded-card px-3.5 py-2 leading-snug")}
+                    >
+                      {s}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {inline ? (
+                <p className="font-mono text-[11px] text-muted max-sm:hidden pointer-coarse:hidden">
+                  Press <kbd className="font-mono text-text">/</kbd> anywhere to ask.
                 </p>
-              )}
-              <div className={showDemo ? "pt-3" : undefined}>
-                {showDemo ? (
-                  <p className="mb-2.5 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
-                    Or ask your own
-                  </p>
-                ) : null}
-                <ul
-                  className={cn(showDemo ? "grid gap-2 sm:grid-cols-2" : "flex flex-wrap gap-2")}
-                  aria-label="Suggested questions"
-                >
-                  {MODE_SUGGESTIONS[mode].map((s) => (
-                    <li key={s}>
-                      <button
-                        type="button"
-                        onClick={() => ask(s)}
-                        className={cn(
-                          chip,
-                          showDemo && "min-h-11 w-full rounded-card px-3.5 py-2 leading-snug",
-                        )}
-                      >
-                        {s}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              ) : null}
             </div>
           ) : null}
 

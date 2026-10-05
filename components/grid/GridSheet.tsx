@@ -148,6 +148,15 @@ export default function GridSheet({
 
   const revealRef = useRevealRef<HTMLDivElement>();
 
+  // Phone: pull the sheet down by its handle to close it (the close button does the same for keyboards).
+  const pull = useRef<number | null>(null);
+  const [dy, setDy] = useState(0);
+  const endPull = () => {
+    if (pull.current !== null && dy > 120) onOpenChange(false);
+    pull.current = null;
+    setDy(0);
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} modal={!wide}>
       <Dialog.Portal>
@@ -156,7 +165,10 @@ export default function GridSheet({
           aria-describedby={undefined}
           data-grid-sheet=""
           data-docked={docked}
-          style={{ ["--grid-w" as string]: `${layout.w}px` }}
+          style={{
+            ["--grid-w" as string]: `${layout.w}px`,
+            transform: dy ? `translateY(${dy}px)` : undefined,
+          }}
           // Beside the page, not above it: clicking the page must not close the chat.
           onInteractOutside={(e) => {
             if (wide) e.preventDefault();
@@ -168,9 +180,34 @@ export default function GridSheet({
           className={cn(
             "grid-sheet fixed inset-0 z-[71] flex flex-col bg-bg focus:outline-none",
             "md:inset-y-0 md:right-0 md:left-auto md:w-[var(--grid-w)] md:border-l md:border-border-2",
+            // the phone's notch and home bar
+            "max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)]",
           )}
         >
           <Dialog.Title className="sr-only">GRID, Vishal&apos;s AI</Dialog.Title>
+          {wide ? null : (
+            <div
+              aria-hidden="true"
+              data-grid-handle=""
+              onPointerDown={(e) => {
+                pull.current = e.clientY;
+                e.currentTarget.setPointerCapture(e.pointerId);
+              }}
+              onPointerMove={(e) => {
+                if (pull.current !== null) setDy(Math.max(0, e.clientY - pull.current));
+              }}
+              onPointerUp={endPull}
+              onPointerCancel={() => {
+                pull.current = null;
+                setDy(0);
+              }}
+              className="flex h-5 shrink-0 cursor-grab touch-none items-center justify-center gap-[3px]"
+            >
+              {[0, 1, 2, 3, 4].map((k) => (
+                <span key={k} className="size-1 rounded-[1px] bg-border-2" />
+              ))}
+            </div>
+          )}
           {wide ? (
             <div
               role="separator"

@@ -9,6 +9,10 @@
  *   {"t":"text","d":"Vishal built …"}                          (repeated)
  *   {"t":"followups","items":["…","…","…"]}
  *   {"t":"done"}
+ *
+ *   {"t":"stage","s":"retrieve","state":"done","n":8}          where the request is in the pipeline (V4): the router,
+ *                                                              retrieval, ranking and the answer; tools have their own
+ *                                                              "tool" events. Drives "How GRID works" and GRID's face.
  */
 export type Source = { n: number; title: string; url: string };
 
@@ -24,6 +28,7 @@ export const TOOL_NAMES = [
   "navigate",
   "show_project",
   "show_role",
+  "brief_me",
   "play_demo",
   "show_diagram",
   "show_skill_evidence",
@@ -148,6 +153,17 @@ export type UiPart =
       stops: number;
     }
   | {
+      /** "Brief me in 30 seconds": who he is, his strongest proof, how he fits the target role, how to reach him. */
+      kind: "brief";
+      who: string;
+      status: string;
+      proofs: Array<{ title: string; line: string; href: string }>;
+      role: string;
+      fit: Array<{ skill: string; where: string | null }>;
+      podiums: number;
+      reach: { email: string; linkedin: string; calLink: string | null };
+    }
+  | {
       /** A role (an internship or freelance job) from profile.experience, as a card: what he did and with what. */
       kind: "role";
       id: string;
@@ -182,6 +198,7 @@ export const PART_KINDS = [
   "live",
   "tour",
   "role",
+  "brief",
 ] as const;
 
 /** The client trusts parts only from its own origin, but still refuses anything of an unknown shape. */
@@ -191,7 +208,13 @@ export const isUiPart = (v: unknown): v is UiPart =>
   typeof (v as { kind?: unknown }).kind === "string" &&
   (PART_KINDS as readonly string[]).includes((v as { kind: string }).kind);
 
+/** The pipeline's stages, in order (tools in between are reported by their own "tool" events). */
+export const STAGES = ["route", "retrieve", "rank", "answer"] as const;
+export type StageName = (typeof STAGES)[number];
+export type StageState = "start" | "done" | "skip";
+
 export type ChatEvent =
+  | { t: "stage"; s: StageName; state: StageState; n?: number }
   | { t: "meta"; mode: ChatMode; sources: Source[]; reason?: OfflineReason }
   | { t: "sources"; sources: Source[] }
   | { t: "tool"; id: string; name: ToolName; state: "running" | "done" | "error" }

@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import type { DemoScene } from "@/lib/grid/demo";
 import { GridFace } from "./GridFace";
 
 /**
@@ -14,7 +13,7 @@ function ChatSkeleton() {
   return (
     <div
       role="status"
-      className="flex h-[1136px] flex-col rounded-card border border-border bg-surface min-[560px]:h-[1096px] sm:h-[952px]"
+      className="flex h-[710px] flex-col rounded-card border border-border bg-surface sm:h-[668px] pointer-coarse:h-[755px] sm:pointer-coarse:h-[701px]"
     >
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
         <GridFace state="thinking" size={36} />
@@ -37,13 +36,17 @@ const GridChat = dynamic(() => import("./GridChat").then((m) => m.GridChat), {
   ssr: false,
   loading: () => <ChatSkeleton />,
 });
+const MeetGridLive = dynamic(() => import("./stage/MeetGridLive").then((m) => m.MeetGridLive), {
+  ssr: false,
+});
 
 /**
- * The inline chat in the Ask section. It mounts only when the section is about to scroll into view, so none of the
- * chat code counts toward the initial bundle. The placeholder is as tall as the chat is when it opens (its demo has a fixed
- * height, so that is the same at every width up to a line or two of wrapping), so nothing below it moves.
+ * The inline chat in the Meet GRID section. It mounts only when the section is about to scroll into view, so none of
+ * the chat code counts toward the initial bundle, and brings the section's live layer with it (the face that looks
+ * at you, the pipeline strip). The placeholder is as tall as the chat is when it opens (its log has a fixed height,
+ * so that is the same at every width up to a line of wrapping in the header), so nothing below it moves.
  */
-export function LazyGridChat({ scenes }: { scenes: DemoScene[] }) {
+export function LazyGridChat() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -67,5 +70,16 @@ export function LazyGridChat({ scenes }: { scenes: DemoScene[] }) {
     return () => io.disconnect();
   }, [visible]);
 
-  return <div ref={ref}>{visible ? <GridChat variant="inline" demo={scenes} /> : <ChatSkeleton />}</div>;
+  return (
+    <div ref={ref}>
+      {visible ? (
+        <>
+          <GridChat variant="inline" />
+          <MeetGridLive />
+        </>
+      ) : (
+        <ChatSkeleton />
+      )}
+    </div>
+  );
 }

@@ -244,6 +244,47 @@ export function rolePart(short: string): UiPart | null {
   };
 }
 
+/**
+ * "Brief me in 30 seconds", as one card, from profile.ts only: who, the three strongest pieces of proof (his two live
+ * products and the role that shows his backend work), where each core skill of his target role shows, and how to
+ * reach him. Nothing in it is written by a model.
+ */
+export function briefPart(): UiPart {
+  const p = profile;
+  const live = p.projects.filter((x) => x.live || x.store).slice(0, 2);
+  const backendRole = roleNodes().find((e) => e.stack.some((s) => usesSkill("Java", s)));
+  const proofs = [
+    ...live.map((x) => ({ title: x.name, line: x.summary, href: `/work/${x.slug}` })),
+    ...(backendRole
+      ? [
+          {
+            title: `${backendRole.short} · ${backendRole.kind}`,
+            line: clip(backendRole.points[0]!, 140),
+            href: "/#experience",
+          },
+        ]
+      : []),
+  ].slice(0, 3);
+  const fit = p.targetRole.coreSkills.map((skill) => {
+    const ev = skillEvidence(skill);
+    const where =
+      ev.kind === "skill"
+        ? (ev.where.find((w) => w.type !== "skills" && w.type !== "education")?.title ?? null)
+        : null;
+    return { skill, where };
+  });
+  return {
+    kind: "brief",
+    who: `${p.name}, ${p.shortRole.toLowerCase()} in ${p.location.split(",")[0]}`,
+    status: `${p.status}. ${p.workPreferences.startDate}.`,
+    proofs,
+    role: p.targetRole.title,
+    fit,
+    podiums: p.recognition.length,
+    reach: { email: p.contact.email, linkedin: p.contact.linkedin, calLink: p.contact.calLink },
+  };
+}
+
 /** "Book a call": the Cal.com link when Vishal has set one, otherwise the card offers a message instead. */
 export const bookPart = (): UiPart => ({
   kind: "book",

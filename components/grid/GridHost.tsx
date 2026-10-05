@@ -83,13 +83,34 @@ export function GridHost() {
       }, reveal);
     };
 
+    /**
+     * A Meet GRID deck tile: run its request in the inline chat below it (which loads as it scrolls into view and
+     * shares this store), or in the panel where there is no room for the inline chat.
+     */
+    const onRun = async (q: string) => {
+      const inline = document.querySelector<HTMLElement>("[data-grid-inline]");
+      if (!inline || !wide() || inline.offsetParent === null) {
+        window.dispatchEvent(new CustomEvent<OpenGridDetail>(OPEN_GRID_EVENT, { detail: { question: q } }));
+        return;
+      }
+      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      inline.scrollIntoView({ block: "start", behavior: still ? "auto" : "smooth" });
+      const { gridStore } = await import("@/lib/grid/store");
+      gridStore.hydrate();
+      void gridStore.checkAi();
+      void gridStore.send(fit(q));
+    };
+
     // Links like <a href="/#ask" data-grid-open data-grid-question="…">: JS opens the panel, no JS follows the href.
     const onClick = (e: MouseEvent) => {
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const el = (e.target as Element | null)?.closest<HTMLElement>("[data-grid-open], [data-live-open]");
+      const el = (e.target as Element | null)?.closest<HTMLElement>(
+        "[data-grid-open], [data-live-open], [data-grid-run]",
+      );
       if (!el) return;
       e.preventDefault();
       e.stopPropagation(); // before a framework <Link> on the same element can navigate
+      if (el.dataset.gridRun) return void onRun(el.dataset.gridRun);
       if (el.hasAttribute("data-live-open")) return onLive(new CustomEvent(OPEN_LIVE_EVENT));
       const detail: OpenGridDetail = {
         question: el.dataset.gridQuestion,

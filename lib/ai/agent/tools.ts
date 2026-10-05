@@ -7,6 +7,7 @@ import { NAV_TARGET_IDS, resolveTarget } from "@/lib/grid/targets";
 import { runMatch } from "@/lib/match/run";
 import { getRetriever } from "@/lib/rag/store";
 import { getStatuses } from "@/lib/status/cache";
+import { profile } from "@/content/profile";
 import { LIMITS } from "../limits";
 import type { ToolName, UiPart } from "../protocol";
 import {
@@ -23,6 +24,7 @@ import {
   tourPart,
   ROLE_NAMES,
   rolePart,
+  briefPart,
 } from "./cards";
 import { currentPresence } from "@/lib/live/read";
 import { draftPart } from "./drafts";
@@ -105,6 +107,20 @@ export function buildTools(ctx: ToolContext) {
         return result({
           part,
           summary: `Showed the ${slug} project card (cite as [${n}] if you describe it).`,
+        });
+      },
+      toModelOutput: ({ output }) => modelText(output),
+    }),
+
+    brief_me: tool({
+      description:
+        "Show a 30-second brief of Vishal as one card: who he is, his strongest proof, how he fits his target role, and how to reach him. Use for 'brief me', 'give me a summary', 'who is he in short'.",
+      inputSchema: z.object({}),
+      execute: async (): Promise<ToolResult> => {
+        const n = ctx.sources.addLink("about", `About ${profile.name}`, "/");
+        return result({
+          part: briefPart(),
+          summary: `Showed the brief card (cite as [${n}]). Add one sentence at most; do not repeat the card.`,
         });
       },
       toModelOutput: ({ output }) => modelText(output),

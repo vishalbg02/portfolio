@@ -315,6 +315,72 @@ export function PartView({
     case "tour":
       return <TourCard part={part} />;
 
+    case "brief":
+      return (
+        <section aria-label="Brief" data-grid-card="brief" className={cn(card, "p-4")}>
+          <p className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">The 30-second brief</p>
+          <p className="mt-1.5 text-[15px] font-medium text-text">{part.who}</p>
+          <p className="mt-0.5 text-sm text-muted">{part.status}</p>
+          <p className="mt-3.5 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+            Strongest proof
+          </p>
+          <ol className="mt-1.5 space-y-2">
+            {part.proofs.map((x, i) => (
+              <li key={x.title} className="flex gap-2.5 text-sm">
+                <span aria-hidden="true" className="font-mono text-accent font-tabular">
+                  {i + 1}
+                </span>
+                <span className="min-w-0">
+                  <Link href={x.href} className="font-medium text-text underline-offset-4 hover:underline">
+                    {x.title}
+                  </Link>
+                  <span className="block text-muted">{x.line}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3.5 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+            Fit for {part.role}
+          </p>
+          <ul className="mt-1.5 grid gap-1 sm:grid-cols-2">
+            {part.fit.map((f) => (
+              <li key={f.skill} className="flex items-baseline gap-2 text-sm">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "size-2 shrink-0 rounded-[2px]",
+                    f.where ? "bg-accent" : "border border-border-2",
+                  )}
+                />
+                <span className="min-w-0 text-text">
+                  {f.skill}
+                  <span className="text-muted"> · {f.where ?? "listed skill"}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-sm text-muted">
+            {part.podiums} hackathon podium {part.podiums === 1 ? "finish" : "finishes"}.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <a href={`mailto:${part.reach.email}`} className={chip}>
+              Email
+            </a>
+            <a href={part.reach.linkedin} target="_blank" rel="noopener noreferrer" className={chip}>
+              LinkedIn ↗<span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            {part.reach.calLink ? (
+              <a href={part.reach.calLink} target="_blank" rel="noopener noreferrer" className={chip}>
+                Book 15 min ↗<span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : null}
+            <Link href="/resume" className={chip}>
+              Résumé
+            </Link>
+          </div>
+        </section>
+      );
+
     case "role":
       return (
         <section

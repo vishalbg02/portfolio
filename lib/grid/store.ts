@@ -16,6 +16,7 @@ import {
 import { unlock } from "@/lib/achievements";
 import { track as realTrack } from "@/lib/analytics";
 import { ACT_EVENT } from "@/lib/grid/events";
+import { emitStage } from "@/lib/grid/stages";
 
 /**
  * GRID's conversation, outside React: one store that the side sheet, the full-screen sheet and the inline
@@ -204,10 +205,15 @@ export function createGridStore(deps: Partial<Deps> = {}) {
       ],
     });
     d.track("grid_question");
+    emitStage({ kind: "question" });
     abort = new AbortController();
+    let failed = false;
 
     const onEvent = (e: ChatEvent) => {
       switch (e.t) {
+        case "stage":
+          emitStage({ kind: "stage", s: e.s, state: e.state, n: e.n });
+          break;
         case "meta":
           patch(botId, (m) => ({ ...m, mode: e.mode, reason: e.reason, sources: e.sources }));
           break;
@@ -215,6 +221,7 @@ export function createGridStore(deps: Partial<Deps> = {}) {
           patch(botId, (m) => ({ ...m, sources: e.sources }));
           break;
         case "tool":
+          emitStage({ kind: "tool", name: e.name, state: e.state });
           if (e.state === "running") d.track("grid_tool_used", { tool: e.name });
           patch(botId, (m) => ({
             ...m,
@@ -236,6 +243,7 @@ export function createGridStore(deps: Partial<Deps> = {}) {
           patch(botId, (m) => ({ ...m, followups: e.items.slice(0, 3) }));
           break;
         case "error":
+          failed = true;
           patch(botId, (m) => ({ ...m, error: e.message, pending: false }));
           break;
         case "done":
@@ -252,6 +260,7 @@ export function createGridStore(deps: Partial<Deps> = {}) {
         lang: state.lang === "auto" ? undefined : state.lang,
       });
     } catch (err) {
+      failed = true;
       const fail = (error: string) => patch(botId, (m) => ({ ...m, pending: false, error }));
       if ((err as Error).name === "AbortError")
         fail(
@@ -266,6 +275,7 @@ export function createGridStore(deps: Partial<Deps> = {}) {
         fail("That message couldn't be sent. Keep it under 1,000 characters.");
       else fail("Couldn't reach GRID. Check your connection and try again.");
     } finally {
+      emitStage({ kind: "end", error: failed });
       abort = null;
       set({ busy: false, messages: state.messages.map((m) => (m.pending ? { ...m, pending: false } : m)) });
     }
