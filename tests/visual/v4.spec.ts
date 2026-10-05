@@ -37,12 +37,15 @@ for (const size of SIZES) {
         // freeze everything at once, then move every animation to the same moment
         await page.evaluate(() => document.getAnimations().forEach((a) => a.pause()));
         await page.evaluate(() => document.fonts.ready);
-        await page.evaluate((ms) => {
-          for (const a of document.getAnimations()) {
-            a.pause();
-            a.currentTime = ms;
-          }
-        }, frame.ms);
+        await page.evaluate(
+          (ms) => {
+            for (const a of document.getAnimations()) {
+              a.pause();
+              a.currentTime = ms;
+            }
+          },
+          frame.ms * (size.isMobile ? 0.5 : 1),
+        ); // phones run the sequence at 0.5× (styles/intro.css)
         expect(await page.evaluate(() => document.documentElement.dataset.intro)).toBe("play");
         await expect(page).toHaveScreenshot(`intro-${frame.name}-${size.name}.png`, {
           maxDiffPixelRatio: 0.01,
