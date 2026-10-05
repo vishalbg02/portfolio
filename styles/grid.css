@@ -156,6 +156,11 @@ html[data-tour-active] .omnibar {
   opacity: 0;
   transition-delay: 0s, 0s, 0s, 220ms;
 }
+/* the pill gets out of the way fast (it is leaving because it would cover something); it arrives at the usual pace */
+.omnibar:not([data-mode="pill"]) .omni-pill {
+  transition-duration: 120ms, 120ms, 150ms, 0s;
+  transition-delay: 0s, 0s, 0s, 120ms;
+}
 .omnibar:not([data-mode="pill"]) .omni-pill {
   transform: translateY(12px) scale(0.96);
 }
@@ -165,6 +170,7 @@ html[data-tour-active] .omnibar {
 /* even the puck would cover a control: tuck it into the edge, 12 px showing; it comes back on hover or focus */
 .omnibar[data-mode="tab"] .omni-puck {
   transform: translateX(56px);
+  transition-duration: 220ms, 120ms, 150ms, 0s; /* out of the way fast; back at the usual pace */
 }
 .omnibar[data-mode="tab"] .omni-puck:is(:hover, :focus-visible) {
   transform: none;

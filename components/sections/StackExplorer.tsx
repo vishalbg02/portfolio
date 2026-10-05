@@ -280,7 +280,7 @@ export function StackExplorer({ groups, nodes }: { groups: StackGroup[]; nodes: 
     return (
       <div ref={wrap} className="relative">
         <div className="grid grid-cols-[minmax(0,5fr)_minmax(96px,3fr)_minmax(0,4fr)]">
-          <ul className="space-y-4">
+          <ul className="space-y-3">
             {groups.map((g) => (
               <li key={g.id}>
                 <h3 className="mb-1 font-mono text-xs tracking-[0.12em] text-muted uppercase">{g.label}</h3>

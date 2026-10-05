@@ -11,6 +11,9 @@
 export type Rect = { left: number; top: number; right: number; bottom: number };
 export type OmniMode = "pill" | "puck" | "tab";
 
+/** Something on screen moved without a scroll (a Work scene swapped in): the Omnibar re-checks what it covers. */
+export const LAYOUT_EVENT = "layout:shift";
+
 export const OMNI = { gap: 20, pillH: 48, pillMaxW: 520, edge: 48, puck: 48, tab: 12 } as const;
 
 /** The pill: min(520 px, 100vw − 48 px) wide, 48 px tall, centred, 20 px above the bottom (or the safe area). */

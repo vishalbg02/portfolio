@@ -35,7 +35,7 @@
   --id-virtual-tour: #bc8cff;
 
   /* V4 target: 52 px, with the nav redesign in Phase 3 */
-  --nav-height: 56px;
+  --nav-height: 52px;
 
   /* ── V4 design language (docs/DESIGN-V4.md) ── */
   /* the one shadow: a hard, flat block offset down-right (never blurred) */

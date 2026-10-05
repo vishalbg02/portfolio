@@ -23,7 +23,7 @@ async function latestActivity() {
 export function Wordmark() {
   return (
     <span className="inline-flex items-center font-mono text-sm text-text">
-      <Link href="/" prefetch={false} className="group tap-slop inline-flex items-center gap-1">
+      <Link href="/" prefetch={false} className="group tap-slop inline-flex min-h-6 items-center gap-1">
         <span className="text-muted transition-colors group-hover:text-text">~/</span>
         <span>vishalbg</span>
         <span className="sr-only"> — home</span>

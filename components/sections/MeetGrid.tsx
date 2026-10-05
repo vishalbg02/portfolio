@@ -104,7 +104,7 @@ export function MeetGrid() {
   const languages = LANGS.filter((l) => l !== "auto").length;
   return (
     <section id="ask" aria-labelledby="ask-label" className="container-page section-y" data-meet-grid="">
-      <SectionHeader prefix="?" label="Ask" id="ask-label" title="Meet GRID, my AI" />
+      <SectionHeader chapter={5} prefix="?" label="Ask" id="ask-label" title="Meet GRID, my AI" />
 
       <div className="grid gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)]">
         {/* the stage */}
@@ -146,7 +146,7 @@ export function MeetGrid() {
                   data-grid-run={t.run}
                   data-tile={i}
                   data-cursor="ask"
-                  className="grid-tile group flex h-full min-h-14 flex-col justify-center rounded-card border border-border bg-surface px-3 py-2.5 transition-colors hover:border-accent focus-visible:border-accent sm:min-h-[76px] sm:justify-start sm:px-3.5 sm:py-3"
+                  className="grid-tile group flex h-full min-h-14 flex-col justify-center rounded-card border border-border bg-surface px-3 py-2.5 transition-colors hover:border-accent focus-visible:border-accent sm:min-h-[68px] sm:justify-start sm:px-3.5 sm:py-3"
                 >
                   <span className="flex items-start justify-between gap-2">
                     <span className="font-mono text-[11px] leading-snug tracking-[0.08em] text-text uppercase sm:text-xs">

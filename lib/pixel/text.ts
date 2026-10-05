@@ -1,6 +1,7 @@
 /**
- * A tiny 5×7 pixel font (same approach as the VBG mark) for the closing "LET'S BUILD" banner.
- * Only the glyphs the banner needs; asking for anything else throws, so a typo fails the build.
+ * A tiny 5×7 pixel font (same approach as the VBG mark), drawn in contribution squares by PixelText: the closing
+ * "LET'S BUILD" banner, the chapter numerals (01–06) and the footer's "VISHAL B G". Only the glyphs those need;
+ * asking for anything else throws, so a typo fails the build.
  */
 const G: Record<string, string[]> = {
   L: ["X....", "X....", "X....", "X....", "X....", "X....", "XXXXX"],
@@ -13,6 +14,17 @@ const G: Record<string, string[]> = {
   U: ["X...X", "X...X", "X...X", "X...X", "X...X", "X...X", ".XXX."],
   I: ["XXX", ".X.", ".X.", ".X.", ".X.", ".X.", "XXX"],
   D: ["XXXX.", "X...X", "X...X", "X...X", "X...X", "X...X", "XXXX."],
+  V: ["X...X", "X...X", "X...X", "X...X", "X...X", ".X.X.", "..X.."],
+  H: ["X...X", "X...X", "X...X", "XXXXX", "X...X", "X...X", "X...X"],
+  A: [".XXX.", "X...X", "X...X", "XXXXX", "X...X", "X...X", "X...X"],
+  G: [".XXXX", "X....", "X....", "X..XX", "X...X", "X...X", ".XXX."],
+  "0": [".XXX.", "X...X", "X..XX", "X.X.X", "XX..X", "X...X", ".XXX."],
+  "1": ["..X..", ".XX..", "..X..", "..X..", "..X..", "..X..", ".XXX."],
+  "2": [".XXX.", "X...X", "....X", "...X.", "..X..", ".X...", "XXXXX"],
+  "3": ["XXXX.", "....X", "....X", ".XXX.", "....X", "....X", "XXXX."],
+  "4": ["...X.", "..XX.", ".X.X.", "X..X.", "XXXXX", "...X.", "...X."],
+  "5": ["XXXXX", "X....", "XXXX.", "....X", "....X", "X...X", ".XXX."],
+  "6": [".XXX.", "X....", "X....", "XXXX.", "X...X", "X...X", ".XXX."],
   " ": ["...", "...", "...", "...", "...", "...", "..."],
 };
 

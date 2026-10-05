@@ -52,11 +52,13 @@
 .px-banner {
   scroll-margin-top: calc(var(--nav-height) + 24px);
 }
-[data-reveal="armed"] .px-on {
-  fill: var(--grid-0);
+/* the lit squares (PixelText's .px-lit group) are uncovered a column at a time, 28 ms per column */
+[data-reveal="armed"] .px-lit {
+  clip-path: inset(0 100% 0 0);
 }
-[data-reveal="play"] .px-on {
-  transition: fill 220ms linear calc(var(--col) * 28ms);
+[data-reveal="play"] .px-lit {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path calc(var(--cols) * 28ms) steps(var(--cols), end);
 }
 
 .snake-row {

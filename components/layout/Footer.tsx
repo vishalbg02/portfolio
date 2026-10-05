@@ -1,5 +1,6 @@
 import { profile } from "@/content/profile";
 import { site } from "@/lib/site";
+import { PixelText } from "@/components/ui/PixelText";
 import { Reveal } from "@/components/ui/Reveal";
 import { LighthouseStrip } from "./LighthouseStrip";
 import { FooterExtras } from "./FooterExtras";
@@ -31,7 +32,7 @@ export function Footer() {
 
   return (
     <footer className="mt-8 border-t border-border md:mt-12">
-      <div className="container-page flex flex-col gap-8 py-10 text-sm text-muted">
+      <div className="container-page flex flex-col gap-6 py-8 text-sm text-muted md:gap-7">
         {/* A tiny snake crosses the grid row once when the footer scrolls into view, then stops. */}
         <Reveal threshold={0.6} className="snake-row -mb-2">
           <svg aria-hidden="true" width="100%" height="11" className="block">
@@ -55,6 +56,14 @@ export function Footer() {
             </g>
           </svg>
         </Reveal>
+
+        {/* the wordmark in contribution squares, lighting left to right, beside who is here right now */}
+        <div className="grid items-end gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,320px)] md:gap-12">
+          <Reveal threshold={0.4} className="footer-mark">
+            <PixelText text="VISHAL B G" className="block h-auto w-full max-w-[760px]" />
+          </Reveal>
+          <FooterExtras />
+        </div>
 
         <p className="font-mono text-text">
           <span className="text-accent">$</span> exit <span className="text-muted">·</span> thanks for
@@ -84,8 +93,6 @@ export function Footer() {
             Bengaluru · <LocalTime />
           </p>
         </div>
-
-        <FooterExtras />
 
         <LighthouseStrip />
 

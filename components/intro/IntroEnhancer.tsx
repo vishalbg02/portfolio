@@ -8,8 +8,8 @@ import { play } from "@/lib/sound";
 import { startTour } from "@/lib/tour/events";
 
 const GREETED = "intro:greeted";
-/** When the greeting appears: as the hand-over ends (1.5 s; 1.1 s on a phone). It stays 6 s. */
-const AT_MS = { wide: 1500, phone: 1100 };
+/** When the greeting appears: as the hand-over ends (1.5 s; 0.8 s on a phone). It stays 6 s. */
+const AT_MS = { wide: 1500, phone: 800 };
 const STAY_MS = 6000;
 
 /**

@@ -13,7 +13,7 @@ type Status = "idle" | "sending" | "sent" | "fallback" | "error";
 
 const EMPTY: Values = { name: "", email: "", org: "", message: "", website: "" };
 const input =
-  "w-full rounded-sm border bg-bg px-3 py-2.5 text-text placeholder:text-muted transition-colors hover:border-border-2 focus:border-accent focus:outline-none";
+  "min-h-12 w-full rounded-sm border bg-bg px-3 py-2.5 text-text placeholder:text-muted transition-colors hover:border-border-2 focus:border-accent focus:outline-none";
 
 function Field({
   id,

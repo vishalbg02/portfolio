@@ -18,7 +18,7 @@ export function CommitTicker({ ticker }: { ticker: Ticker }) {
       rel="noopener noreferrer"
       data-testid="commit-ticker"
       title={`${ticker.repo}: ${ticker.text}`}
-      className="mt-1 hidden max-w-[330px] items-center gap-1.5 font-mono text-[11px] leading-none text-muted transition-colors hover:text-text xl:flex"
+      className="hidden min-h-6 max-w-[330px] items-center gap-1.5 font-mono text-[11px] leading-none text-muted transition-colors hover:text-text xl:flex"
     >
       <span aria-hidden="true" className="size-1.5 shrink-0 rounded-[1px] bg-accent" />
       <span className="truncate">

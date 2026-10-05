@@ -1,7 +1,8 @@
 /*
  * The opening sequence (components/intro/IntroOverlay.tsx, docs/INTRO.md). Flat squares only, transform and opacity
  * only, so it runs on the compositor while the page hydrates. Times are desktop times; phones run the same sequence
- * at 0.72× (1.3 s instead of 1.8 s) through --k.
+ * at 0.5× (0.9 s instead of 1.8 s) through --k: a phone is the Lighthouse device, and every 100 ms the hero is
+ * covered costs Speed Index.
  *
  *   0–300 ms     wake      the faint contribution grid, one green square blinking in the middle
  *   300–900 ms   assemble  a ripple of squares travels outward; the centre flips into GRID's face, which blinks;
@@ -33,7 +34,7 @@ html[data-intro="done"] .intro {
 @media (max-width: 767.98px) {
   html[data-intro="play"] .intro,
   html[data-intro="done"] .intro {
-    --k: 0.72;
+    --k: 0.5;
   }
 }
 @keyframes intro-gone {
@@ -61,7 +62,7 @@ html[data-intro="play"] body::before {
 }
 @media (max-width: 767.98px) {
   html[data-intro="play"] body::before {
-    animation-delay: 650ms;
+    animation-delay: 450ms;
   }
 }
 
@@ -220,6 +221,23 @@ html[data-intro="play"] body::before {
     --fs: 0.26;
   }
 }
+/* Phones get the sparse sequence (docs/INTRO.md): no covering squares and no cover, so the hero is on screen from
+   the first frame (a phone is the Lighthouse device, and a covered hero costs Speed Index). Only GRID wakes, on a
+   small panel of its own in the middle, blinks and drops into the dock. */
+@media (max-width: 767.98px) {
+  html[data-intro="play"] body::before,
+  .intro-tiles,
+  .intro-line {
+    display: none;
+  }
+  .intro-fly {
+    padding: 14px;
+    border: 1px solid var(--border-2);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--px-shadow);
+  }
+}
 @keyframes intro-fly {
   85% {
     opacity: 1;
@@ -370,16 +388,16 @@ html[data-intro]:not([data-intro="skip"]) .hero-cursor {
 }
 @media (max-width: 767.98px) {
   html[data-intro]:not([data-intro="skip"]) .term-type {
-    animation-delay: 1100ms;
+    animation-delay: 750ms;
   }
   html[data-intro]:not([data-intro="skip"]) .term-row {
-    animation-delay: calc(1800ms + var(--i, 0) * 150ms);
+    animation-delay: calc(1450ms + var(--i, 0) * 150ms);
   }
   html[data-intro]:not([data-intro="skip"]) .term-late {
-    animation-delay: 2500ms;
+    animation-delay: 2150ms;
   }
   html[data-intro]:not([data-intro="skip"]) .hero-cursor {
-    animation-delay: 1000ms;
+    animation-delay: 700ms;
   }
 }
 

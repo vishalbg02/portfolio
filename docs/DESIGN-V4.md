@@ -82,12 +82,30 @@ Every home section opens the same way:
 After the opener, layouts alternate (split / full / grid / split …), so no two neighbours share a pattern.
 
 - 96 px between chapters on desktop, 64 px on phones.
-- Home stays under 11,000 px at 1440 × 900.
+- Home stays under 11,000 px at 1440 × 900 (`tests/e2e/rhythm.spec.ts`; 10,984 px at the end of Phase 3).
+
+In code: `SectionHeader` with `chapter={n}` draws the opener (the numeral is `PixelText` inside a `Reveal`, styled in
+`styles/system.css`). `PixelText` (`components/ui/PixelText.tsx`, font in `lib/pixel/text.ts`) is the one way to draw
+words in squares: the numerals, LET'S BUILD and the footer's VISHAL B G. `Reveal` stays the one entrance primitive
+(one-shot, final state in the markup, nothing armed under reduced motion), rather than a new `useEntrance`.
+
+The nav is 52 px. The link of the chapter you are reading (or the page you are on) carries `aria-current` and a row
+of three squares under it (`NavShell`).
+
+The Work showcase scrolls one screen for the first project and 55 % of a screen for each next one; the scene's own
+numeral is a small `1/4`, so it never competes with the chapter numeral.
 
 ## States
 
 Every block that loads data has four designed states: loading (a square skeleton), empty, error and offline. It is never
 a blank box or a spinner.
+
+- Loading: `Skeleton` (grid squares, the island's measured height, real facts in the HTML underneath).
+- Empty, error, offline: `DataState` (`components/ui/DataState.tsx`), a 3 × 3 square glyph whose lit squares say which
+  state it is (not colour alone), a short line and an optional action. The one-line `inline` form sits in status rows
+  (the activity calendar's year loads); the block form takes the data's place (latest activity with nothing public).
+- Live status (Work, case studies): live with its latency, offline with the captures still there, unknown while checking.
+- GRID: online, offline mode (answers from the site's text and says so), and per-message errors.
 
 ## Focus, selection, cursor
 

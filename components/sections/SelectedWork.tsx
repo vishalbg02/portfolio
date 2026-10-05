@@ -11,6 +11,7 @@ export function SelectedWork() {
   return (
     <section id="work" aria-labelledby="work-label" className="container-page section-y">
       <SectionHeader
+        chapter={1}
         prefix="{ }"
         label="Work"
         id="work-label"

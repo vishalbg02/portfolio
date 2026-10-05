@@ -1,7 +1,7 @@
 /**
  * The opening sequence (docs/INTRO.md): GRID wakes up, assembles from contribution squares, flies to its home and
  * hands over to the hero. Server-rendered markup and CSS only (styles/intro.css): it paints with the first frame,
- * runs on the compositor while React hydrates, and removes itself at 1.8 s (1.3 s on phones) whatever happens.
+ * runs on the compositor while React hydrates, and removes itself at 1.8 s (0.9 s on phones) whatever happens.
  * It exists only while <html data-intro="play"> (set by the head script, lib/intro/script.ts).
  *
  * Decorative (aria-hidden), never focusable, and never in the way: pointer-events are off, so the hero underneath

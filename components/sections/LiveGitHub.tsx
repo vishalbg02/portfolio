@@ -1,3 +1,4 @@
+import { DataState } from "@/components/ui/DataState";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { profile } from "@/content/profile";
 import { getGithubData } from "@/lib/github/data";
@@ -44,6 +45,7 @@ export async function LiveGitHub() {
   return (
     <section id="github" aria-labelledby="github-label" className="container-page section-y">
       <SectionHeader
+        chapter={4}
         prefix=">_"
         label="Activity"
         id="github-label"
@@ -74,7 +76,15 @@ export async function LiveGitHub() {
       ))}
 
       <h3 className="mt-10 mb-3 font-mono text-xs tracking-[0.12em] text-muted uppercase">Latest activity</h3>
-      <ul className="divide-y divide-border rounded-card border border-border bg-surface">
+      {data.activity.length === 0 ? (
+        <DataState kind="empty" title="No public activity to show">
+          Nothing public in the last snapshot. The calendar above still counts every contribution.
+        </DataState>
+      ) : null}
+      <ul
+        hidden={data.activity.length === 0}
+        className="divide-y divide-border rounded-card border border-border bg-surface"
+      >
         {data.activity.map((a) => (
           <li key={a.repo}>
             <a

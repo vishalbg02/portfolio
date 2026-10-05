@@ -14,20 +14,19 @@
 @media (min-width: 960px) { .island-activity { min-height: 730px; } }
 @media (min-width: 980px) { .island-activity { min-height: 735px; } }
 @media (min-width: 1000px) { .island-activity { min-height: 745px; } }
-@media (min-width: 1040px) { .island-activity { min-height: 740px; } }
-@media (min-width: 1060px) { .island-activity { min-height: 745px; } }
-@media (min-width: 1080px) { .island-activity { min-height: 750px; } }
-@media (min-width: 1100px) { .island-activity { min-height: 760px; } }
-@media (min-width: 1120px) { .island-activity { min-height: 765px; } }
-@media (min-width: 1140px) { .island-activity { min-height: 770px; } }
-@media (min-width: 1160px) { .island-activity { min-height: 780px; } }
-@media (min-width: 1180px) { .island-activity { min-height: 785px; } }
+@media (min-width: 1024px) { .island-activity { min-height: 680px; } }
+@media (min-width: 1040px) { .island-activity { min-height: 685px; } }
+@media (min-width: 1060px) { .island-activity { min-height: 690px; } }
+@media (min-width: 1080px) { .island-activity { min-height: 700px; } }
+@media (min-width: 1100px) { .island-activity { min-height: 705px; } }
+@media (min-width: 1140px) { .island-activity { min-height: 680px; } }
+@media (min-width: 1160px) { .island-activity { min-height: 685px; } }
 .island-stack { min-height: 1120px; }
 @media (min-width: 440px) { .island-stack { min-height: 1065px; } }
 @media (min-width: 580px) { .island-stack { min-height: 1015px; } }
 @media (min-width: 768px) { .island-stack { min-height: 1000px; } }
 @media (min-width: 1000px) { .island-stack { min-height: 955px; } }
-@media (min-width: 1024px) { .island-stack { min-height: 1335px; } }
+@media (min-width: 1024px) { .island-stack { min-height: 1315px; } }
 .island-form { min-height: 580px; }
 @media (min-width: 360px) { .island-form { min-height: 560px; } }
 @media (min-width: 520px) { .island-form { min-height: 520px; } }

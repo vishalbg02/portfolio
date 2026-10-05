@@ -1,7 +1,13 @@
 # The opening sequence
 
 A cold visit to the home page opens with GRID waking up, then hands over to the hero. It should feel like a system
-starting, not a loading screen. It is about 1.8 s on desktops and 1.3 s on phones, and nothing waits for it.
+starting, not a loading screen. It is about 1.8 s on desktops and 0.9 s on phones, and nothing waits for it.
+
+**Phones get the sparse sequence** (V4 Phase 3). The hero is on screen from the first frame: no covering squares, no
+cover, no typed line. Only GRID wakes on a small panel of its own in the middle of the screen, assembles, blinks and
+drops into the dock's GRID button, at 0.5× speed (0.9 s). A phone is the device Lighthouse measures, and the full
+sequence's covered hero cost Speed Index on every cold run (local mobile Lighthouse, median of 5: full sequence 93,
+sparse 94, the V3 baseline without any intro 94, with the same LCP of 3,061 ms).
 
 | Time (desktop) | Beat      | What you see                                                                                                                                                                                                                                                               |
 | -------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

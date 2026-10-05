@@ -6,6 +6,7 @@ export function Stack() {
   return (
     <section id="stack" aria-labelledby="stack-label" className="container-page section-y">
       <SectionHeader
+        chapter={3}
         prefix="[ ]"
         label="Stack"
         id="stack-label"

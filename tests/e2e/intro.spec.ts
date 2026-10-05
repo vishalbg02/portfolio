@@ -196,6 +196,8 @@ test.describe("the opening sequence", () => {
   test("Replay intro (palette) plays it again, marked as a replay", async ({ page }) => {
     await status(page);
     await page.goto("/?nointro");
+    // the shortcuts load when the page is idle: press ⌘K once they are listening
+    await page.waitForFunction(() => document.documentElement.dataset.shortcuts === "ready");
     await page.keyboard.press("ControlOrMeta+k");
     await page.getByRole("combobox").fill("Replay intro");
     await page.keyboard.press("Enter");
