@@ -427,11 +427,12 @@ test.describe("personal links", () => {
     // a well-formed code the server refuses: no banner, and the code is forgotten
     const page3 = await page.context().newPage();
     await mockStatus(page3);
-    await mockLink(page3, { ok: false }, 404);
+    const seen3 = await mockLink(page3, { ok: false }, 404);
     await page3.goto("/?c=zz99yy88.ZzYyXxWwVvUuTtSs");
-    await page3.waitForTimeout(800);
+    // the link host loads when the page is idle: wait for its check, then for the code to be forgotten
+    await expect.poll(() => seen3.length).toBeGreaterThan(0);
+    await expect.poll(() => page3.evaluate(() => sessionStorage.getItem("link:v1"))).toBeNull();
     await expect(page3.getByTestId("company-banner")).toHaveCount(0);
-    expect(await page3.evaluate(() => sessionStorage.getItem("link:v1"))).toBeNull();
   });
 
   test("a résumé download and a chat with GRID tell the server (once each), and nothing else is sent", async ({
