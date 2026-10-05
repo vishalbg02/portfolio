@@ -10,7 +10,6 @@ import { ProjectSlugSchema } from "./profile-schema";
 const text = z.string().trim().min(3);
 
 export const IllustrationIdSchema = z.enum([
-  "gv-upload",
   "gv-track",
   "ls-discover",
   "ls-encrypt",

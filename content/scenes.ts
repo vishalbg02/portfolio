@@ -22,10 +22,10 @@ const scenes: Scene[] = [
     hero: { type: "clip", id: "gv-scroll" },
     beats: [
       {
-        id: "browse",
-        label: "Browse services",
-        caption: "The catalogue: business setup, GST, compliance, trademark and IP.",
-        media: { type: "still", id: "gv-menu-desktop" },
+        id: "home",
+        label: "The home page",
+        caption: "One platform for legal and tax compliance, with fixed prices.",
+        media: { type: "still", id: "gv-home-desktop" },
       },
       {
         id: "service",
@@ -34,10 +34,10 @@ const scenes: Scene[] = [
         media: { type: "still", id: "gv-service-desktop" },
       },
       {
-        id: "upload",
-        label: "Upload documents",
-        caption: "Documents are uploaded against the purchase.",
-        media: { type: "illustration", id: "gv-upload" },
+        id: "steps",
+        label: "How it works",
+        caption: "From browsing a service to completion, in four steps.",
+        media: { type: "still", id: "gv-steps-desktop" },
       },
       {
         id: "track",
@@ -46,7 +46,7 @@ const scenes: Scene[] = [
         media: { type: "illustration", id: "gv-track" },
       },
     ],
-    illustrationNote: "The last two beats are illustrations: the real dashboards are private.",
+    illustrationNote: "The last beat is an illustration: the real dashboards are private.",
   },
   {
     slug: "talnio",

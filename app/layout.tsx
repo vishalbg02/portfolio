@@ -6,15 +6,10 @@ import { Footer } from "@/components/layout/Footer";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { ClickTracker } from "@/components/analytics/ClickTracker";
 import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
-import { DelightHost } from "@/components/delight/DelightHost";
-import { CursorHost } from "@/components/delight/CursorHost";
-import { RouteWipe } from "@/components/delight/RouteWipe";
 import { GridHost } from "@/components/grid/GridHost";
 import { Omnibar } from "@/components/grid/Omnibar";
 import { ProofHost } from "@/components/ProofHost";
-import { CompanyLinkHost } from "@/components/links/CompanyLinkHost";
-import { TourHost } from "@/components/tour/TourHost";
-import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
+import { IdleHosts } from "@/components/layout/IdleHosts";
 import { ToastHost } from "@/components/ui/ToastHost";
 import { baseMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
@@ -51,12 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MobileDock />
         <GridHost />
         <Omnibar />
-        <ShortcutsHost />
-        <DelightHost />
-        <RouteWipe />
-        <CursorHost />
-        <TourHost />
-        <CompanyLinkHost />
+        <IdleHosts />
         <ProofHost />
         <ToastHost />
         <ClickTracker />
