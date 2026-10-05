@@ -34,6 +34,9 @@ for (const size of SIZES) {
       test(`intro: ${frame.name}`, async ({ page }) => {
         await status(page);
         await page.goto("/", { waitUntil: "domcontentloaded" });
+        // the hero's trail canvas mounts lazily, sometimes before this frame and sometimes after: the frames are about
+        // the overlay, so leave it out (on phones the hero shows through the sparse intro)
+        await page.addStyleTag({ content: "canvas { display: none !important; }" });
         // freeze everything at once, then move every animation to the same moment
         await page.evaluate(() => document.getAnimations().forEach((a) => a.pause()));
         await page.evaluate(() => document.fonts.ready);
