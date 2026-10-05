@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated } from "./helpers";
 
 /** V3 · Phase 5: pixel-dissolve, square button fill, the context cursor, Contact (QR and vCard), Experience monograms. */

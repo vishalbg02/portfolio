@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const SITE = "https://vishalbg.vercel.app";
 const SLUGS = ["golden-verdict", "talnio", "lansymphony", "virtual-tour"];

@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoReady, loadIslands } from "./helpers";
 
 /** V2 · Phase 0: section rhythm, sketches that move on touch, GitHub stats, no floating pill on mobile. */

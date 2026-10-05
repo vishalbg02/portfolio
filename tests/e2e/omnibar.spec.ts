@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoReady, settleAnimations, loadIslands, ownClient } from "./helpers";
 
 const NAME = "Ask GRID or run a command";

@@ -350,16 +350,32 @@ export function ShowcaseController({
     const posterIo = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          const v = e.target as HTMLVideoElement;
-          if (!e.isIntersecting || !v.dataset.poster) continue;
-          v.poster = v.dataset.poster;
-          delete v.dataset.poster;
-          posterIo.unobserve(v);
+          if (!e.isIntersecting) continue;
+          const t = e.target as HTMLElement;
+          if (t instanceof HTMLVideoElement && t.dataset.poster) {
+            t.poster = t.dataset.poster;
+            delete t.dataset.poster;
+          } else if (t.matches("picture[data-deferred]")) {
+            // a deferred still (MediaStill defer): sources first, so the browser picks AVIF/WebP, then the img
+            t.querySelectorAll<HTMLSourceElement>("source[data-srcset]").forEach((src) => {
+              src.srcset = src.dataset.srcset!;
+              delete src.dataset.srcset;
+            });
+            const img = t.querySelector<HTMLImageElement>("img[data-src]");
+            if (img) {
+              img.src = img.dataset.src!;
+              delete img.dataset.src;
+            }
+            delete t.dataset.deferred;
+          }
+          posterIo.unobserve(t);
         }
       },
       { rootMargin: "300px 500px" },
     );
-    el.querySelectorAll<HTMLVideoElement>("video[data-poster]").forEach((v) => posterIo.observe(v));
+    el.querySelectorAll<HTMLElement>("video[data-poster], picture[data-deferred]").forEach((v) =>
+      posterIo.observe(v),
+    );
 
     // Deck: the card in the middle of the snap row is the active one.
     const deckIo = new IntersectionObserver(

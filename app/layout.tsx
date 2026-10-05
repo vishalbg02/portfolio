@@ -11,6 +11,7 @@ import { Omnibar } from "@/components/grid/Omnibar";
 import { ProofHost } from "@/components/ProofHost";
 import { IdleHosts } from "@/components/layout/IdleHosts";
 import { ToastHost } from "@/components/ui/ToastHost";
+import { INTRO_SCRIPT } from "@/lib/intro/script";
 import { baseMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
 
@@ -35,7 +36,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-IN" className={`${geistSans.variable} ${geistMono.variable}`}>
+    // suppressHydrationWarning: the head script sets data-intro on <html> before React hydrates (Next's
+    // "preventing flash before hydration" pattern); nothing else on <html> differs.
+    <html lang="en-IN" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Decides, before the first paint, whether the opening sequence plays (lib/intro/script.ts, docs/INTRO.md). */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_SCRIPT }} />
+      </head>
       <body className="flex min-h-dvh flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-20">
         <SkipLink />
         <Nav />

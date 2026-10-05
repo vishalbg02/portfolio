@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, gotoReady, ownClient } from "./helpers";
 
 /** V3 · Phase 6: keyboard navigation, the tour, achievements, sound, night mode, the nav ticker, the visitor wall, personal links. */

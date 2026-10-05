@@ -36,16 +36,16 @@ export function Hero() {
           </div>
           <h1
             id="hero-title"
-            className="mt-5 text-[2.75rem] leading-none font-semibold tracking-[-0.03em] text-text md:text-5xl"
+            className="mt-5 text-[3rem] leading-none font-semibold tracking-[-0.035em] text-text md:text-7xl"
           >
             {profile.name}
             <span
               aria-hidden="true"
-              className="ml-2 inline-block h-[0.8em] w-[0.42em] animate-blink bg-accent align-[-0.05em]"
+              className="hero-cursor ml-2 inline-block h-[0.8em] w-[0.42em] animate-blink bg-accent align-[-0.05em]"
             />
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted md:text-xl">{profile.headline}</p>
-          <div className="mt-6 flex flex-col gap-1 text-sm text-muted sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
+          <div className="mt-6 flex flex-col gap-1 font-mono text-[13px] text-muted sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2">
             <p className="flex items-center gap-2">
               <StatusDot />
               <NightStatus day={profile.status} />
@@ -60,7 +60,7 @@ export function Hero() {
           <div className="-m-1.5 mt-8 flex flex-wrap sm:-m-2 sm:mt-8">
             <Magnetic>
               <span className="m-1.5 inline-block sm:m-2">
-                <ButtonLink href="/#work" variant="solid">
+                <ButtonLink href="/#work" variant="solid" className="px-shadow">
                   View work
                 </ButtonLink>
               </span>
@@ -68,7 +68,12 @@ export function Hero() {
             <Magnetic>
               <span className="m-1.5 inline-block sm:m-2">
                 {/* A plain link: without JS it goes to the Ask section, with JS GridHost opens the chat. */}
-                <Link href="/#ask" prefetch={false} data-grid-open="" className={buttonClass("outline")}>
+                <Link
+                  href="/#ask"
+                  prefetch={false}
+                  data-grid-open=""
+                  className={buttonClass("outline", "md", "bg-bg px-shadow")}
+                >
                   Ask GRID
                 </Link>
               </span>

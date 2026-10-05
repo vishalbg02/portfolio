@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated } from "./helpers";
 
 /** The activity calendar's role bands and peak days, and the contact form after the email redesign. */

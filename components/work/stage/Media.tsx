@@ -17,15 +17,49 @@ export const STAGE_SIZES = "(min-width: 1024px) min(58vw, 760px), min(92vw, 520p
 export function MediaStill({
   asset,
   priority = false,
+  defer = false,
   className,
   sizes = STAGE_SIZES,
 }: {
   asset: MediaStill;
   priority?: boolean;
+  /**
+   * Not requested until the Work controller sees it coming (data-src / data-srcset, like the clips' posters): for a
+   * phone deck card off to the side, which the browser's own lazy loading would otherwise fetch before the first paint.
+   * Without JavaScript the <noscript> copy shows instead.
+   */
+  defer?: boolean;
   className?: string;
   sizes?: string;
 }) {
   const s = stillSources(asset);
+  if (defer)
+    return (
+      <>
+        <picture data-deferred="">
+          <source type="image/avif" data-srcset={s.avifSetW} sizes={sizes} />
+          <source type="image/webp" data-srcset={s.webpSetW} sizes={sizes} />
+          <img
+            data-src={s.fallback}
+            alt={asset.alt}
+            width={s.width}
+            height={s.height}
+            decoding="async"
+            className={cn("block size-full object-cover object-top", className)}
+          />
+        </picture>
+        <noscript>
+          <img
+            src={s.fallback}
+            alt={asset.alt}
+            width={s.width}
+            height={s.height}
+            loading="lazy"
+            className={cn("block size-full object-cover object-top", className)}
+          />
+        </noscript>
+      </>
+    );
   return (
     <picture>
       <source type="image/avif" srcSet={s.avifSetW} sizes={sizes} />

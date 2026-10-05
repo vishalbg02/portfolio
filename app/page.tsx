@@ -1,4 +1,6 @@
 import { Hero } from "@/components/hero/Hero";
+import { IntroLoader } from "@/components/intro/IntroLoader";
+import { IntroOverlay } from "@/components/intro/IntroOverlay";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { homeJsonLd } from "@/lib/seo/jsonld";
 import { RailLoader } from "@/components/rail/RailLoader";
@@ -24,6 +26,8 @@ const RAIL_SECTIONS = [
 export default function HomePage() {
   return (
     <>
+      <IntroOverlay />
+      <IntroLoader />
       <JsonLd data={homeJsonLd()} />
       <RailLoader sections={RAIL_SECTIONS} />
       <Hero />

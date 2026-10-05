@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, loadIslands, settleAnimations } from "./helpers";
 
 /** V3 · Phase 0: no clipped text at any breakpoint (calendar labels, LET'S BUILD), quieter Experience, /privacy. */

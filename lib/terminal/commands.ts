@@ -14,6 +14,7 @@ export type TerminalAction =
   | { type: "download"; href: string; filename: string }
   | { type: "copy"; text: string; label: string }
   | { type: "game"; name: "cosmostrike" }
+  | { type: "intro" }
   | { type: "ask"; question?: string }
   | { type: "clear" }
   | { type: "exit" };
@@ -269,6 +270,10 @@ const commands: Record<string, Command> = {
       action: { type: "game", name: "cosmostrike" },
       egg: "cosmostrike",
     }),
+  },
+  intro: {
+    summary: "replay the opening sequence",
+    run: () => ({ lines: [out("waking GRID up again…", "muted")], action: { type: "intro" } }),
   },
   snake: {
     summary: "snake lives on the 404 page",

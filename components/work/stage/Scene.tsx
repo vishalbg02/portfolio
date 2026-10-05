@@ -15,10 +15,18 @@ import { MediaClip, MediaStill, resolveMedia } from "./Media";
 const MAX_CHIPS = 6;
 
 /** One media reference as content (a still, a clip or a drawn illustration), sized by its frame. */
-function Content({ media, priority = false }: { media: MediaRef; priority?: boolean }) {
+function Content({
+  media,
+  priority = false,
+  defer = false,
+}: {
+  media: MediaRef;
+  priority?: boolean;
+  defer?: boolean;
+}) {
   if (media.type === "illustration") return <Illustration id={media.id} />;
   if (media.type === "clip") return <MediaClip asset={resolveMedia(media.id, "clip")} />;
-  return <MediaStill asset={resolveMedia(media.id, "still")} priority={priority} />;
+  return <MediaStill asset={resolveMedia(media.id, "still")} priority={priority} defer={defer} />;
 }
 
 /** The full-screen button: in a browser frame it sits in the window bar; elsewhere it floats in the corner. */
@@ -172,7 +180,8 @@ export function Scene({
         {/* A phone card's media: one clip or still, tap to open full screen. */}
         <div className="scene-hero stage-grid" data-cursor="open">
           <Framed scene={scene} project={project} openable={openable}>
-            <Content media={scene.hero} />
+            {/* every deck card but the first waits until it is about to be swiped to */}
+            <Content media={scene.hero} defer={index > 0} />
           </Framed>
           {openable && scene.frame === "phone" ? <Expand slug={project.slug} name={project.name} /> : null}
         </div>

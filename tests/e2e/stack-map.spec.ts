@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, loadIslands } from "./helpers";
 
 /** V3 · Phase 5: the Stack as a map: skills on the left, projects on the right, wires between, an accordion on phones. */

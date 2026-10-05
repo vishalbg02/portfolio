@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page, type Route } from "@playwright/test";
+import { type Page, type Route } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, gotoReady, settleAnimations, ownClient } from "./helpers";
 
 const mockStatus = (page: Page) =>

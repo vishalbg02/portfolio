@@ -3,6 +3,7 @@ import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
 import { openCosmoStrike } from "@/lib/delight";
 import type { TerminalAction } from "@/lib/terminal/commands";
+import { replayIntro } from "@/lib/intro/replay";
 import { toast } from "@/lib/toast";
 
 export type ActionContext = {
@@ -51,6 +52,9 @@ export function performAction(action: TerminalAction, ctx: ActionContext): void 
     case "game":
       ctx.beforeOverlay?.();
       window.setTimeout(openCosmoStrike, 150);
+      break;
+    case "intro":
+      if (!replayIntro()) toast.info("The intro stays off while your device asks for reduced motion.");
       break;
     case "ask":
       ctx.beforeOverlay?.();
