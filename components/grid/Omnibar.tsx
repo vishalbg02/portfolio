@@ -8,10 +8,10 @@ import { track } from "@/lib/analytics";
 import { OPEN_OMNIBAR_EVENT } from "@/lib/grid/events";
 import {
   INTERACTIVE,
+  intersects,
   omniMode,
   pillRect,
   puckRect,
-  samplePoints,
   type OmniMode,
   type Rect,
 } from "@/lib/grid/overlap";
@@ -38,16 +38,21 @@ const HINTS = [
  * scrolling up; a 48 px GRID face at the bottom right while scrolling down, while a field has focus, over the footer,
  * after Esc, or when the pill would cover a control; tucked into the edge when even that would.
  */
-/** Is something clickable the topmost thing at any sample point inside this rect (the Omnibar itself aside)? */
+/**
+ * Does any visible control (a link, button, field…; not the Omnibar itself) touch this rect? Box against box, the same
+ * test the e2e suite makes, so a field that only grazes the bar's edge counts too. Run once per scroll frame.
+ */
 function covers(r: Rect): boolean {
-  return samplePoints(r).some(({ x, y }) => {
-    for (const el of document.elementsFromPoint(x, y)) {
-      if (el.closest(".omnibar")) continue;
-      if (el === document.documentElement || el === document.body) return false;
-      return el.closest(INTERACTIVE) !== null;
-    }
-    return false;
-  });
+  for (const el of document.querySelectorAll<HTMLElement>(INTERACTIVE)) {
+    const q = el.getBoundingClientRect();
+    if (!q.width || !q.height || !intersects(r, q) || el.closest(".omnibar")) continue;
+    const shown =
+      typeof el.checkVisibility === "function"
+        ? el.checkVisibility({ visibilityProperty: true })
+        : getComputedStyle(el).visibility !== "hidden";
+    if (shown) return true;
+  }
+  return false;
 }
 
 const isField = (el: Element | null) =>
