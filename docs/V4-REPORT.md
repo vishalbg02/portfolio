@@ -50,7 +50,7 @@ Details live next to the code: [README](../README.md), [DESIGN-V4](DESIGN-V4.md)
 | Local Lighthouse, mobile, median of 5 (same machine) | 94 · LCP 3,062 ms · CLS 0           | **94 · LCP 3,061 ms** · CLS 0                   |
 | LCP element                                          | the hero headline (server-rendered) | the same, never the intro                       |
 | Unit tests                                           | 913                                 | 1,045                                           |
-| E2E tests (Playwright + axe)                         | 468                                 | 550                                             |
+| E2E tests (Playwright + axe)                         | 468                                 | 551                                             |
 | GRID evaluation set (`tests/ai-evals.md`)            | 40                                  | 56                                              |
 | GRID tools / card kinds                              | 16 / 15                             | 18 / 17                                         |
 
