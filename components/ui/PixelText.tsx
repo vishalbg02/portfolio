@@ -8,12 +8,15 @@ const level = (col: number, row: number) => 3 + ((col * 7 + row * 3) % 2);
  * A line of text in contribution squares (the pixel font in lib/pixel/text.ts), drawn at the width of its container:
  * the viewBox is the text's own grid, so the squares scale to fit and nothing can be clipped. Decorative.
  *
- * - `base`: the unlit squares are drawn too, as one quiet path (the LET'S BUILD banner, the footer wordmark).
- * - `outline`: lit squares carry a hairline, so before a reveal fills them they read as empty squares (the chapter
- *   numerals).
+ * Compact on purpose (it is in every page's footer): one path per brightness level instead of an element per square,
+ * with the corners rounded by a stroke of the same colour.
  *
- * Lit squares are `.px-on` with a level and their column (`--col`), so a surrounding Reveal can light them left to
- * right (styles/case.css). The markup is the final state: no JS or reduced motion shows it complete.
+ * - `base`: every square of the grid is drawn dark underneath (the LET'S BUILD banner, the footer wordmark).
+ * - `outline`: the letters' squares carry a hairline, so before a reveal fills them they read as empty squares
+ *   (the chapter numerals).
+ *
+ * The lit squares are one group (`.px-lit`, with its column count as `--cols`), so a surrounding Reveal lights them left
+ * to right a column at a time (styles/system.css). The markup is the final state: no JS or reduced motion shows it lit.
  */
 export function PixelText({
   text,
@@ -32,15 +35,18 @@ export function PixelText({
 }) {
   const pitch = cell + gap;
   const { cells, cols } = layoutText(text);
-  const lit = new Set(cells.map((c) => `${c.col},${c.row}`));
-  const r = Math.max(1, cell / 5);
-  const unlit = base
-    ? Array.from({ length: cols * ROWS }, (_, i) => {
-        const col = Math.floor(i / ROWS);
-        const row = i % ROWS;
-        return lit.has(`${col},${row}`) ? "" : `M${col * pitch} ${row * pitch}h${cell}v${cell}h-${cell}z`;
-      }).join("")
+  // rounded corners: each square is inset by r/2 and stroked r wide with round joins
+  const r = outline ? 0 : Math.max(1, cell / 5);
+  const sq = (col: number, row: number) => {
+    const s = cell - r;
+    return `M${col * pitch + r / 2} ${row * pitch + r / 2}h${s}v${s}h-${s}z`;
+  };
+  const lit: Record<number, string> = { 3: "", 4: "" };
+  for (const c of cells) lit[level(c.col, c.row)] += sq(c.col, c.row);
+  const grid = base
+    ? Array.from({ length: cols * ROWS }, (_, i) => sq(Math.floor(i / ROWS), i % ROWS)).join("")
     : "";
+  const round = r ? { strokeWidth: r, strokeLinejoin: "round" as const } : {};
   return (
     <svg
       aria-hidden="true"
@@ -48,20 +54,23 @@ export function PixelText({
       className={className}
       data-px-outline={outline ? "" : undefined}
     >
-      {unlit ? <path d={unlit} fill="var(--grid-0)" /> : null}
-      {cells.map((c) => (
-        <rect
-          key={`${c.col}-${c.row}`}
-          className="px-on"
-          data-l={level(c.col, c.row)}
-          style={{ "--col": c.col } as CSSProperties}
-          x={c.col * pitch}
-          y={c.row * pitch}
-          width={cell}
-          height={cell}
-          rx={r}
-        />
-      ))}
+      {grid ? <path d={grid} fill="var(--grid-0)" stroke="var(--grid-0)" {...round} /> : null}
+      {outline ? <path d={lit[3] + lit[4]} fill="none" stroke="var(--grid-2)" strokeWidth={0.6} /> : null}
+      <g className="px-lit" style={{ "--cols": cols } as CSSProperties}>
+        {[3, 4].map((l) =>
+          lit[l] ? (
+            <path
+              key={l}
+              className="px-on"
+              data-l={l}
+              d={lit[l]}
+              stroke={outline ? "var(--grid-2)" : `var(--grid-${l})`}
+              strokeWidth={outline ? 0.6 : r}
+              strokeLinejoin="round"
+            />
+          ) : null,
+        )}
+      </g>
     </svg>
   );
 }

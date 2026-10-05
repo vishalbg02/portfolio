@@ -43,7 +43,9 @@ test.describe("home rhythm @1440", () => {
       const num = page.locator(`#${id} header .chapter-num`).first();
       await expect(num, id).toHaveCount(1);
       // the numeral is drawn from the pixel font: its lit squares are the digits "0" and i + 1
-      const lit = await num.locator(".px-on").count();
+      const lit = await num
+        .locator(".px-on")
+        .evaluateAll((els) => els.reduce((n, e) => n + (e.getAttribute("d")?.match(/M/g)?.length ?? 0), 0));
       expect(lit, id).toBeGreaterThan(10);
       await expect(page.locator(`#${id} header`).first(), id).toContainText(
         ["Work", "Experience", "Stack", "Activity", "Ask", "Contact"][i]!,

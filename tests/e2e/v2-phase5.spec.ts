@@ -228,29 +228,24 @@ test.describe("closing moment", () => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
     const banner = page.locator(".px-banner");
-    const on = banner.locator(".px-on");
-    expect(await on.count()).toBeGreaterThan(80);
+    const lit = banner.locator("svg:visible .px-lit");
+    // the lit squares: two brightness levels, each one path of many squares
+    const squares = await banner
+      .locator("svg:visible .px-on")
+      .evaluateAll((els) => els.reduce((n, e) => n + (e.getAttribute("d")?.match(/M/g)?.length ?? 0), 0));
+    expect(squares).toBeGreaterThan(80);
+    // before it scrolls in it is armed: the letters are covered, the dark grid shows
+    await expect(banner).toHaveAttribute("data-reveal", "armed");
+    expect(await lit.evaluate((g) => getComputedStyle(g).clipPath)).toContain("100%");
     await banner.scrollIntoViewIfNeeded();
     await expect(banner).toHaveAttribute("data-reveal", "play");
-    // after the sweep every lit square has a green fill, and the leftmost came on before the rightmost
-    await expect
-      .poll(
-        async () =>
-          on.evaluateAll((els) =>
-            els.every(
-              (e) =>
-                getComputedStyle(e).fill !==
-                getComputedStyle(els[0]!.parentElement!.querySelector("path")!).fill,
-            ),
-          ),
-        { timeout: 6000 },
-      )
-      .toBe(true);
-    const delays = await on.evaluateAll((els) =>
-      els.map((e) => Number(getComputedStyle(e).getPropertyValue("--col"))),
+    // a column at a time, left to right: the uncovering is stepped, one step per column
+    expect(await lit.evaluate((g) => getComputedStyle(g).transitionTimingFunction)).toMatch(
+      /^steps\((4\d|5\d)/,
     );
-    expect(Math.min(...delays)).toBe(0);
-    expect(Math.max(...delays)).toBeGreaterThan(40);
+    await expect
+      .poll(() => lit.evaluate((g) => getComputedStyle(g).clipPath), { timeout: 6000 })
+      .toMatch(/inset\(0(px)?\)|^none$/);
   });
 
   test("reduced motion: never armed, so it is the finished banner straight away", async ({ page }) => {
@@ -260,9 +255,15 @@ test.describe("closing moment", () => {
     await page.locator(".px-banner").scrollIntoViewIfNeeded();
     await expect(page.locator(".px-banner")).not.toHaveAttribute("data-reveal", /.+/);
     const fills = await page
-      .locator(".px-on")
+      .locator(".px-banner .px-on")
       .evaluateAll((els) => new Set(els.map((e) => getComputedStyle(e).fill)).size);
     expect(fills).toBeGreaterThan(1);
+    expect(
+      await page
+        .locator(".px-banner .px-lit")
+        .first()
+        .evaluate((g) => getComputedStyle(g).clipPath),
+    ).toBe("none");
   });
 
   test("a tiny snake crosses the footer grid row once, then stops", async ({ page }) => {

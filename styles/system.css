@@ -4,13 +4,6 @@
  */
 
 /* ── chapter opener: pixel numeral (outlined squares that fill), mono label, H2 ───────────────────── */
-[data-px-outline] .px-on {
-  stroke: var(--grid-2);
-  stroke-width: 0.6;
-}
-[data-reveal="armed"] [data-px-outline] .px-on {
-  fill: transparent;
-}
 .chapter-num {
   display: block;
   height: 21px;
