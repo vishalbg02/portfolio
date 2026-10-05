@@ -47,6 +47,11 @@
   fill: var(--grid-4);
 }
 /* Armed = squares dark; playing = they light up left to right (28 ms per column). */
+/* a jump to #contact (nav, dock, GRID) lands with the banner fully clear of the sticky nav */
+#contact,
+.px-banner {
+  scroll-margin-top: calc(var(--nav-height) + 24px);
+}
 [data-reveal="armed"] .px-on {
   fill: var(--grid-0);
 }
