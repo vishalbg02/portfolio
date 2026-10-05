@@ -10,7 +10,7 @@ import type { ProjectStatus } from "./types";
  */
 const cachedCheck = unstable_cache(
   (slug: string, url: string | null) => checkProject(slug, url),
-  ["project-status-v1"],
+  ["project-status-v2"],
   { revalidate: 300, tags: ["project-status"] },
 );
 

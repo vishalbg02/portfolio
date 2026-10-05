@@ -10,6 +10,10 @@ import { Magnetic } from "./Magnetic";
 import { TrailLoader } from "./TrailLoader";
 import { ShipConsole } from "./ShipConsole";
 
+/** The quiet links under the two hero buttons: mono, underlined on hover, 44 px tall on touch screens. */
+const quietLink =
+  "tap-slop inline-flex min-h-6 items-center gap-1 rounded-sm px-1 text-muted underline-offset-4 transition-colors hover:text-text hover:underline pointer-coarse:min-h-11";
+
 /**
  * Hero. The text column is fully server-rendered and works with JS off; the right column is the
  * "ship console" (live project status). The canvas trail mounts on idle; greeting/clock are tiny islands.
@@ -69,38 +73,26 @@ export function Hero() {
                 </Link>
               </span>
             </Magnetic>
-            <Magnetic>
-              <span className="m-1.5 inline-block sm:m-2">
-                <ButtonLink
-                  href={resumeHref}
-                  variant="outline"
-                  target="_blank"
-                  rel="noopener"
-                  data-track="resume_download"
-                >
-                  Résumé
-                </ButtonLink>
-              </span>
-            </Magnetic>
-            <Magnetic>
-              <span className="m-1.5 inline-block sm:m-2">
-                <ButtonLink href="/#contact" variant="ghost">
-                  Contact
-                </ButtonLink>
-              </span>
-            </Magnetic>
           </div>
-          <p className="needs-grid mt-4 text-sm text-muted">
-            Ask anything about my work, or let GRID show you around.
-          </p>
-          <p className="mt-2 text-sm">
-            <Link
-              href="/?tour=1"
-              prefetch={false}
-              data-tour-open=""
-              className="tap-slop inline-flex items-center gap-1.5 rounded-sm font-mono text-xs text-link underline-offset-4 hover:underline"
+          {/* Two actions; everything else is one quiet row, so the hero has a single clear choice. */}
+          <p className="mt-5 flex flex-wrap items-center gap-x-1 gap-y-1 font-mono text-xs text-muted">
+            <a
+              href={resumeHref}
+              target="_blank"
+              rel="noopener"
+              data-track="resume_download"
+              className={quietLink}
             >
-              <span aria-hidden="true">▶</span> Take the 60-second tour
+              résumé <span aria-hidden="true">↗</span>
+              <span className="sr-only"> (PDF, opens in a new tab)</span>
+            </a>
+            <span aria-hidden="true">·</span>
+            <Link href="/#contact" className={quietLink}>
+              contact
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/?tour=1" prefetch={false} data-tour-open="" className={quietLink}>
+              <span aria-hidden="true">▶</span> 60-second tour
             </Link>
           </p>
         </div>
@@ -110,7 +102,8 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="relative z-10 pb-6 text-center">
+      {/* phones only: on wider screens the Omnibar sits right here and says more */}
+      <div className="relative z-10 pb-6 text-center md:hidden">
         <a
           href="#work"
           className="tap-slop inline-flex items-center gap-1.5 rounded-sm px-2 py-1 font-mono text-xs text-muted transition-colors hover:text-text"

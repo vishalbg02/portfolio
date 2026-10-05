@@ -135,8 +135,8 @@ test.describe("stack as a connection map", () => {
     await stack.scrollIntoViewIfNeeded();
     await expect(stack.locator(".stack-line")).toHaveCount(0); // faint wires only, none lit
     await stack.getByRole("button", { name: "Firebase" }).hover();
-    // Firebase is used by Golden Verdict and Talnio
-    await expect(stack.locator(".stack-line")).toHaveCount(2);
+    // Firebase is used by Golden Verdict, Talnio and the Social Agent internship
+    await expect(stack.locator(".stack-line")).toHaveCount(3);
     await expect(stack.locator("[data-marker='golden-verdict']")).toHaveAttribute("aria-pressed", "false");
     expect(await stack.locator(".stack-line path").first().getAttribute("stroke-width")).toBe("1");
     const accent = await page.evaluate(() =>
@@ -160,7 +160,7 @@ test.describe("stack as a connection map", () => {
         .filter((m) => m.on)
         .map((m) => m.slug)
         .sort();
-    await expect.poll(litSlugs).toEqual(["golden-verdict", "talnio"]); // the border colour transitions in
+    await expect.poll(litSlugs).toEqual(["golden-verdict", "role-socialagent", "talnio"]); // the border colour transitions in
     await page.mouse.move(2, 2);
     await expect(stack.locator(".stack-line")).toHaveCount(0);
   });

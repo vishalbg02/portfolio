@@ -138,6 +138,43 @@ html[data-grid-panel="open"] .omnibar,
 html[data-tour-active] .omnibar {
   display: none;
 }
+.omnibar {
+  bottom: max(20px, env(safe-area-inset-bottom));
+}
+/* pill ⇄ puck (Omnibar.tsx, lib/grid/overlap.ts): the hidden one is out of reach (visibility) once it has faded */
+.omni-pill,
+.omni-puck {
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out),
+    border-color 150ms,
+    visibility 0s linear 0s;
+}
+.omnibar:not([data-mode="pill"]) .omni-pill,
+.omnibar[data-mode="pill"] .omni-puck {
+  visibility: hidden;
+  opacity: 0;
+  transition-delay: 0s, 0s, 0s, 220ms;
+}
+.omnibar:not([data-mode="pill"]) .omni-pill {
+  transform: translateY(12px) scale(0.96);
+}
+.omnibar[data-mode="pill"] .omni-puck {
+  transform: scale(0.6);
+}
+/* even the puck would cover a control: tuck it into the edge, 12 px showing; it comes back on hover or focus */
+.omnibar[data-mode="tab"] .omni-puck {
+  transform: translateX(56px);
+}
+.omnibar[data-mode="tab"] .omni-puck:is(:hover, :focus-visible) {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .omni-pill,
+  .omni-puck {
+    transition: visibility 0s;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   .omni-hint {
     animation: omni-in 240ms ease-out;

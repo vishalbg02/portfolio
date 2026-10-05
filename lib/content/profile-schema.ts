@@ -35,11 +35,18 @@ export type Project = z.infer<typeof ProjectSchema>;
 export const ExperienceSchema = z.object({
   role: nonEmpty,
   company: nonEmpty,
+  /** The short name people know the work by ("Cove IoT"), used on the Stack map and in cards. */
+  short: nonEmpty,
   period: nonEmpty,
   current: z.boolean(),
   /** How he worked there; drives the wording ("internship", "freelance") on the site, in the AI and in the terminal. */
   kind: z.enum(["internship", "freelance", "full-time"]),
   points: z.array(nonEmpty).min(1),
+  /**
+   * What he used in this role, for the Stack map and GRID. Every item must be named in `points` (a unit test checks
+   * it), so a role can never be credited with something its own description does not say.
+   */
+  stack: z.array(nonEmpty),
 });
 export type Experience = z.infer<typeof ExperienceSchema>;
 
@@ -65,6 +72,7 @@ export const SkillsSchema = z.object({
   mobile: z.array(nonEmpty),
   dataCloud: z.array(nonEmpty),
   ai: z.array(nonEmpty),
+  networking: z.array(nonEmpty),
   tools: z.array(nonEmpty),
 });
 export type SkillGroup = keyof z.infer<typeof SkillsSchema>;

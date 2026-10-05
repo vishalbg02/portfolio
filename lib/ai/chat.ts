@@ -180,7 +180,7 @@ export async function* chatEvents(
       model: route.model,
       instructions,
       messages,
-      tools: buildTools({ sources: registry }),
+      tools: buildTools({ sources: registry, visitorText: question }),
       stopWhen: isStepCount(LIMITS.maxSteps),
       maxOutputTokens: LIMITS.chatMaxOutputTokens + (route.extraOutputTokens ?? 0),
       temperature: 0.2,

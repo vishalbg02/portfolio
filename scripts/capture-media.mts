@@ -216,13 +216,6 @@ const goldenVerdict: Stills = {
       await open(p, `${GV}/`);
       return shot(p);
     }),
-  "gv-menu-desktop": (b) =>
-    withPage(b, DESKTOP, async (p) => {
-      await open(p, `${GV}/`);
-      await p.getByText("Business Setup").first().hover();
-      await p.waitForTimeout(900);
-      return shot(p);
-    }),
   "gv-steps-desktop": (b) =>
     withPage(b, DESKTOP, async (p) => {
       await open(p, `${GV}/`);
@@ -309,11 +302,9 @@ const clips: Record<string, (b: Browser) => Promise<{ raw: string; trim: number;
       b,
       (p) => open(p, `${GV}/`),
       async (p) => {
-        await p.waitForTimeout(900);
-        await p.getByText("Business Setup").first().hover();
-        await p.waitForTimeout(1_600);
-        await p.mouse.move(700, 700);
-        await p.waitForTimeout(300);
+        // No menus: the pointer rests on the page body, far from the nav, so nothing opens on hover.
+        await p.mouse.move(720, 760);
+        await p.waitForTimeout(1_400);
         await smoothScroll(p, 2200, 2_200);
         await p.waitForTimeout(900);
         await smoothScroll(p, 5700, 2_400);

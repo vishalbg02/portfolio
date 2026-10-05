@@ -3,6 +3,7 @@ import { Chip } from "@/components/ui/Chip";
 import type { Project } from "@/lib/content/profile-schema";
 import type { MediaRef, Scene as SceneData } from "@/lib/content/scene-schema";
 import { kindOf } from "@/lib/content/kind";
+import { embedFor } from "@/lib/security/embeds";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "../identity";
 import { ProjectLinks } from "../ProjectLinks";
@@ -77,7 +78,8 @@ export function Scene({
 }) {
   const id = `scene-${project.slug}`;
   const extra = project.stack.length - MAX_CHIPS;
-  const isTour = project.slug === "virtual-tour";
+  // a live site the CSP may frame: "Launch live site" appears once /api/status says the site allows it (data-embeddable)
+  const embeddable = embedFor(project.live) !== null;
   return (
     <article
       data-scene={index}
@@ -134,16 +136,35 @@ export function Scene({
           </ul>
         </div>
         <div className="scene-actions">
-          <ProjectLinks project={project} className="flex flex-wrap items-center gap-x-5 gap-y-2" />
-          {isTour && project.live ? (
+          {project.live ? (
+            <a
+              href={project.live}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-visit-live=""
+              data-track="project_live_click"
+              data-track-project={project.slug}
+              className="inline-flex h-9 items-center gap-2 rounded-sm bg-accent px-3.5 font-mono text-sm font-semibold text-bg pointer-coarse:h-11"
+            >
+              Visit live site <span aria-hidden="true">↗</span>
+              <span className="sr-only"> ({project.name}, opens in a new tab)</span>
+            </a>
+          ) : null}
+          {embeddable && project.live ? (
             <button
               type="button"
               data-live-launch={project.live}
-              className="inline-flex h-9 items-center gap-2 rounded-sm border border-accent px-3.5 font-mono text-sm text-accent transition-colors hover:bg-accent hover:text-bg pointer-coarse:h-11"
+              data-live-title={`${project.name}, the live site`}
+              className="h-9 items-center gap-2 rounded-sm border border-accent px-3.5 font-mono text-sm text-accent transition-colors hover:bg-accent hover:text-bg pointer-coarse:h-11"
             >
-              Launch live demo <span aria-hidden="true">▶</span>
+              Launch live site <span aria-hidden="true">▶</span>
             </button>
           ) : null}
+          <ProjectLinks
+            project={project}
+            live={false}
+            className="flex flex-wrap items-center gap-x-5 gap-y-2"
+          />
         </div>
       </div>
 
@@ -166,9 +187,7 @@ export function Scene({
                     <Content media={b.media} />
                   </div>
                 ))}
-                {isTour && project.live ? (
-                  <div data-live-slot hidden className="absolute inset-0 z-10 bg-bg" />
-                ) : null}
+                {embeddable ? <div data-live-slot hidden className="absolute inset-0 z-10 bg-bg" /> : null}
               </Framed>
               {openable && scene.frame === "phone" ? (
                 <Expand slug={project.slug} name={project.name} />
@@ -181,6 +200,9 @@ export function Scene({
                 <button type="button" data-beat-go={j} aria-current={j === 0 ? "step" : undefined}>
                   <span className="beat-num" aria-hidden="true">
                     {j + 1}
+                  </span>
+                  <span className="beat-tick" aria-hidden="true">
+                    <i />
                   </span>
                   <span className="min-w-0">
                     <span className="beat-label">{b.label}</span>

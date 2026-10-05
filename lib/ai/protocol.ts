@@ -23,6 +23,7 @@ export const TOOL_NAMES = [
   "search_profile",
   "navigate",
   "show_project",
+  "show_role",
   "play_demo",
   "show_diagram",
   "show_skill_evidence",
@@ -116,6 +117,9 @@ export type UiPart =
       action: "send_message";
       name: string;
       email: string;
+      /** Optional: the sender's company and the role they are writing about (pre-filled from what they typed). */
+      company: string;
+      role: string;
       message: string;
       /** Where to write instead if delivery is not possible (built on the server from the profile). */
       mailto: string;
@@ -142,6 +146,20 @@ export type UiPart =
       /** The 60-second guided tour of the home page: a button that starts it. */
       kind: "tour";
       stops: number;
+    }
+  | {
+      /** A role (an internship or freelance job) from profile.experience, as a card: what he did and with what. */
+      kind: "role";
+      id: string;
+      title: string;
+      company: string;
+      short: string;
+      period: string;
+      jobKind: string;
+      /** The first line of the role's description. */
+      impact: string;
+      stack: string[];
+      href: string;
     };
 
 export const DRAFT_KINDS = ["interview_invite", "intro", "project_inquiry", "hackathon_team"] as const;
@@ -163,6 +181,7 @@ export const PART_KINDS = [
   "interview",
   "live",
   "tour",
+  "role",
 ] as const;
 
 /** The client trusts parts only from its own origin, but still refuses anything of an unknown shape. */

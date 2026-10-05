@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 import { graphs } from "@/components/diagram/graphs";
+import { answeredNotes } from "@/content/interview";
 import { profile as defaultProfile } from "@/content/profile";
 import type { Profile } from "@/lib/content/profile-schema";
 import { workStatus } from "@/lib/content/work-status";
@@ -126,6 +127,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     ["Mobile", p.skills.mobile],
     ["Data and cloud", p.skills.dataCloud],
     ["AI", p.skills.ai],
+    ["Networking and security", p.skills.networking],
     ["Tools", p.skills.tools],
   ];
   groups.forEach(([label, items]) =>
@@ -263,8 +265,18 @@ export function caseStudyChunks(slug: string, name: string, raw: string): Chunk[
   return chunks;
 }
 
+/** His own interview answers (content/interview.ts), verbatim: only the ones he has written. */
+export function interviewChunks(p: Pick<Profile, "name"> = defaultProfile, notes = answeredNotes()): Chunk[] {
+  return notes.map((n) => ({
+    id: `interview-${n.id}`,
+    title: `In his own words: ${n.question}`,
+    url: "/#ask",
+    text: `Interview question "${n.question}" — ${p.name}'s own answer, in his words: ${n.answer}`,
+  }));
+}
+
 export async function buildCorpus(root = process.cwd(), p: Profile = defaultProfile): Promise<Chunk[]> {
-  const chunks = profileChunks(p);
+  const chunks = [...profileChunks(p), ...interviewChunks(p)];
   for (const project of p.projects) {
     const raw = await readFile(path.join(root, "content", "work", `${project.slug}.mdx`), "utf8");
     chunks.push(...caseStudyChunks(project.slug, project.name, raw));

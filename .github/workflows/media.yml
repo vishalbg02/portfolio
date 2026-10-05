@@ -1,0 +1,58 @@
+name: Capture product media
+
+# Re-captures the Work section's stills and clips (scripts/capture-media.mts) on a GitHub runner, for networks that
+# cannot reach a product's site. Public pages only, never a login; the cookie banner is declined. The result is
+# uploaded as an artifact to review before anything is committed: this job never pushes.
+# Runs by hand, and on a branch push that changes the capture script (a manual run needs the file on main first).
+on:
+  push:
+    branches-ignore: [main]
+    paths: [scripts/capture-media.mts, .github/workflows/media.yml]
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Projects to capture (comma-separated slugs)"
+        required: true
+        default: "golden-verdict"
+      video:
+        description: "Record the clips too"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium and ffmpeg
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+
+      - name: Capture
+        env:
+          ONLY: ${{ inputs.only || 'golden-verdict' }}
+          VIDEO: ${{ github.event_name == 'workflow_dispatch' && !inputs.video && 'false' || 'true' }}
+        run: pnpm media "--only=$ONLY" --force $([ "$VIDEO" = "true" ] || echo --no-video)
+
+      - name: Upload the captures for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: media-${{ github.run_id }}
+          path: public/media/
+          retention-days: 7

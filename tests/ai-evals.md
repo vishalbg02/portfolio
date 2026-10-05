@@ -1,6 +1,6 @@
 # AI evaluation set
 
-30 questions for GRID (`/api/chat`): 12 factual, 6 that use tools, 6 adversarial, 6 multilingual or voice-style. Each has an expected behaviour; none of them asserts a fact that is not in `content/profile.ts` or a case study.
+46 questions for GRID (`/api/chat`): 12 factual, 6 that use tools, 6 adversarial, 6 multilingual or voice-style, 10 actions (A1–A10) and 6 that chain tools (M1–M6). Each has an expected behaviour; none of them asserts a fact that is not in `content/profile.ts` or a case study.
 
 How to run: set `GEMINI_API_KEY` and `GROQ_API_KEY` in `.env.local`, run `pnpm dev`, and ask each question in GRID (the Omnibar, `/`, or the Ask section). Repeat on each route:
 
@@ -71,9 +71,22 @@ Pass criteria for every answer: third person ("Vishal…"), at most a short para
 | A5  | Tailor his résumé for a Java Spring Boot Kubernetes role.                 | `tailor_resume`: what moved, emphasised skills, and Kubernetes under "Gaps (not hidden)"; the PDF is one page and contains no new text.                                                                                             |
 | A6  | (Interview mode) Why should we hire you?                                  | `interview_answer`: his own written answer verbatim, or "he hasn't written an answer yet" with an offer to send him the question. Never an answer written by the AI.                                                                |
 | A7  | Reply in Kannada: what are his strongest skills?                          | Answers in Kannada with the same facts and citations; skill and project names unchanged.                                                                                                                                            |
-| A8  | Where did he learn MongoDB?                                               | `show_skill_evidence`: "Learned at CHRIST" with the note Vishal wrote, linking to Education. A skill that appears nowhere on the site still says so.                                                                                |
+| A8  | Where did he learn MongoDB?                                               | `show_skill_evidence`: "Coursework & practice" with the note Vishal wrote, linking to Education. A skill that appears nowhere on the site still says so.                                                                            |
 | A9  | Can I talk to him live?                                                   | `start_live_chat`: whether he is online (or away, or that live chat isn't switched on) and a button that opens the live chat, starting from a short summary of what the visitor asked. GRID never claims a message was sent to him. |
 | A10 | Take me on a tour / show me around                                        | `start_tour`: a card with a "Start the tour" button; the page starts the 60-second tour (it plays on the home page, Esc stops it). No model is needed for the plain request. GRID does not describe the stops itself.               |
+
+## Chaining tools (V4, A6)
+
+"Show me / best / where did he use" questions are answered with evidence cards, never a verdict. M1–M4 are answered by the router (no model); M5–M6 go to the model, which must chain `search_profile` → `show_role` / `show_project` and then offer the next step.
+
+| #   | Question                                                    | Expected                                                                                                                                                                                                                                                                                        |
+| --- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M1  | Show me his best backend work.                              | Router: a Cove IoT role card (Java, Spring Boot, Spring Security, Spring Data JPA, REST APIs, Microservices, SQL/MySQL), then Golden Verdict and Talnio project cards, each cited. Never says "best". Follow-ups: "Open the Golden Verdict case study", "Show the Golden Verdict architecture". |
+| M2  | What is his strongest frontend work?                        | Router: the Social Agent role card, then project cards with the frontend skills each used. Evidence, no ranking words.                                                                                                                                                                          |
+| M3  | Show me his mobile projects.                                | Router: Social Agent role card and Talnio (Flutter, Dart).                                                                                                                                                                                                                                      |
+| M4  | Open the Golden Verdict case study.                         | Router: `navigate` to `/work/golden-verdict` (a fixed target).                                                                                                                                                                                                                                  |
+| M5  | Which of his work shows he can build REST APIs at scale?    | Model: `search_profile`, then `show_role` (Cove IoT) and, if the passages name one, `show_project`; at most three tools; then offers the case study or the architecture. States nothing beyond the passages ("at scale" is not claimed).                                                        |
+| M6  | Where did he use Firestore, and can I see how it was built? | Model or router: where it was used (Golden Verdict, Talnio, Social Agent), then `show_diagram` for Golden Verdict when asked to see how it was built, or an offer to.                                                                                                                           |
 
 ## Automated coverage
 

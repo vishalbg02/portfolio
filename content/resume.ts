@@ -53,7 +53,7 @@ export const resumeConfig = ResumeConfigSchema.parse({
   skills: [
     {
       label: "Languages",
-      items: ["Java", "JavaScript", "TypeScript", "SQL", "Kotlin", "Dart", "HTML5", "CSS3"],
+      items: ["Java", "JavaScript", "TypeScript", "Python", "SQL", "Kotlin", "Dart", "C++", "HTML5", "CSS3"],
     },
     {
       label: "Backend",

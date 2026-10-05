@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sceneFor, sceneList } from "@/content/scenes";
-import { mediaById } from "@/content/media";
+import { media, mediaById } from "@/content/media";
 import { profile } from "@/content/profile";
 import { ScenesSchema } from "@/lib/content/scene-schema";
 
@@ -65,10 +65,18 @@ describe("scenes (content/scenes.ts)", () => {
     }
     // Golden Verdict's private dashboards are never presented as captures
     const gv = sceneFor("golden-verdict")!;
-    expect(gv.beats.filter((b) => b.media.type === "illustration").map((b) => b.id)).toEqual([
-      "upload",
-      "track",
+    expect(gv.beats.filter((b) => b.media.type === "illustration").map((b) => b.id)).toEqual(["track"]);
+  });
+
+  it("opens Golden Verdict on its real home page, never on an open menu", () => {
+    const gv = sceneFor("golden-verdict")!;
+    expect(gv.beats.map((b) => b.media.id)).toEqual([
+      "gv-home-desktop",
+      "gv-service-desktop",
+      "gv-steps-desktop",
+      "gv-track",
     ]);
+    expect(media.some((m) => /menu/i.test(m.id) || /menu/i.test(m.alt))).toBe(false);
   });
 
   it("never claims what the brief wanted but profile.ts does not say (LanSymphony key exchange)", () => {

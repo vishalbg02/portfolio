@@ -87,8 +87,8 @@ test.describe("LET'S BUILD banner", () => {
       expect(m, "exactly one visible banner").toHaveLength(1);
       expect(m[0]!.fits).toBe(true);
       expect(m[0]!.pitch, "square size").toBeGreaterThanOrEqual(9);
-      // phones get BUILD (27 columns), everything wider gets LET'S BUILD (58 columns)
-      expect(m[0]!.cols).toBe(width >= 640 ? 58 : 27);
+      // phones get BUILD (27 columns), everything wider gets LET'S BUILD (57: the apostrophe is one square wide)
+      expect(m[0]!.cols).toBe(width >= 640 ? 57 : 27);
     });
   }
 });

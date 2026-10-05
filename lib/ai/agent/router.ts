@@ -16,6 +16,7 @@ import {
   matchSkill,
   navigatePart,
   projectCard,
+  rolePart,
   skillEvidence,
   statsPart,
   tourPart,
@@ -24,9 +25,12 @@ import {
 import { looksLikeJobDescription, norm } from "./jd";
 import { draftPart, type DraftContext } from "./drafts";
 import { findInterviewNote, interviewCard } from "./interview";
+import { extractSlots } from "./slots";
 import { currentPresence } from "@/lib/live/read";
 import { cleanRole, requirementsFor, resumeCard } from "./resume";
 import { SourceRegistry } from "./sources";
+import { buildStackGroups, buildUseNodes } from "@/lib/stack/usage";
+import type { SkillGroup } from "@/lib/content/profile-schema";
 
 export { looksLikeJobDescription, norm };
 
@@ -144,6 +148,76 @@ const contactKind = (q: string): ContactKind =>
             ? "phone"
             : "all";
 
+/* ── showcase: "show me his best backend work" ─────────────────────────────────────────────────── */
+
+// area words only: a named skill ("show me his Java work") is a skill-evidence question, answered below
+const AREAS: Array<[RegExp, string, SkillGroup[]]> = [
+  [/\bfull ?stack\b/, "full-stack", ["backend", "frontend", "dataCloud"]],
+  [/\b(?:backend|back end|server side)\b/, "backend", ["backend", "dataCloud"]],
+  [/\b(?:frontend|front end)\b/, "frontend", ["frontend"]],
+  [/\bmobile\b/, "mobile", ["mobile"]],
+  [/\b(?:ai|genai|gen ai)\b/, "AI", ["ai"]],
+  [/\b(?:networking|network)\b/, "networking", ["networking"]],
+];
+const SHOWCASE_ASK = /\b(?:show|see|best|strongest|top|favou?rite|most impressive|main|where)\b/;
+const SHOWCASE_WHAT = /\b(?:work|projects?|experience|things he built|stuff)\b/;
+
+/** Drops a skill another one already names ("MySQL" beside "SQL/MySQL"). */
+const distinct = (names: string[]) =>
+  names.filter((n) => !names.some((o) => o !== n && o.toLowerCase().includes(n.toLowerCase())));
+
+/**
+ * Evidence, not a ranking: the role and projects that used most of his skills in that area, from the same data as
+ * the Stack map. Answered with cards (no model), then offers to open the case study or the architecture.
+ */
+export function showcase(q: string): Routed | null {
+  if (!SHOWCASE_ASK.test(q) || !SHOWCASE_WHAT.test(q) || findProject(q)) return null;
+  const area = AREAS.find(([re]) => re.test(q));
+  if (!area) return null;
+  const [, label, groupKeys] = area;
+  const ids: Record<SkillGroup, string> = {
+    backend: "backend",
+    frontend: "frontend",
+    mobile: "mobile",
+    dataCloud: "data-cloud",
+    ai: "ai",
+    networking: "networking",
+    tools: "tools",
+  };
+  const items = buildStackGroups()
+    .filter((g) => groupKeys.some((k) => ids[k] === g.id))
+    .flatMap((g) => g.items);
+  const nodes = buildUseNodes()
+    .map((n) => ({ n, skills: distinct(items.filter((i) => i.used.includes(n.id)).map((i) => i.name)) }))
+    .filter((x) => x.skills.length > 0)
+    .sort((a, b) => b.skills.length - a.skills.length); // stable: ties keep profile order
+  if (nodes.length === 0) return null;
+  const role = nodes.find((x) => x.n.kind === "role");
+  const projects = nodes.filter((x) => x.n.kind === "project").slice(0, 2);
+  const reg = new SourceRegistry();
+  const parts: Routed["parts"] = [];
+  const lines: string[] = [];
+  if (role) {
+    const part = rolePart(role.n.name);
+    if (part) parts.push({ tool: "show_role", part });
+    lines.push(
+      `the ${role.n.name} ${role.n.sub.split(" · ")[0]} (${role.skills.join(", ")}) ${link(reg, `role-${role.n.id}`, `${role.n.name} — experience`, "/#experience")}`,
+    );
+  }
+  for (const { n, skills } of projects) {
+    const part = projectCard(n.id as ProjectSlug);
+    if (part) parts.push({ tool: "show_project", part });
+    lines.push(
+      `${n.name} (${skills.join(", ")}) ${link(reg, `project-${n.id}`, `${n.name} — case study`, n.href)}`,
+    );
+  }
+  return {
+    parts,
+    text: `Where his ${label} skills show on this site: ${sentenceList(lines)}.`,
+    sources: reg.all(),
+  };
+}
+
 /* ── actions ─────────────────────────────────────────────────────────────────────────────────────── */
 
 const BOOK =
@@ -249,7 +323,8 @@ async function routeAction(text: string, q: string, mode?: GridMode): Promise<Ro
   }
 
   if (MESSAGE.test(lead)) {
-    const part = confirmPart({ message: messageBody(text) });
+    // who is writing ("I'm Priya from Acme, priya@acme.dev") pre-fills the card; the visitor can change every field
+    const part = confirmPart({ ...extractSlots(text), message: messageBody(text) });
     return {
       parts: [{ tool: "send_message_to_vishal", part }],
       text: "Here's your message to him for review. Nothing is sent until you press Send.",
@@ -363,6 +438,18 @@ export async function routeIntent(raw: string, opts: { mode?: GridMode } = {}): 
       sources: reg.all(),
     };
   }
+
+  // "open the Golden Verdict case study": the case study page (a fixed navigation target)
+  const caseStudy = /\b(?:open|go to|take me to|show me|show)\b.*\bcase study\b/.test(q) ? project : null;
+  if (caseStudy) {
+    const part = navigatePart(caseStudy);
+    if (part && part.kind === "navigate")
+      return { parts: [{ tool: "navigate", part }], text: `Taking you to the ${part.label}.`, sources: [] };
+  }
+
+  // "show me his best backend work": a role card and project cards, from the Stack map's data
+  const shown = showcase(q);
+  if (shown) return shown;
 
   // "where did he use X", "evidence for X", "show his X work"
   const skillAsk =

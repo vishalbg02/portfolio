@@ -10,7 +10,7 @@ import { z } from "zod";
  * TODO(vishal): write your own answer for each question (2–5 sentences each, first person is fine: GRID shows
  * your words as a quote, "In his own words"). Interview mode appears on the site once at least 3 are answered.
  */
-const Entry = z.object({
+export const InterviewEntrySchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   question: z.string().trim().min(8).max(140),
   /** Words a visitor might use for the same question, so "your biggest weakness?" finds the weakness note. */
@@ -18,10 +18,10 @@ const Entry = z.object({
   /** His own answer, or null until he writes it. Plain text, max 900 characters. */
   answer: z.string().trim().min(20).max(900).nullable(),
 });
-export type InterviewEntry = z.infer<typeof Entry>;
+export type InterviewEntry = z.infer<typeof InterviewEntrySchema>;
 
 export const interviewBank: InterviewEntry[] = z
-  .array(Entry)
+  .array(InterviewEntrySchema)
   .length(12)
   .parse([
     {

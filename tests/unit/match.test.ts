@@ -62,7 +62,6 @@ describe("taxonomy", () => {
       "linux",
       "testing",
       "agile",
-      "cpp",
       "go",
       "rust",
       "php",
@@ -116,7 +115,7 @@ describe("grading is literal, honest evidence", () => {
     expect(r.evidence.length).toBeGreaterThan(0);
   });
 
-  it.each(["Docker", "Kubernetes", "Terraform", "Linux", "Unit testing", "Agile", "C++", "GoLang", "Redis"])(
+  it.each(["Docker", "Kubernetes", "Terraform", "Linux", "Unit testing", "Agile", "GoLang", "Redis"])(
     "%s → gap, no invented evidence",
     (skill) => {
       const r = grade(skill);

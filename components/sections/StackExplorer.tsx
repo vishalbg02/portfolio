@@ -4,16 +4,26 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { identityBg } from "@/components/work/identity";
 import { track } from "@/lib/analytics";
-import type { ProjectSlug } from "@/lib/content/profile-schema";
 import { openGrid } from "@/lib/grid/events";
 import { connections, type Active } from "@/lib/stack/map";
-import type { StackGroup, StackItem } from "@/lib/stack/usage";
+import type { StackGroup, StackItem, UseNode } from "@/lib/stack/usage";
 import { cn } from "@/lib/utils/cn";
 
-type ProjectRef = { slug: ProjectSlug; name: string };
 type Pt = { x: number; y: number };
 
-const NONE: Active = { skill: null, project: null };
+const NONE: Active = { skill: null, node: null };
+
+/** A node's square: a project's colour, or an outlined square for a role (roles have no identity colour). */
+function NodeMark({ node, size = "size-2" }: { node: UseNode; size?: string }) {
+  return node.kind === "project" ? (
+    <span
+      aria-hidden="true"
+      className={cn(size, "shrink-0 rounded-[2px]", identityBg[node.id as keyof typeof identityBg])}
+    />
+  ) : (
+    <span aria-hidden="true" className={cn(size, "shrink-0 rounded-[2px] border border-text")} />
+  );
+}
 
 /** A flat S-curve between two anchors (a straight run in the middle, so lines read as wiring, not as swirls). */
 export const wire = (a: Pt, b: Pt) => {
@@ -22,23 +32,16 @@ export const wire = (a: Pt, b: Pt) => {
 };
 
 /**
- * The stack as a connection map. Wide screens: skills on the left, grouped by area, the projects on the right, and flat
- * 1 px lines between every skill and the projects that used it (faint until you point at one). Hover, focus or pick a
- * skill and its lines light up and draw in; pick a project and every skill it used lights up. Phones: an accordion by
- * area, each skill showing a dot per project, with the same facts in a line under the one you tapped.
- * Every skill can ask GRID "where did he use it?". A skill no project used says so and points to where it was learned,
- * which is the profile's own note, so nothing is linked that the case studies don't back up.
+ * The stack as a connection map. Wide screens: skills on the left, grouped by area, where they were used on the right
+ * (the projects, and the internships that are not a project of their own), and flat 1 px lines between every skill and
+ * the places that used it (faint until you point at one). Hover, focus or pick a skill and its lines light up and draw
+ * in; pick a place and every skill it used lights up. Phones: an accordion by area, each skill showing a square per
+ * place, with the same facts in a line under the one you tapped.
+ * Every skill can ask GRID "where did he use it?". A skill nothing on the map used says where it comes from instead
+ * (a leadership role, a certificate, this site, or coursework & practice), so nothing is linked that profile.ts does
+ * not back up.
  */
-export function StackExplorer({
-  groups,
-  projects,
-  note,
-}: {
-  groups: StackGroup[];
-  projects: ProjectRef[];
-  /** profile.skillsNote: where a skill that no project shows was learned. */
-  note: string;
-}) {
+export function StackExplorer({ groups, nodes }: { groups: StackGroup[]; nodes: UseNode[] }) {
   const liveId = useId();
   const [wide, setWide] = useState(
     () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches,
@@ -54,14 +57,15 @@ export function StackExplorer({
   const [pinned, setPinned] = useState<Active>(NONE);
   const [open, setOpen] = useState<string | null>(groups[0]?.id ?? null);
   const active: Active = {
-    skill: hovered.skill ?? (hovered.project ? null : pinned.skill),
-    project: hovered.project ?? (hovered.skill ? null : pinned.project),
+    skill: hovered.skill ?? (hovered.node ? null : pinned.skill),
+    node: hovered.node ?? (hovered.skill ? null : pinned.node),
   };
   const lit = connections(groups, active);
   const items = groups.flatMap((g) => g.items);
   const activeItem = items.find((i) => i.name === active.skill) ?? null;
-  const activeProject = projects.find((p) => p.slug === active.project) ?? null;
-  const litProjects = projects.filter((p) => lit.projects.includes(p.slug));
+  const activeNode = nodes.find((n) => n.id === active.node) ?? null;
+  const litNodes = nodes.filter((n) => lit.nodes.includes(n.id));
+  const nodeName = (id: string) => nodes.find((n) => n.id === id)?.name ?? id;
 
   const wrap = useRef<HTMLDivElement>(null);
   const skillEls = useRef(new Map<string, HTMLElement>());
@@ -101,33 +105,33 @@ export function StackExplorer({
   useEffect(() => {
     const cards = document.querySelectorAll<HTMLElement>("[data-project]");
     cards.forEach((c) => {
-      if (lit.projects.includes(c.dataset.project as ProjectSlug)) c.setAttribute("data-stack-hit", "true");
+      if (lit.nodes.includes(c.dataset.project ?? "")) c.setAttribute("data-stack-hit", "true");
       else c.removeAttribute("data-stack-hit");
     });
     return () => cards.forEach((c) => c.removeAttribute("data-stack-hit"));
-  }, [lit.projects]);
+  }, [lit.nodes]);
 
   const pinSkill = (name: string) => {
     const next = pinned.skill === name ? null : name;
     if (next) track("stack_skill_select", { kind: "skill", skill: name });
-    setPinned({ skill: next, project: null });
+    setPinned({ skill: next, node: null });
   };
-  const pinProject = (slug: ProjectSlug) => {
-    const next = pinned.project === slug ? null : slug;
-    if (next) track("stack_skill_select", { kind: "project", project: slug });
-    setPinned({ skill: null, project: next });
+  const pinNode = (id: string) => {
+    const next = pinned.node === id ? null : id;
+    if (next) track("stack_skill_select", { kind: "project", project: id });
+    setPinned({ skill: null, node: next });
   };
 
   const hoverSkill = (name: string) => ({
-    onMouseEnter: () => setHovered({ skill: name, project: null }),
+    onMouseEnter: () => setHovered({ skill: name, node: null }),
     onMouseLeave: () => setHovered(NONE),
-    onFocus: () => setHovered({ skill: name, project: null }),
+    onFocus: () => setHovered({ skill: name, node: null }),
     onBlur: () => setHovered(NONE),
   });
-  const hoverProject = (slug: ProjectSlug) => ({
-    onMouseEnter: () => setHovered({ skill: null, project: slug }),
+  const hoverNode = (id: string) => ({
+    onMouseEnter: () => setHovered({ skill: null, node: id }),
     onMouseLeave: () => setHovered(NONE),
-    onFocus: () => setHovered({ skill: null, project: slug }),
+    onFocus: () => setHovered({ skill: null, node: id }),
     onBlur: () => setHovered(NONE),
   });
 
@@ -149,25 +153,21 @@ export function StackExplorer({
           "flex min-h-6 w-full items-center justify-between gap-3 rounded-sm border px-2.5 text-left font-mono text-[13px] transition-colors max-lg:min-h-11 pointer-coarse:min-h-11",
           on || pressed
             ? "border-accent bg-grid-1/40 text-text"
-            : item.projects.length
+            : item.used.length
               ? "border-transparent text-text hover:border-border-2"
               : "border-transparent text-muted hover:border-border-2 hover:text-text",
         )}
       >
         <span>{item.name}</span>
         <span className="flex shrink-0 items-center gap-1">
-          {item.projects.map((slug) => (
-            <span
-              key={slug}
-              aria-hidden="true"
-              title={projects.find((p) => p.slug === slug)?.name}
-              className={cn("size-2 rounded-[2px]", identityBg[slug])}
-            />
-          ))}
-          {item.projects.length ? (
-            <span className="sr-only">
-              used in {item.projects.map((s) => projects.find((p) => p.slug === s)?.name).join(", ")}
-            </span>
+          {item.used.map((id) => {
+            const node = nodes.find((n) => n.id === id);
+            return node ? <NodeMark key={id} node={node} /> : null;
+          })}
+          {item.used.length ? (
+            <span className="sr-only">used in {item.used.map(nodeName).join(", ")}</span>
+          ) : item.elsewhere ? (
+            <span className="text-[10px] tracking-[0.08em] text-muted uppercase">{item.elsewhere.tag}</span>
           ) : null}
         </span>
       </button>
@@ -178,25 +178,26 @@ export function StackExplorer({
     <div id={liveId} aria-live="polite" className="min-h-9 font-mono text-xs text-muted">
       {activeItem ? (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          {activeItem.projects.length ? (
+          {activeItem.used.length ? (
             <>
               <span>
                 <span className="text-text">{activeItem.name}</span> used in
               </span>
-              {litProjects.map((p) => (
+              {litNodes.map((n) => (
                 <Link
-                  key={p.slug}
-                  href={`/work/${p.slug}`}
+                  key={n.id}
+                  href={n.href}
                   className="inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border px-2.5 py-1 text-text transition-colors hover:border-border-2"
                 >
-                  <span aria-hidden="true" className={cn("size-2 rounded-pill", identityBg[p.slug])} />
-                  {p.name}
+                  <NodeMark node={n} />
+                  {n.name}
+                  {n.kind === "role" ? <span className="text-muted">· {n.sub.split(" · ")[0]}</span> : null}
                 </Link>
               ))}
             </>
           ) : (
             <span className="max-w-[60ch] text-[13px] leading-snug">
-              <span className="text-text">{activeItem.name}</span>: no project on this site used it. {note}
+              <span className="text-text">{activeItem.name}</span>: {activeItem.elsewhere?.text}
             </span>
           )}
           <button
@@ -211,16 +212,18 @@ export function StackExplorer({
             Ask GRID where
           </button>
         </div>
-      ) : activeProject ? (
+      ) : activeNode ? (
         <p className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span>
-            <span className="text-text">{activeProject.name}</span> used {lit.skills.length} of these skills
+            <span className="text-text">{activeNode.name}</span>
+            {activeNode.kind === "role" ? ` (${activeNode.sub})` : ""} used {lit.skills.length} of these
+            skills
           </span>
           <Link
-            href={`/work/${activeProject.slug}`}
+            href={activeNode.href}
             className="inline-flex min-h-8 items-center gap-1.5 rounded-pill border border-border px-2.5 py-1 text-text transition-colors hover:border-border-2"
           >
-            Case study →
+            {activeNode.kind === "project" ? "Case study →" : "Experience →"}
           </Link>
         </p>
       ) : (
@@ -229,43 +232,49 @@ export function StackExplorer({
             className="mr-1.5 inline-block size-1.5 rounded-pill bg-accent align-middle"
             aria-hidden="true"
           />
-          Point at a skill to see which projects used it, or pick a project to see its skills.
+          Point at a skill to see where it was used, or pick a project or internship to see its skills.
         </p>
       )}
     </div>
   );
 
-  const marker = (p: ProjectRef, kind: "node" | "chip") => {
-    const on = lit.projects.includes(p.slug);
-    const count = items.filter((i) => i.projects.includes(p.slug)).length;
+  const marker = (n: UseNode, kind: "node" | "chip") => {
+    const on = lit.nodes.includes(n.id);
+    const count = items.filter((i) => i.used.includes(n.id)).length;
     return (
       <button
         ref={(el) => {
-          if (el) markerEls.current.set(p.slug, el);
-          else markerEls.current.delete(p.slug);
+          if (el) markerEls.current.set(n.id, el);
+          else markerEls.current.delete(n.id);
         }}
         type="button"
-        data-marker={p.slug}
-        aria-pressed={pinned.project === p.slug}
-        aria-describedby={active.project === p.slug ? liveId : undefined}
-        {...hoverProject(p.slug)}
-        onClick={() => pinProject(p.slug)}
+        data-marker={n.id}
+        data-marker-kind={n.kind}
+        aria-pressed={pinned.node === n.id}
+        aria-describedby={active.node === n.id ? liveId : undefined}
+        {...hoverNode(n.id)}
+        onClick={() => pinNode(n.id)}
         className={cn(
           "inline-flex items-center gap-2 rounded-sm border text-left font-mono text-xs transition-colors",
           kind === "node" ? "min-h-14 w-full px-3.5" : "min-h-11 px-3 md:min-h-9",
           on ? "border-accent bg-grid-1/40 text-text" : "border-border-2 text-text hover:border-accent",
         )}
       >
-        <span aria-hidden="true" className={cn("size-2.5 shrink-0 rounded-[2px]", identityBg[p.slug])} />
+        <NodeMark node={n} size="size-2.5" />
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px]">{p.name}</span>
-          {kind === "node" ? <span className="block text-muted">{count} skills</span> : null}
+          <span className="block text-[13px]">{n.name}</span>
+          {kind === "node" ? (
+            <span className="block text-muted">
+              {n.kind === "role" ? `${n.sub.split(" · ")[0]} · ` : ""}
+              {count} skills
+            </span>
+          ) : null}
         </span>
       </button>
     );
   };
 
-  const baseWires = items.flatMap((i) => i.projects.map((slug) => [i.name, slug] as const));
+  const baseWires = items.flatMap((i) => i.used.map((id) => [i.name, id] as const));
 
   if (wide) {
     return (
@@ -287,8 +296,8 @@ export function StackExplorer({
           <div className="flex flex-col justify-between gap-3 py-8">
             <p className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">Used in</p>
             <ul className="flex flex-1 flex-col justify-around gap-3">
-              {projects.map((p) => (
-                <li key={p.slug}>{marker(p, "node")}</li>
+              {nodes.map((n) => (
+                <li key={n.id}>{marker(n, "node")}</li>
               ))}
             </ul>
           </div>
@@ -304,13 +313,13 @@ export function StackExplorer({
           className="pointer-events-none absolute inset-0 z-10 overflow-visible"
         >
           <g data-layer="base" opacity={lit.pairs.length ? 0.35 : 0.9}>
-            {baseWires.map(([skill, slug]) => {
+            {baseWires.map(([skill, id]) => {
               const a = pts.skills[skill];
-              const b = pts.markers[slug];
+              const b = pts.markers[id];
               if (!a || !b) return null;
               return (
                 <path
-                  key={`${skill}>${slug}`}
+                  key={`${skill}>${id}`}
                   d={wire(a, b)}
                   fill="none"
                   stroke="var(--border)"
@@ -319,12 +328,12 @@ export function StackExplorer({
               );
             })}
           </g>
-          {lit.pairs.map(([skill, slug]) => {
+          {lit.pairs.map(([skill, id]) => {
             const a = pts.skills[skill];
-            const b = pts.markers[slug];
+            const b = pts.markers[id];
             if (!a || !b) return null;
             return (
-              <g key={`${skill}>${slug}`} className="stack-line">
+              <g key={`${skill}>${id}`} className="stack-line">
                 <path
                   d={wire(a, b)}
                   fill="none"
@@ -388,11 +397,11 @@ export function StackExplorer({
       <div className="mt-6 border-t border-border pt-4">
         <p className="mb-3 font-mono text-[11px] tracking-[0.12em] text-muted uppercase">Used in</p>
         <ul className="flex flex-wrap gap-2">
-          {projects.map((p) => (
-            <li key={p.slug}>{marker(p, "chip")}</li>
+          {nodes.map((n) => (
+            <li key={n.id}>{marker(n, "chip")}</li>
           ))}
         </ul>
-        {pinned.project ? <div className="mt-4">{detail}</div> : null}
+        {pinned.node ? <div className="mt-4">{detail}</div> : null}
       </div>
     </div>
   );

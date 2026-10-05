@@ -314,6 +314,47 @@ export function PartView({
 
     case "tour":
       return <TourCard part={part} />;
+
+    case "role":
+      return (
+        <section
+          aria-label={`${part.title}, ${part.short}`}
+          data-grid-card="role"
+          className={cn(card, "p-3.5")}
+        >
+          <p className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+            {part.jobKind} · {part.period}
+          </p>
+          <p className="mt-1 text-[15px] font-medium text-text">
+            {part.title}, <span className="text-muted">{part.short}</span>
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-text">{part.impact}</p>
+          <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label="Stack">
+            {part.stack.map((s) => (
+              <li
+                key={s}
+                className="rounded-pill border border-border px-2 py-0.5 font-mono text-[11px] text-muted"
+              >
+                {s}
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <Link href={part.href} className={chip}>
+              Experience →
+            </Link>
+            {onAsk ? (
+              <button
+                type="button"
+                className={chip}
+                onClick={() => onAsk(`What did he do at ${part.short}?`)}
+              >
+                Ask about it
+              </button>
+            ) : null}
+          </div>
+        </section>
+      );
   }
 }
 

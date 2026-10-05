@@ -81,12 +81,6 @@ const assets: MediaAsset[] = [
   ),
   browser(
     "golden-verdict",
-    "gv-menu-desktop",
-    `${GV}/`,
-    "Golden Verdict’s Business Setup menu open over the home page, in columns: Company Registration, International Business Registration, Licenses & Registrations, More Registrations and Others.",
-  ),
-  browser(
-    "golden-verdict",
     "gv-steps-desktop",
     `${GV}/`,
     "Golden Verdict’s “From browse to completion — four simple steps” section, showing the first step, Browse Services, and a note that every service shows a fixed price upfront.",
@@ -113,7 +107,7 @@ const assets: MediaAsset[] = [
     "golden-verdict",
     "gv-scroll",
     `${GV}/`,
-    "Screen recording of Golden Verdict’s public site: the Business Setup menu opens over the home page, then the page scrolls through the how-it-works steps to the free tools section.",
+    "Screen recording of Golden Verdict’s public home page: it starts on the headline “One platform for all your legal & tax compliance”, then scrolls through the how-it-works steps to the free tools section.",
   ),
 
   // ── CHRIST University Virtual Tour (the app's own pages; the 360° tour itself is third-party) ──

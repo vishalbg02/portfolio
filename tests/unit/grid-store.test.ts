@@ -330,6 +330,8 @@ describe("GRID store: language and decisions", () => {
       action: "send_message",
       name: "",
       email: "",
+      company: "",
+      role: "",
       message: "hi there you",
       mailto: "a@b.co",
     };

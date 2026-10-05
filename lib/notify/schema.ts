@@ -23,6 +23,14 @@ export const GridMessageSchema = z.object({
         .max(MESSAGE_LIMITS.message.max, MESSAGE_ERRORS.messageLong)
         .refine((m) => countLinks(m) <= MESSAGE_LIMITS.links, MESSAGE_ERRORS.links),
     ),
+  /** Optional, from the card's Company and Role fields (pre-filled from what the visitor typed). */
+  company: z
+    .string()
+    .transform(oneLine)
+    .pipe(z.string().max(MESSAGE_LIMITS.company.max))
+    .optional()
+    .default(""),
+  role: z.string().transform(oneLine).pipe(z.string().max(MESSAGE_LIMITS.role.max)).optional().default(""),
   /** One id per attempt, so a double click or a retry cannot deliver the same message twice. */
   requestId: z.uuid(),
   /** The page the visitor was on (a path), so the message has context. */
