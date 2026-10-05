@@ -220,14 +220,16 @@ test.describe("A4 · the Omnibar never covers something you can click or type in
           return hits;
         });
       const ys = [1, 2, 3, 4, 5, 6].map((i) => Math.round(((height - 900) * i) / 7));
+      // 650 ms: a scroll into the Work stage can swap its scene in mid-dissolve (~150 ms later) and the bar then
+      // slides to the edge; what is asserted is where it settles, not a race with that animation
       for (const y of ys) {
         await page.evaluate((top) => window.scrollTo(0, top), y);
-        await page.waitForTimeout(350);
+        await page.waitForTimeout(650);
         expect(await covered(), `down to ${y}`).toEqual([]);
       }
       for (const y of [...ys].reverse()) {
         await page.evaluate((top) => window.scrollTo(0, top), y - 240);
-        await page.waitForTimeout(350);
+        await page.waitForTimeout(650);
         expect(await covered(), `up to ${y - 240}`).toEqual([]);
       }
     });

@@ -14,6 +14,7 @@ import {
   puckRect,
   type OmniMode,
   type Rect,
+  LAYOUT_EVENT,
 } from "@/lib/grid/overlap";
 import { isTypingTarget } from "@/lib/shortcuts";
 import { shipped } from "@/lib/site";
@@ -47,10 +48,13 @@ function covers(r: Rect): boolean {
   for (const el of document.querySelectorAll<HTMLElement>(INTERACTIVE)) {
     const q = el.getBoundingClientRect();
     if (!q.width || !q.height || !intersects(r, q) || el.closest(".omnibar")) continue;
+    // The Work scenes share one layout and swap in place (mid-dissolve, after the scroll that chose them), so a
+    // control in a hidden scene counts too: the bar is already out of the way when that scene appears.
     const shown =
-      typeof el.checkVisibility === "function"
+      el.closest(".work-stage .scene") !== null ||
+      (typeof el.checkVisibility === "function"
         ? el.checkVisibility({ visibilityProperty: true })
-        : getComputedStyle(el).visibility !== "hidden";
+        : getComputedStyle(el).visibility !== "hidden");
     if (shown) return true;
   }
   return false;
@@ -165,6 +169,7 @@ export function Omnibar() {
     const state = { dir: "none" as "up" | "down" | "none", field: false, footer: false, escaped: false };
     let lastY = window.scrollY;
     let raf = 0;
+    let settle = 0;
     const update = () => {
       raf = 0;
       if (!wide.matches) return;
@@ -186,6 +191,10 @@ export function Omnibar() {
       state.dir = dy > 0 ? "down" : "up";
       if (state.dir === "up") state.escaped = false;
       soon();
+      // and once more when the scroll settles: what scrolled in may still change (a Work scene swaps in mid-dissolve,
+      // an island mounts), and the bar must not end up over it
+      window.clearTimeout(settle);
+      settle = window.setTimeout(soon, 240);
     };
     const onFocus = () => {
       state.field = isField(document.activeElement);
@@ -207,15 +216,18 @@ export function Omnibar() {
     if (footer) io?.observe(footer);
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", soon);
+    window.addEventListener(LAYOUT_EVENT, soon);
     document.addEventListener("focusin", onFocus);
     document.addEventListener("focusout", onBlur);
     window.addEventListener("keydown", onEsc);
     soon();
     return () => {
       window.cancelAnimationFrame(raf);
+      window.clearTimeout(settle);
       io?.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", soon);
+      window.removeEventListener(LAYOUT_EVENT, soon);
       document.removeEventListener("focusin", onFocus);
       document.removeEventListener("focusout", onBlur);
       window.removeEventListener("keydown", onEsc);

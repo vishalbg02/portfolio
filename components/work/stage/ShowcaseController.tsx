@@ -7,6 +7,7 @@ import { WORK_GO_EVENT } from "@/lib/grid/events";
 import type { ViewerItem } from "./viewer-types";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "../identity";
+import { LAYOUT_EVENT } from "@/lib/grid/overlap";
 import { play } from "@/lib/sound";
 import { useStatuses } from "@/lib/status/store";
 
@@ -120,6 +121,8 @@ export function ShowcaseController({
       });
       setActive(i);
       syncClips();
+      // what is on screen changed without a scroll: the Omnibar checks it is not now over a control
+      if (changed) window.dispatchEvent(new Event(LAYOUT_EVENT));
       if (changed && announce) {
         track("scene_view", { project: scenes[i]!.slug });
         play("click");

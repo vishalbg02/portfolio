@@ -56,10 +56,10 @@ test.describe("home rhythm @1440", () => {
     await mockStatus(page);
     await gotoHydrated(page, "/");
     const nav = page.getByRole("navigation", { name: "Primary" });
-    await page.locator("#experience").evaluate((e) => window.scrollTo(0, e.offsetTop + 200));
+    await page.locator("#experience").evaluate((e) => window.scrollTo(0, (e as HTMLElement).offsetTop + 200));
     await expect(nav.getByRole("link", { name: "Experience" })).toHaveAttribute("aria-current", "location");
     await expect(nav.getByRole("link", { name: "Work" })).not.toHaveAttribute("aria-current", /.+/);
-    await page.locator("#contact").evaluate((e) => window.scrollTo(0, e.offsetTop + 200));
+    await page.locator("#contact").evaluate((e) => window.scrollTo(0, (e as HTMLElement).offsetTop + 200));
     await expect(nav.getByRole("link", { name: "Contact" })).toHaveAttribute("aria-current", "location");
   });
 
