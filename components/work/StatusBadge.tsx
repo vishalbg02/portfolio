@@ -31,7 +31,8 @@ export function StaticBadge({ label, className }: { label: string; className?: s
 
 /**
  * Live status from /api/status (client fetch, shared store, never blocks render).
- * Skeleton while loading; Live · 142 ms / Degraded / Offline once known.
+ * Skeleton while loading; Live · 142 ms / Degraded / Offline once known; "Status unknown" when the check came back
+ * without this project, "Status unavailable" when it failed.
  */
 export function StatusBadge({
   slug,
@@ -47,6 +48,9 @@ export function StatusBadge({
   const base = cn(bare ? "inline-flex items-center gap-1.5 font-mono text-xs" : pill, className);
 
   if (phase === "error") return <span className={cn(base, "text-muted")}>Status unavailable</span>;
+  // checked, but nothing came back for this one: say so, never leave a blank pill
+  if (phase === "ready" && (!status || !status.state))
+    return <span className={cn(base, "text-muted")}>Status unknown</span>;
   if (!status || !status.state) {
     return (
       // No invisible text: it fails contrast checks. The label is for screen readers only.

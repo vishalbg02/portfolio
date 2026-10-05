@@ -259,7 +259,7 @@ export function ActivityPanel({
                 setMode(m);
               }}
               className={cn(
-                "min-h-7 rounded-pill px-3 font-mono text-xs transition-colors pointer-coarse:min-h-10",
+                "min-h-7 rounded-pill px-3 font-mono text-xs transition-colors pointer-coarse:min-h-11",
                 mode === m ? "bg-surface-2 text-text" : "text-muted hover:text-text",
               )}
             >

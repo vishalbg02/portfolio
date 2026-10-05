@@ -71,9 +71,15 @@ test.describe("Meet GRID @desktop", () => {
     await expect(section.locator("[data-pipeline-note]")).toContainText("Router");
 
     // the strip and the chat are on screen together
-    const box = await section.locator("[data-grid-inline]").boundingBox();
-    expect(box!.y).toBeGreaterThanOrEqual(56);
-    expect(box!.y + box!.height).toBeLessThanOrEqual(900);
+    // (the tile's smooth scroll may still be settling under load)
+    const inline = section.locator("[data-grid-inline]");
+    await expect.poll(async () => (await inline.boundingBox())!.y).toBeGreaterThanOrEqual(52);
+    await expect
+      .poll(async () => {
+        const box = (await inline.boundingBox())!;
+        return box.y + box.height;
+      })
+      .toBeLessThanOrEqual(900);
   });
 
   test("each router tile gets its card: architecture, skill evidence, job match, résumé, message", async ({

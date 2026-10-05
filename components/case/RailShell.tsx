@@ -31,7 +31,11 @@ export function RailShell({ children }: { children: ReactNode }) {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    // content that settles late moves the diagram without a scroll
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(onScroll);
+    ro?.observe(document.getElementById("case-article") ?? document.body);
     return () => {
+      ro?.disconnect();
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);

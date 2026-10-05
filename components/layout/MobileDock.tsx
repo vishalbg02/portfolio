@@ -114,11 +114,15 @@ export function MobileDock() {
           : null;
 
   const item =
-    "relative flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-1 font-mono text-[11px] transition-colors";
+    "relative flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-1 font-mono text-[11px] transition-colors active:bg-surface";
   const tone = (id: Id) => (active === id ? "text-accent" : "text-muted hover:text-text");
   const dot = (id: Id) =>
     active === id ? (
-      <span aria-hidden="true" className="absolute top-1.5 size-1 rounded-pill bg-accent" />
+      <span aria-hidden="true" className="absolute top-1.5 flex gap-[2px]">
+        <span className="size-1 rounded-[1px] bg-grid-2" />
+        <span className="size-1 rounded-[1px] bg-accent" />
+        <span className="size-1 rounded-[1px] bg-grid-2" />
+      </span>
     ) : null;
   const tap = (id: Id) => {
     haptic();
@@ -129,7 +133,7 @@ export function MobileDock() {
     <nav
       aria-label="Quick links"
       data-hidden={hidden}
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg pb-[env(safe-area-inset-bottom)] transition-transform duration-200 data-[hidden=true]:translate-y-full md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg pb-[env(safe-area-inset-bottom)] transition-transform duration-(--dur-2) ease-(--ease-out) data-[hidden=true]:translate-y-full md:hidden"
     >
       <div className="flex h-16">
         <Link
@@ -163,7 +167,7 @@ export function MobileDock() {
             aria-haspopup="dialog"
             aria-label="Ask GRID"
             className={cn(
-              "absolute -top-4 flex size-[3.75rem] flex-col items-center justify-center gap-1 rounded-card border-2 bg-surface font-mono text-[10px] tracking-[0.1em] transition-colors",
+              "absolute -top-4 flex size-[3.75rem] flex-col items-center justify-center gap-1 rounded-card border-2 bg-surface font-mono text-[10px] tracking-[0.1em] px-shadow transition-[color,border-color,transform] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none",
               active === "grid"
                 ? "border-accent text-accent"
                 : "border-border-2 text-text hover:border-accent",

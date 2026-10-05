@@ -66,7 +66,7 @@ export default function RecruiterPage() {
           <p className="flex items-center gap-2 font-mono text-xs text-muted">
             <StatusDot /> {profile.status}
           </p>
-          <h1 className="mt-2 text-3xl font-semibold md:text-4xl">{profile.name}</h1>
+          <h1 className="page-title mt-2">{profile.name}</h1>
           <p className="mt-2 max-w-2xl text-muted">{profile.summary}</p>
           <p className="mt-3 max-w-2xl text-sm text-text">
             <span className="font-mono text-xs tracking-[0.12em] text-muted uppercase">Looking for </span>
@@ -78,6 +78,7 @@ export default function RecruiterPage() {
           <ButtonLink
             href={resumeHref}
             variant="solid"
+            className="px-shadow"
             download={RESUME_FILENAME}
             data-track="resume_download"
           >
@@ -92,7 +93,7 @@ export default function RecruiterPage() {
         </div>
       </header>
 
-      <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-card border border-border bg-surface md:grid-cols-5 [&>div]:border-border md:[&>div]:border-t-0 md:[&>div:not(:first-child)]:border-l [&>div:not(:nth-child(-n+2))]:border-t [&>div:nth-child(even)]:border-l md:[&>div:nth-child(odd)]:border-l">
+      <dl className="mt-6 grid grid-cols-2 overflow-hidden rounded-card border border-border bg-surface px-shadow md:grid-cols-5 [&>div]:border-border md:[&>div]:border-t-0 md:[&>div:not(:first-child)]:border-l [&>div:not(:nth-child(-n+2))]:border-t [&>div:nth-child(even)]:border-l md:[&>div:nth-child(odd)]:border-l">
         {facts.map(([k, v]) => (
           <div key={k} className="p-3 md:p-4">
             <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">{k}</dt>
@@ -134,7 +135,7 @@ export default function RecruiterPage() {
                 </div>
                 <p className="text-sm text-muted">{p.summary}</p>
                 <p className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                  <Link href={`/work/${p.slug}`} className="text-link underline underline-offset-4">
+                  <Link href={`/work/${p.slug}`} className="tap-slop text-link underline underline-offset-4">
                     Case study
                   </Link>
                   {p.live ? (
@@ -142,7 +143,7 @@ export default function RecruiterPage() {
                       href={p.live}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-link underline underline-offset-4"
+                      className="tap-slop text-link underline underline-offset-4"
                       data-track="project_live_click"
                     >
                       Live site<span aria-hidden="true"> ↗</span>
@@ -153,7 +154,7 @@ export default function RecruiterPage() {
                       href={p.store}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-link underline underline-offset-4"
+                      className="tap-slop text-link underline underline-offset-4"
                       data-track="project_live_click"
                     >
                       Google Play<span aria-hidden="true"> ↗</span>
@@ -164,7 +165,7 @@ export default function RecruiterPage() {
                       href={p.repo}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-link underline underline-offset-4"
+                      className="tap-slop text-link underline underline-offset-4"
                     >
                       Code<span aria-hidden="true"> ↗</span>
                     </a>
@@ -224,11 +225,11 @@ export default function RecruiterPage() {
 
       <p className="mt-12 text-sm text-muted">
         Want the full story?{" "}
-        <Link href="/" className="text-link underline underline-offset-4">
+        <Link href="/" className="tap-slop text-link underline underline-offset-4">
           Open the full site
         </Link>{" "}
         or the{" "}
-        <Link href="/resume" className="text-link underline underline-offset-4">
+        <Link href="/resume" className="tap-slop text-link underline underline-offset-4">
           web résumé
         </Link>
         .

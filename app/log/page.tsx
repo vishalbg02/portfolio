@@ -36,7 +36,7 @@ export default async function LogPage() {
         ])}
       />
       <SectionHeader prefix="$" label="Ship Log" id="log-label" />
-      <h1 className="text-3xl font-semibold md:text-4xl">Ship Log</h1>
+      <h1 className="page-title">Ship Log</h1>
       <p className="mt-3 max-w-2xl text-lg text-muted">
         Notes from building and shipping: decisions, trade-offs and what I&apos;d change.{" "}
         <a href="/log/rss.xml" className="text-link underline underline-offset-4">

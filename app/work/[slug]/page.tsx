@@ -79,7 +79,7 @@ export default async function CaseStudyPage({ params }: PageProps<"/work/[slug]"
             {project.type}
             {project.period ? <span> · {project.period}</span> : null}
           </p>
-          <h1 className="mt-3 text-3xl font-semibold md:text-5xl">
+          <h1 className="page-title mt-3">
             <ViewTransition name={`title-${project.slug}`} share="morph" default="none">
               <span className="inline-block">{project.name}</span>
             </ViewTransition>
