@@ -17,13 +17,13 @@
   container-type: inline-size;
   min-width: 0;
 }
+/* a small "1/4": the chapter opener owns the big numeral (D11) */
 .scene-index {
-  line-height: 0.9;
-  letter-spacing: -0.04em;
-}
-.scene[data-active] .idx-num {
-  color: var(--accent);
-  -webkit-text-stroke: 0;
+  margin-bottom: 6px;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 .scene-eyebrow > span:first-child {
   margin-top: 0.4em;
@@ -255,8 +255,9 @@
 /* ── A · pinned stage ───────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .work-pin {
-    /* one screen of scroll per project; its beats advance by themselves (ShowcaseController), not by scroll */
-    height: calc(var(--scenes) * 100svh);
+    /* the first project's screen, then 55 % of a screen of scroll for each next one: enough to feel each change,
+       short enough that four products don't take half the page. Beats advance by themselves (ShowcaseController). */
+    height: calc(100svh + (var(--scenes) - 1) * 55svh);
   }
   .work-stick {
     position: sticky;
@@ -288,9 +289,6 @@
   }
   .scene:not([data-active]) {
     visibility: hidden;
-  }
-  .scene-index {
-    font-size: clamp(4.5rem, 13vh, 8.5rem);
   }
   .scene-title {
     margin-top: 8px;
@@ -392,9 +390,6 @@
     border-top: 0;
     padding-top: 8px;
   }
-  .scene-index {
-    font-size: 6rem;
-  }
   .scene-title {
     margin-top: 6px;
     font-size: clamp(2.25rem, min(4.6vw, calc(100cqw / (var(--word) * 0.6))), 4.5rem);
@@ -469,9 +464,6 @@
   }
   .scene-index {
     margin-bottom: 4px;
-    font-size: 1.25rem;
-    color: var(--accent);
-    -webkit-text-stroke: 0;
   }
   .scene-title {
     font-size: 1.75rem;

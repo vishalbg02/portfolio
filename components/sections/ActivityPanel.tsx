@@ -15,6 +15,7 @@ import type { ContributionCalendar as Calendar } from "@/lib/github/types";
 import { cn } from "@/lib/utils/cn";
 import { relativeTime } from "@/lib/utils/relative-time";
 import { CountUp } from "@/components/ui/CountUp";
+import { DataState } from "@/components/ui/DataState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ContributionCalendar } from "./ContributionCalendar";
 
@@ -35,7 +36,7 @@ const addDays = (iso: string, n: number) =>
 const unit = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 
 const Stat = ({ value, label }: { value: React.ReactNode; label: string }) => (
-  <div className="min-w-0 p-4 sm:p-5">
+  <div className="min-w-0 p-4 sm:p-5 lg:p-4">
     <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">{label}</dt>
     <dd className="mt-1.5 text-2xl font-semibold text-text tabular-nums">{value}</dd>
   </div>
@@ -154,75 +155,82 @@ export function ActivityPanel({
         ))}
       </div>
 
-      <dl className="grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l">
-        <Stat value={<CountUp value={view.calendar.total} />} label={`Contributions, ${period}`} />
-        <Stat value={<CountUp value={activeDays} />} label={`Active days, ${period}`} />
-        <Stat
-          value={
-            <>
-              <CountUp value={longest} /> {longest === 1 ? "day" : "days"}
-            </>
-          }
-          label="Longest streak"
-        />
-      </dl>
+      {/* the counts and the highlights: two rows, side by side from 1024 px */}
+      <div className="grid gap-3 lg:grid-cols-2">
+        <dl className="grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l">
+          <Stat value={<CountUp value={view.calendar.total} />} label={`Contributions, ${period}`} />
+          <Stat value={<CountUp value={activeDays} />} label={`Active days, ${period}`} />
+          <Stat
+            value={
+              <>
+                <CountUp value={longest} /> {longest === 1 ? "day" : "days"}
+              </>
+            }
+            label="Longest streak"
+          />
+        </dl>
 
-      {peaks[0] || high.week || high.month ? (
-        <dl
-          aria-label="Highlights"
-          className="mt-3 grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l"
-        >
-          {peaks[0] ? (
-            <div className="min-w-0 p-4 sm:p-5">
-              <dt className="font-mono text-[11px] tracking-[0.12em] text-accent uppercase">▲ Busiest day</dt>
-              <dd className="mt-1.5">
-                <button
-                  type="button"
-                  data-testid="busiest-day"
-                  onClick={() => {
-                    track("milestone_open", { kind: "peak" });
-                    setSelectedId(`peak-${peaks[0]!.date}`);
-                  }}
-                  className="-m-1 min-h-11 rounded-sm p-1 text-left transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-link"
-                >
+        {peaks[0] || high.week || high.month ? (
+          <dl
+            aria-label="Highlights"
+            className="grid overflow-hidden rounded-card border border-border bg-surface sm:grid-cols-3 [&>div:not(:first-child)]:border-t [&>div:not(:first-child)]:border-border sm:[&>div:not(:first-child)]:border-t-0 sm:[&>div:not(:first-child)]:border-l"
+          >
+            {peaks[0] ? (
+              <div className="min-w-0 p-4 sm:p-5 lg:p-4">
+                <dt className="font-mono text-[11px] tracking-[0.12em] text-accent uppercase">
+                  ▲ Busiest day
+                </dt>
+                <dd className="mt-1.5">
+                  <button
+                    type="button"
+                    data-testid="busiest-day"
+                    onClick={() => {
+                      track("milestone_open", { kind: "peak" });
+                      setSelectedId(`peak-${peaks[0]!.date}`);
+                    }}
+                    className="-m-1 min-h-11 rounded-sm p-1 text-left transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-link"
+                  >
+                    <span className="text-lg font-semibold text-text tabular-nums">
+                      {peaks[0].count} contributions
+                    </span>
+                    <span className="mt-0.5 block font-mono text-xs text-muted">
+                      {longDate(peaks[0].date)} · show on the calendar
+                    </span>
+                  </button>
+                </dd>
+              </div>
+            ) : null}
+            {high.week ? (
+              <div className="min-w-0 p-4 sm:p-5 lg:p-4">
+                <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">Best week</dt>
+                <dd className="mt-1.5">
                   <span className="text-lg font-semibold text-text tabular-nums">
-                    {peaks[0].count} contributions
+                    {high.week.total} contributions
                   </span>
                   <span className="mt-0.5 block font-mono text-xs text-muted">
-                    {longDate(peaks[0].date)} · show on the calendar
+                    {shortDate(high.week.start)} – {shortDate(addDays(high.week.start, 6))}
                   </span>
-                </button>
-              </dd>
-            </div>
-          ) : null}
-          {high.week ? (
-            <div className="min-w-0 p-4 sm:p-5">
-              <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">Best week</dt>
-              <dd className="mt-1.5">
-                <span className="text-lg font-semibold text-text tabular-nums">
-                  {high.week.total} contributions
-                </span>
-                <span className="mt-0.5 block font-mono text-xs text-muted">
-                  {shortDate(high.week.start)} – {shortDate(addDays(high.week.start, 6))}
-                </span>
-              </dd>
-            </div>
-          ) : null}
-          {high.month ? (
-            <div className="min-w-0 p-4 sm:p-5">
-              <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
-                Most active month
-              </dt>
-              <dd className="mt-1.5">
-                <span className="text-lg font-semibold text-text tabular-nums">
-                  {high.month.total} contributions
-                </span>
-                <span className="mt-0.5 block font-mono text-xs text-muted">{monthName(high.month.key)}</span>
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-      ) : null}
+                </dd>
+              </div>
+            ) : null}
+            {high.month ? (
+              <div className="min-w-0 p-4 sm:p-5 lg:p-4">
+                <dt className="font-mono text-[11px] tracking-[0.12em] text-muted uppercase">
+                  Most active month
+                </dt>
+                <dd className="mt-1.5">
+                  <span className="text-lg font-semibold text-text tabular-nums">
+                    {high.month.total} contributions
+                  </span>
+                  <span className="mt-0.5 block font-mono text-xs text-muted">
+                    {monthName(high.month.key)}
+                  </span>
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        ) : null}
+      </div>
 
       <div
         className="mt-4 rounded-card border border-border bg-surface p-4 sm:p-5"
@@ -278,11 +286,17 @@ export function ActivityPanel({
 
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-muted">
           <span role="status">
-            {status === "loading"
-              ? `Loading ${key}…`
-              : status === "error"
-                ? `Couldn't load ${key}. Showing the last year instead.`
-                : view.updated}
+            {status === "loading" ? (
+              <DataState inline kind="loading" title={`Loading ${key}…`} />
+            ) : status === "error" ? (
+              <DataState
+                inline
+                kind={typeof navigator !== "undefined" && !navigator.onLine ? "offline" : "error"}
+                title={`Couldn't load ${key}. Showing the last year instead.`}
+              />
+            ) : (
+              view.updated
+            )}
           </span>
           <span aria-hidden="true" className="flex items-center gap-1">
             less

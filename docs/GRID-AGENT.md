@@ -119,13 +119,13 @@ Everything is optional: with none of them the site builds and runs, and GRID ans
 - **How GRID works**: five steps (question, retrieve, rank, tools, answer) drawn in markup and lit by `grid:stage`,
   with counts and a note ("Router: … no model" / "Found n passages, kept m"). It sits right above the chat so a run is
   seen lighting up as it answers, and links to the Ship Log post on how it was built.
-- **Chat**: `LazyGridChat` mounts `GridChat` (inline: fixed 400 px log, 720 px reading measure, an empty state with the
+- **Chat**: `LazyGridChat` mounts `GridChat` (inline: fixed 360 px log, 720 px reading measure, an empty state with the
   mode's four suggestions and "Press / anywhere to ask") when the section is near, and with it `MeetGridLive`, the
   section's live layer: the face's eyes follow the pointer (or the focused tile), it mirrors `grid:face`, and it draws
   the strip. Reduced motion: the eyes stay still and nothing blinks.
 - **Honesty row**: four promises the code keeps.
-- Heights: the chat's log has a fixed height and the placeholder is as tall as the opened chat (710 / 668 px for a
-  mouse, 755 / 701 px for touch, switching at 640 px), so the section never moves when the chat loads (e2e checks 390,
+- Heights: the chat's log has a fixed height and the placeholder is as tall as the opened chat (670 / 628 px for a
+  mouse, 715 / 661 px for touch, switching at 640 px), so the section never moves when the chat loads (e2e checks 390,
   768 and 1440 px, mouse and touch). If the chat's controls change height, re-measure and update `ChatSkeleton`.
 - The V3 demo reel (a scripted loop of router answers in the empty chat) was replaced by the deck, which runs the same
   kind of requests for real.

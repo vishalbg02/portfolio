@@ -13,7 +13,7 @@ function ChatSkeleton() {
   return (
     <div
       role="status"
-      className="flex h-[710px] flex-col rounded-card border border-border bg-surface sm:h-[668px] pointer-coarse:h-[755px] sm:pointer-coarse:h-[701px]"
+      className="flex h-[670px] flex-col rounded-card border border-border bg-surface sm:h-[628px] pointer-coarse:h-[715px] sm:pointer-coarse:h-[661px]"
     >
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
         <GridFace state="thinking" size={36} />

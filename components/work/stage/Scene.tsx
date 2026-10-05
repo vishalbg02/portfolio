@@ -76,11 +76,14 @@ export function Scene({
   scene,
   project,
   index,
+  count,
   openable,
 }: {
   scene: SceneData;
   project: Project;
   index: number;
+  /** How many projects the showcase has (the scene's small "1/4"). */
+  count: number;
   /** Whether the project has stills the full-screen viewer can show. */
   openable: boolean;
 }) {
@@ -98,8 +101,8 @@ export function Scene({
       className="scene"
     >
       <div className="scene-copy">
-        <p aria-hidden="true" className="scene-index idx-num font-mono font-semibold">
-          {String(index + 1).padStart(2, "0")}
+        <p aria-hidden="true" className="scene-index font-mono">
+          {index + 1}/{count}
         </p>
         <p className="scene-eyebrow">
           <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-pill", identityBg[project.slug])} />

@@ -25,7 +25,7 @@ export function Contact() {
 
   return (
     <section id="contact" aria-labelledby="contact-label" className="container-page section-y">
-      <SectionHeader prefix="@" label="Contact" id="contact-label" ask="How can I contact him?" />
+      <SectionHeader chapter={6} prefix="@" label="Contact" id="contact-label" ask="How can I contact him?" />
       <LetsBuildBanner />
       <h2 className="mt-8 text-3xl font-semibold md:text-5xl">Let&apos;s build something.</h2>
       <p className="mt-4 max-w-xl text-lg text-muted">

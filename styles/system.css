@@ -1,0 +1,45 @@
+/*
+ * V4 design system on the home page (docs/DESIGN-V4.md): chapter openers, the pixel numeral, data-block states.
+ * Flat only: panels, hairlines, squares, one hard pixel shadow. Transform and opacity only for motion.
+ */
+
+/* ── chapter opener: pixel numeral (outlined squares that fill), mono label, H2 ───────────────────── */
+[data-px-outline] .px-on {
+  stroke: var(--grid-2);
+  stroke-width: 0.6;
+}
+[data-reveal="armed"] [data-px-outline] .px-on {
+  fill: transparent;
+}
+.chapter-num {
+  display: block;
+  height: 21px;
+  width: auto;
+}
+@media (width >= 48rem) {
+  .chapter-num {
+    height: 27px;
+  }
+}
+
+/* ── nav: the link of the chapter you are reading (or the page you are on) gets a row of squares under it ── */
+nav[aria-label="Primary"] a {
+  position: relative;
+}
+nav[aria-label="Primary"] a[aria-current]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--accent);
+  box-shadow:
+    -6px 0 0 var(--grid-2),
+    6px 0 0 var(--grid-2);
+  transform: translateX(-50%);
+}
+nav[aria-label="Primary"] a[aria-current] {
+  color: var(--text);
+}

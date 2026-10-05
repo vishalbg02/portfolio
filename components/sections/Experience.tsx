@@ -113,7 +113,7 @@ export function Experience() {
             <span
               aria-hidden="true"
               data-monogram={monogram(job.company)}
-              className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-sm border font-mono text-xs font-medium text-text"
+              className="inline-flex size-10 shrink-0 items-center justify-center rounded-sm border bg-surface font-mono text-[13px] font-medium text-text px-shadow"
               style={{ borderColor: color }}
             >
               {monogram(job.company)}
@@ -174,6 +174,7 @@ export function Experience() {
   return (
     <section id="experience" aria-labelledby="exp-label" className="container-page section-y">
       <SectionHeader
+        chapter={2}
         prefix="//"
         label="Experience"
         id="exp-label"

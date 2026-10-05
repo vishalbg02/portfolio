@@ -284,7 +284,7 @@ export function GridChat({
         className={cn(
           "overflow-y-auto px-4 py-4",
           // inline, the log has one fixed height whatever it holds, so the section never moves as a chat runs
-          variant === "sheet" ? "min-h-0 flex-1" : "h-[400px]",
+          variant === "sheet" ? "min-h-0 flex-1" : "h-[360px]",
         )}
       >
         <div ref={inner} className={cn("space-y-5", inline && "mx-auto max-w-[720px]")}>

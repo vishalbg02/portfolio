@@ -33,6 +33,7 @@ export function WorkShowcase() {
           scene={i.scene}
           project={i.project}
           index={i.index}
+          count={items.length}
           openable={i.viewer.length > 0}
         />
       ))}
