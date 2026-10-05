@@ -5,6 +5,8 @@ const describe = (p: UiPart): string => {
   switch (p.kind) {
     case "project":
       return `[card] Project: ${p.name}, ${p.tagline}`;
+    case "brief":
+      return `[card] Brief: ${p.who}. ${p.status} Proof: ${p.proofs.map((x) => x.title).join(", ")}`;
     case "role":
       return `[card] Role: ${p.title}, ${p.short} (${p.period})`;
     case "contact":

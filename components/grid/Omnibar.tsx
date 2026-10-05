@@ -18,6 +18,7 @@ import {
 import { isTypingTarget } from "@/lib/shortcuts";
 import { shipped } from "@/lib/site";
 import { GridFace } from "./GridFace";
+import { useGridFace } from "./useGridFace";
 
 const loadPanel = () => import("./OmnibarPanel");
 const OmnibarPanel = dynamic(loadPanel, { ssr: false });
@@ -68,6 +69,7 @@ export function Omnibar() {
   const [hint, setHint] = useState(0);
   const [still, setStill] = useState(false);
   const [mode, setMode] = useState<OmniMode>("pill");
+  const face = useGridFace();
   const pill = useRef<HTMLButtonElement>(null);
   const puck = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -247,7 +249,7 @@ export function Omnibar() {
           onFocus={() => void loadPanel()}
           className="omni-puck pointer-events-auto absolute right-5 bottom-0 grid size-12 place-items-center rounded-card border border-border-2 bg-surface transition-colors hover:border-accent focus-visible:border-accent"
         >
-          <GridFace state="idle" size={24} label="" />
+          <GridFace state={face} size={24} label="" />
         </button>
         <button
           ref={pill}
@@ -270,7 +272,7 @@ export function Omnibar() {
           onBlur={() => setStill(false)}
           className="omni-pill pointer-events-auto flex h-12 w-[min(520px,calc(100vw-48px))] items-center gap-3 rounded-pill border border-border-2 bg-surface pr-3 pl-4 text-left transition-colors hover:border-accent focus-visible:border-accent"
         >
-          <GridFace state="idle" size={22} label="" />
+          <GridFace state={face} size={22} label="" />
           <span
             aria-hidden="true"
             key={hint}

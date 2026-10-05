@@ -40,6 +40,7 @@ async function* finish(
   sources: Routed["sources"],
   parts: UiPart[],
 ): AsyncGenerator<ChatEvent> {
+  yield { t: "stage", s: "answer", state: "done" };
   const items = suggestFollowUps({ mode, question, sources, parts });
   if (items.length > 0) yield { t: "followups", items };
   yield { t: "done" };
@@ -48,6 +49,10 @@ async function* finish(
 /** A router answer: cards (as tool events), then a sentence, with no model call. */
 async function* routedEvents(routed: Routed, question: string, mode: GridMode): AsyncGenerator<ChatEvent> {
   yield { t: "meta", mode: "router", sources: routed.sources };
+  // the router knew the answer: no retrieval, no ranking, no model
+  yield { t: "stage", s: "route", state: "done" };
+  yield { t: "stage", s: "retrieve", state: "skip" };
+  yield { t: "stage", s: "rank", state: "skip" };
   let i = 0;
   for (const { tool, part } of routed.parts) {
     const id = `r${++i}`;
@@ -55,6 +60,7 @@ async function* routedEvents(routed: Routed, question: string, mode: GridMode): 
     yield { t: "part", id, part };
     yield { t: "tool", id, name: tool, state: "done" };
   }
+  yield { t: "stage", s: "answer", state: "start" };
   yield* textAsEvents(routed.text);
   yield* finish(
     question,
@@ -72,6 +78,7 @@ async function* offlineEvents(
 ): AsyncGenerator<ChatEvent> {
   const { text, sources } = offlineAnswer(retrieval.results, reason);
   yield { t: "meta", mode: "offline", sources, reason };
+  yield { t: "stage", s: "answer", state: "start" };
   yield* textAsEvents(text);
   yield* finish(question, mode, sources, []);
 }
@@ -99,10 +106,16 @@ export async function* chatEvents(
     return;
   }
 
+  // not a command the router knows: search the site's content (BM25 + embeddings), then rank what came back
+  yield { t: "stage", s: "route", state: "skip" };
+  yield { t: "stage", s: "retrieve", state: "start" };
   const retrieval = await retrieveFor(messages, opts.project);
+  yield { t: "stage", s: "retrieve", state: "done", n: retrieval.results.length };
+  yield { t: "stage", s: "rank", state: "done", n: retrieval.coverage >= RELEVANCE_MIN ? retrieval.results.length : 0 };
   if (retrieval.coverage < RELEVANCE_MIN) {
     log({ mode: "refusal", coverage: +retrieval.coverage.toFixed(2), retrieval: retrieval.mode });
     yield { t: "meta", mode: "refusal", sources: [], reason: "off_topic" };
+    yield { t: "stage", s: "answer", state: "start" };
     yield* textAsEvents(REFUSAL_TEXT);
     yield* finish(question, mode, [], []);
     return;
@@ -136,8 +149,11 @@ export async function* chatEvents(
   /** Protocol events for one stream part (or none). */
   const translate = (part: { type: string; [k: string]: unknown }): ChatEvent[] => {
     if (part.type === "text-delta" && typeof part.text === "string" && part.text) {
+      const first = !hasText;
       hasText = true;
-      return [{ t: "text", d: part.text }];
+      return first
+        ? [{ t: "stage", s: "answer", state: "start" }, { t: "text", d: part.text }]
+        : [{ t: "text", d: part.text }];
     }
     if (part.type === "tool-call" && typeof part.toolName === "string" && isToolName(part.toolName)) {
       toolsUsed.push(part.toolName);

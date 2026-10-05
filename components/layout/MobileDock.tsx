@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { GridFace } from "@/components/grid/GridFace";
+import { useGridFace } from "@/components/grid/useGridFace";
 import { track } from "@/lib/analytics";
 import { openGrid } from "@/lib/grid/events";
 import { haptic } from "@/lib/haptics";
@@ -45,6 +46,7 @@ const ICONS: Record<Exclude<Id, "grid">, ReactNode> = {
  * reserves its height at the bottom so it never covers content.
  */
 export function MobileDock() {
+  const face = useGridFace();
   const pathname = usePathname();
   const [hidden, setHidden] = useState(false);
   const [section, setSection] = useState<Section | null>(null);
@@ -167,7 +169,7 @@ export function MobileDock() {
                 : "border-border-2 text-text hover:border-accent",
             )}
           >
-            <GridFace state="idle" size={24} />
+            <GridFace state={face} size={24} />
             GRID
           </button>
         </div>

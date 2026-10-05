@@ -16,6 +16,7 @@ import {
   matchSkill,
   navigatePart,
   projectCard,
+  briefPart,
   rolePart,
   skillEvidence,
   statsPart,
@@ -115,7 +116,8 @@ export function briefing(): Routed {
     `- Recognition: ${profile.recognition.length} hackathon podium ${profile.recognition.length === 1 ? "finish" : "finishes"}. ${c.awards}`,
     `- Education: ${edu.join("; ")}. ${c.edu}`,
   ].join("\n");
-  return { parts: [], text, sources: reg.all() };
+  // the card carries the brief at a glance; the text is the same facts, with a source on each line
+  return { parts: [{ tool: "brief_me", part: briefPart() }], text, sources: reg.all() };
 }
 
 /* ── intents ─────────────────────────────────────────────────────────────────────────────────────── */

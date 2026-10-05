@@ -20,6 +20,16 @@ import { GridFace, type FaceState } from "./GridFace";
 import { SourcesRow } from "./SourcesRow";
 import { usePresence } from "@/lib/live/use-presence";
 import { useVoice } from "./voice/useVoice";
+import { emitFace } from "@/lib/grid/stages";
+
+/** What a screen reader hears when GRID's state changes (politely, once per change). */
+const FACE_SAY: Record<FaceState, string> = {
+  idle: "",
+  listening: "",
+  thinking: "GRID is thinking…",
+  acting: "GRID is using a tool…",
+  speaking: "GRID is answering…",
+};
 
 const MODE_NOTE: Partial<Record<ChatMode, string>> = {
   offline: "Offline mode — answered straight from this site's content, no AI.",
@@ -155,6 +165,8 @@ export function GridChat({
     listening: voice.listening,
     speaking: voice.speaking,
   });
+  // every GRID face on the page (Omnibar, puck, dock, the Meet GRID stage) mirrors this one
+  useEffect(() => emitFace(face), [face]);
   const small =
     "shrink-0 rounded-sm font-mono text-xs whitespace-nowrap text-muted transition-colors hover:text-text pointer-coarse:min-h-11 pointer-coarse:px-2";
 
@@ -172,6 +184,9 @@ export function GridChat({
           </span>
         ) : null}
         <GridFace state={face} size={36} label={`GRID is ${face === "idle" ? "ready" : face}`} />
+        <span role="status" aria-live="polite" className="sr-only">
+          {FACE_SAY[face]}
+        </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-mono text-sm text-text">GRID</p>
           <p className="flex items-center gap-1.5 truncate font-mono text-[11px] whitespace-nowrap text-muted">
