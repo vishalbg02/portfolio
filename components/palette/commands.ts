@@ -13,7 +13,7 @@ export type PaletteAction =
   | { type: "download"; href: string; filename?: string; event?: AnalyticsEvent }
   | { type: "tel"; href: string }
   | { type: "copy"; text: string; label: string; event?: AnalyticsEvent }
-  | { type: "event"; name: "open-terminal" | "open-grid" | "open-live" | "start-tour" };
+  | { type: "event"; name: "open-terminal" | "open-grid" | "open-live" | "start-tour" | "replay-intro" };
 
 export type PaletteItem = {
   id: string;
@@ -122,6 +122,12 @@ export function buildPaletteGroups(): PaletteGroup[] {
           } satisfies PaletteItem,
         ]
       : []),
+    {
+      id: "act-intro",
+      label: "Replay intro",
+      keywords: ["intro", "opening", "animation", "replay", "grid wakes up"],
+      action: { type: "event", name: "replay-intro" },
+    } satisfies PaletteItem,
     ...(shipped.resume
       ? [
           {

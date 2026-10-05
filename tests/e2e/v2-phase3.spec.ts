@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, settleAnimations } from "./helpers";
 
 /** V2 · Phase 3: Experience as a git history; milestones and the year switcher on the activity calendar. */

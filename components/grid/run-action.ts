@@ -2,6 +2,7 @@ import type { useRouter } from "next/navigation";
 import { unlock } from "@/lib/achievements";
 import { track } from "@/lib/analytics";
 import { copyText } from "@/lib/clipboard";
+import { replayIntro } from "@/lib/intro/replay";
 import { toast } from "@/lib/toast";
 import type { PaletteAction } from "@/components/palette/commands";
 
@@ -40,6 +41,10 @@ export async function runAction(action: PaletteAction, router: ReturnType<typeof
       break;
     }
     case "event":
+      if (action.name === "replay-intro") {
+        if (!replayIntro()) toast.info("The intro stays off while your device asks for reduced motion.");
+        break;
+      }
       window.dispatchEvent(new Event(`app:${action.name}`));
       break;
   }

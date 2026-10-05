@@ -34,6 +34,19 @@
   --id-lansymphony: #58a6ff;
   --id-virtual-tour: #bc8cff;
 
+  /* V4 target: 52 px, with the nav redesign in Phase 3 */
   --nav-height: 56px;
+
+  /* ── V4 design language (docs/DESIGN-V4.md) ── */
+  /* the one shadow: a hard, flat block offset down-right (never blurred) */
+  --shadow-ink: #010409;
+  --px-shadow: 4px 4px 0 0 var(--shadow-ink);
+  /* motion: four durations, two easings, one stagger; transform and opacity only */
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 320ms;
+  --dur-4: 600ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-step: steps(4, end);
+  --stagger: 40ms;
 }

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, ownClient } from "./helpers";
 
 /** The Ask section's intro: a loop of GRID's real answers, controls to pause and choose, and a chat that opens where it was. */

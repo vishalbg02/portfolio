@@ -7,6 +7,7 @@ import { BootLine } from "./BootLine";
 import { CommitTicker } from "./CommitTicker";
 import { NavShell } from "./NavShell";
 import { MobileMenu } from "./MobileMenu";
+import { NavPath } from "./NavPath";
 import { PaletteButton } from "./PaletteButton";
 import { RecruiterToggle } from "./RecruiterToggle";
 
@@ -21,16 +22,16 @@ async function latestActivity() {
 
 export function Wordmark() {
   return (
-    <Link
-      href="/"
-      prefetch={false}
-      className="group tap-slop inline-flex items-center gap-1 font-mono text-sm text-text"
-    >
-      <span className="text-muted transition-colors group-hover:text-text">~/</span>
-      <span>vishalbg</span>
-      <span aria-hidden="true" className="ml-0.5 inline-block h-4 w-2 animate-blink bg-accent" />
-      <span className="sr-only"> — home</span>
-    </Link>
+    <span className="inline-flex items-center font-mono text-sm text-text">
+      <Link href="/" prefetch={false} className="group tap-slop inline-flex items-center gap-1">
+        <span className="text-muted transition-colors group-hover:text-text">~/</span>
+        <span>vishalbg</span>
+        <span className="sr-only"> — home</span>
+      </Link>
+      {/* outside the link: the path is decoration, and the home link keeps one size on every page */}
+      <NavPath />
+      <span aria-hidden="true" className="ml-1.5 inline-block h-4 w-2 animate-blink bg-accent" />
+    </span>
   );
 }
 

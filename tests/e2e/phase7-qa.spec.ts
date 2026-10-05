@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoReady, ownClient, settleAnimations } from "./helpers";
 
 /** V3 · Phase 7: accessibility and layout of the new states, across devices, and no CSP violation or console error in any of them. */

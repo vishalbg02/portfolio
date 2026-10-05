@@ -1,7 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, settleAnimations, loadIslands } from "./helpers";
 
 /** V2 · Phase 5: jump to proof, stack map, closing moment, boot line, count-ups, touch polish. */

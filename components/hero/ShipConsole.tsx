@@ -15,7 +15,7 @@ import { StatusCheck } from "./StatusCheck";
  */
 export function ShipConsole() {
   return (
-    <div className="w-full max-w-[520px] rounded-card border border-border bg-bg font-mono text-sm lg:ml-auto">
+    <div className="brackets w-full max-w-[520px] rounded-card border border-border bg-bg font-mono text-sm px-shadow lg:ml-auto">
       <div className="flex items-center gap-3 border-b border-border px-4 py-2.5">
         <span aria-hidden="true" className="flex gap-1.5">
           <span className="size-2.5 rounded-pill border border-border-2" />

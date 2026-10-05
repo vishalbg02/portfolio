@@ -43,6 +43,9 @@ const EVENTS = [
   "tour_complete",
   "company_link_open",
   "sound_on",
+  "intro_played",
+  "intro_skipped",
+  "intro_greeting_click",
 ];
 
 function* files(dir: string): Generator<string> {

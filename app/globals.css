@@ -10,6 +10,8 @@
 @import "../styles/fx.css";
 @import "../styles/islands.css";
 @import "../styles/grid.css";
+/* the opening sequence: in the one global stylesheet, so it never costs a second render-blocking request */
+@import "../styles/intro.css";
 
 /*
  * Tailwind theme: reset the default palette so only design tokens exist as utilities.
@@ -64,6 +66,11 @@
   --text-4xl--line-height: 1.1;
   --text-5xl: 4rem;
   --text-5xl--line-height: 1.05;
+  /* V4 display sizes: section H2 on desktop (56) and the hero H1 (88) */
+  --text-6xl: 3.5rem;
+  --text-6xl--line-height: 1.04;
+  --text-7xl: 5.5rem;
+  --text-7xl--line-height: 0.98;
 
   /* Radius: 8 small, 12 cards, pills */
   --radius-*: initial;
@@ -151,7 +158,7 @@
   }
 
   ::selection {
-    background-color: var(--accent-dim);
+    background-color: var(--grid-2);
     color: var(--text);
   }
 
@@ -200,6 +207,66 @@
 
 @utility font-tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* V4: the hard pixel shadow on raised things (cards, the Omnibar, primary buttons, the terminal, the dock) */
+@utility px-shadow {
+  box-shadow: var(--px-shadow);
+}
+
+/* V4: corner brackets (8 px L-marks in --border-2) around media and key panels; green with .brackets-on.
+   Drawn as a 9-slice SVG border-image on a pseudo-element, so the box itself keeps its size and border. */
+@utility brackets {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    pointer-events: none;
+    border: 8px solid transparent;
+    border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath fill='%233d444d' d='M0 0h8v2H2v6H0zM16 0h8v8h-2V2h-6zM0 16h2v6h6v2H0zM22 16h2v8h-8v-2h6z'/%3E%3C/svg%3E")
+      8;
+  }
+}
+@utility brackets-on {
+  &::before {
+    border-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath fill='%233fb950' d='M0 0h8v2H2v6H0zM16 0h8v8h-2V2h-6zM0 16h2v6h6v2H0zM22 16h2v8h-8v-2h6z'/%3E%3C/svg%3E")
+      8;
+  }
+}
+
+/* V4 inner pages' mini entrance (≤ 350 ms): the path types in the nav (NavPath), the first rows of the page slide in,
+   staggered. Transform only (an opacity fade would read as low contrast to an accessibility check mid-way). */
+@media (prefers-reduced-motion: no-preference) {
+  .nav-path {
+    width: calc(var(--n) * 1ch);
+    animation: nav-path var(--dur-3) steps(12, end) both;
+  }
+  main > article > :nth-child(-n + 6) {
+    animation: page-row var(--dur-3) var(--ease-out) both;
+  }
+  main > article > :nth-child(2) {
+    animation-delay: calc(var(--stagger) * 1);
+  }
+  main > article > :nth-child(3) {
+    animation-delay: calc(var(--stagger) * 2);
+  }
+  main > article > :nth-child(4) {
+    animation-delay: calc(var(--stagger) * 3);
+  }
+  main > article > :nth-child(n + 5) {
+    animation-delay: calc(var(--stagger) * 4);
+  }
+}
+@keyframes nav-path {
+  from {
+    width: 0;
+  }
+}
+@keyframes page-row {
+  from {
+    transform: translateY(8px);
+  }
 }
 
 /* Respect reduced motion everywhere */

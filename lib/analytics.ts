@@ -38,7 +38,10 @@ export type AnalyticsEvent =
   | "tour_start"
   | "tour_complete"
   | "company_link_open"
-  | "sound_on";
+  | "sound_on"
+  | "intro_played"
+  | "intro_skipped"
+  | "intro_greeting_click";
 
 export function track(event: AnalyticsEvent, props?: Record<string, string | number | boolean>) {
   if (typeof window === "undefined") return;

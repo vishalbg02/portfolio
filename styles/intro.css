@@ -1,0 +1,442 @@
+/*
+ * The opening sequence (components/intro/IntroOverlay.tsx, docs/INTRO.md). Flat squares only, transform and opacity
+ * only, so it runs on the compositor while the page hydrates. Times are desktop times; phones run the same sequence
+ * at 0.72× (1.3 s instead of 1.8 s) through --k.
+ *
+ *   0–300 ms     wake      the faint contribution grid, one green square blinking in the middle
+ *   300–900 ms   assemble  a ripple of squares travels outward; the centre flips into GRID's face, which blinks;
+ *                          "GRID online · loading vishal-bg…" types under it
+ *   900–1500 ms  hand-over the face shrinks and flies to its home (the Omnibar; the dock on a phone) while the squares
+ *                          dissolve from the centre out, revealing the hero that was painted underneath all along
+ *   1.8 s        gone      whatever happened (no JS, a slow phone), the overlay is hidden by CSS alone
+ */
+
+/* It exists only while it plays (and fades out at once when skipped). */
+.intro {
+  display: none;
+}
+html[data-intro="play"] .intro,
+html[data-intro="done"] .intro {
+  --k: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  animation: intro-gone 0s linear calc(1800ms * var(--k)) forwards;
+}
+html[data-intro="done"] .intro {
+  animation: intro-skip var(--dur-1) var(--ease-out) forwards;
+}
+@media (max-width: 767.98px) {
+  html[data-intro="play"] .intro,
+  html[data-intro="done"] .intro {
+    --k: 0.72;
+  }
+}
+@keyframes intro-gone {
+  to {
+    visibility: hidden;
+  }
+}
+@keyframes intro-skip {
+  to {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+/* Before the overlay's markup is parsed, nothing (nav, hero) may flash: the page is covered from the first frame,
+   and the cover goes as the squares start to dissolve. It removes itself too, so nothing can ever stay hidden. */
+html[data-intro="play"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 89;
+  pointer-events: none;
+  background: var(--bg);
+  animation: intro-gone 0s linear 900ms forwards;
+}
+@media (max-width: 767.98px) {
+  html[data-intro="play"] body::before {
+    animation-delay: 650ms;
+  }
+}
+
+/* ── the squares ─────────────────────────────────────────────────────────────────────────────────── */
+.intro-tiles {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+.intro-tiles i {
+  position: relative;
+  /* opaque page colour, with the faint contribution square drawn in it (one box per tile, not two) */
+  background: var(--bg)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' rx='.6' fill='%23161b22'/%3E%3C/svg%3E")
+    center / 52% auto no-repeat;
+  /* the dissolve: each square pops off (no fade), the middle first, with a little scatter */
+  animation: intro-out 1ms steps(1, end) forwards;
+  animation-delay: calc((900ms + var(--d) * 70ms + var(--j) * 35ms) * var(--k));
+}
+.intro-tiles i::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 52%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  transform: translate(-50%, -50%);
+}
+/* the ripple: lit squares, bright near the middle, settling back */
+.intro-tiles i::after {
+  opacity: 0;
+  background: var(--lv, var(--grid-1));
+  animation: intro-ripple calc(380ms * var(--k)) var(--ease-out) forwards;
+  animation-delay: calc((300ms + var(--d) * 45ms) * var(--k));
+}
+@keyframes intro-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes intro-ripple {
+  30% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ring (distance from the middle) and level, landscape (12 × 8) … */
+.a0,
+.a1 {
+  --lv: var(--grid-4);
+}
+.a2,
+.a3 {
+  --lv: var(--grid-3);
+}
+.a4,
+.a5 {
+  --lv: var(--grid-2);
+}
+.a0 {
+  --d: 0;
+}
+.a1 {
+  --d: 1;
+}
+.a2 {
+  --d: 2;
+}
+.a3 {
+  --d: 3;
+}
+.a4 {
+  --d: 4;
+}
+.a5 {
+  --d: 5;
+}
+.j0 {
+  --j: 0;
+}
+.j1 {
+  --j: 1;
+}
+.j2 {
+  --j: 2;
+}
+.j3 {
+  --j: 3;
+}
+/* … and portrait (8 × 12) */
+@media (orientation: portrait) {
+  .intro-tiles {
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+  }
+  .b0,
+  .b1 {
+    --lv: var(--grid-4);
+  }
+  .b2,
+  .b3 {
+    --lv: var(--grid-3);
+  }
+  .b4,
+  .b5 {
+    --lv: var(--grid-2);
+  }
+  .b0 {
+    --d: 0;
+  }
+  .b1 {
+    --d: 1;
+  }
+  .b2 {
+    --d: 2;
+  }
+  .b3 {
+    --d: 3;
+  }
+  .b4 {
+    --d: 4;
+  }
+  .b5 {
+    --d: 5;
+  }
+}
+
+/* ── GRID's face ─────────────────────────────────────────────────────────────────────────────────── */
+.intro-fly {
+  --cell: 24px;
+  --gap: 4px;
+  /* where it flies: the face in the Omnibar pill (bottom centre, 22 px) */
+  --fx: calc(27px - min(260px, 50vw - 24px));
+  --fy: calc(50vh - 44px - max(0px, env(safe-area-inset-bottom) - 20px));
+  --fs: 0.16;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: intro-fly calc(560ms * var(--k)) var(--ease-out) forwards;
+  animation-delay: calc(940ms * var(--k));
+}
+@media (max-width: 767.98px) {
+  /* phones: the dock's GRID button (bottom centre, 24 px) */
+  .intro-fly {
+    --cell: 16px;
+    --gap: 3px;
+    --fx: 0px;
+    --fy: calc(50vh - 58px - env(safe-area-inset-bottom));
+    --fs: 0.26;
+  }
+}
+@keyframes intro-fly {
+  85% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--fx), var(--fy)) scale(var(--fs));
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--fx), var(--fy)) scale(var(--fs));
+  }
+}
+.intro-face {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, var(--cell));
+  gap: var(--gap);
+}
+.intro-face b {
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 3px;
+  background: var(--grid-1);
+  opacity: 0;
+  transform: perspective(200px) rotateY(90deg);
+  animation: intro-flip calc(220ms * var(--k)) var(--ease-out) forwards;
+  animation-delay: calc((420ms + var(--fd) * 55ms) * var(--k));
+}
+.intro-face b.on {
+  background: var(--grid-4);
+}
+/* the eyes blink once it is assembled */
+.intro-face b.eye {
+  animation:
+    intro-flip calc(220ms * var(--k)) var(--ease-out) calc((420ms + var(--fd) * 55ms) * var(--k)) forwards,
+    intro-blink calc(160ms * var(--k)) steps(2, jump-none) calc(800ms * var(--k));
+}
+@keyframes intro-flip {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes intro-blink {
+  50% {
+    transform: scaleY(0.15);
+  }
+}
+/* wake: one green square, blinking where the face will be */
+.intro-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 3px;
+  background: var(--grid-4);
+  transform: translate(-50%, -50%);
+  animation: intro-wake calc(420ms * var(--k)) steps(1, end) forwards;
+}
+@keyframes intro-wake {
+  0%,
+  25% {
+    opacity: 1;
+  }
+  25.01%,
+  50% {
+    opacity: 0;
+  }
+  50.01%,
+  99% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* the line under it, typed, gone as the face leaves */
+.intro-line {
+  position: absolute;
+  top: calc(50% + 2.5 * var(--cell, 24px) + 40px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--muted);
+  animation: intro-out 1ms steps(1, end) forwards;
+  animation-delay: calc(940ms * var(--k));
+}
+.intro-line span {
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: bottom;
+  animation: intro-type calc(420ms * var(--k)) steps(32, end) forwards;
+  animation-delay: calc(480ms * var(--k));
+}
+@keyframes intro-type {
+  to {
+    width: 32ch;
+  }
+}
+@media (max-width: 767.98px) {
+  .intro-line {
+    top: calc(50% + 2.5 * 16px + 30px);
+    font-size: 12px;
+  }
+}
+
+/* a quiet hint; any click, tap, key, wheel or scroll anywhere skips (lib/intro/script.ts) */
+.intro-skip {
+  position: absolute;
+  top: calc(var(--nav-height) + 12px);
+  right: 16px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  pointer-events: auto;
+}
+.intro-skip span {
+  color: var(--muted);
+}
+@media (max-width: 767.98px) {
+  .intro-skip span {
+    display: none;
+  }
+}
+
+/* ── the hand-over: the hero's terminal starts typing and the H1's cursor starts blinking as it is revealed ── */
+html[data-intro]:not([data-intro="skip"]) .term-type {
+  animation-delay: 1450ms;
+}
+html[data-intro]:not([data-intro="skip"]) .term-row {
+  animation-delay: calc(2150ms + var(--i, 0) * 150ms);
+}
+html[data-intro]:not([data-intro="skip"]) .term-late {
+  animation-delay: 2850ms;
+}
+html[data-intro]:not([data-intro="skip"]) .hero-cursor {
+  animation-delay: 1400ms;
+  animation-fill-mode: backwards;
+}
+@media (max-width: 767.98px) {
+  html[data-intro]:not([data-intro="skip"]) .term-type {
+    animation-delay: 1100ms;
+  }
+  html[data-intro]:not([data-intro="skip"]) .term-row {
+    animation-delay: calc(1800ms + var(--i, 0) * 150ms);
+  }
+  html[data-intro]:not([data-intro="skip"]) .term-late {
+    animation-delay: 2500ms;
+  }
+  html[data-intro]:not([data-intro="skip"]) .hero-cursor {
+    animation-delay: 1000ms;
+  }
+}
+
+/* reduced motion never gets here (the head script skips), but if it changes mid-visit: no overlay */
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  html[data-intro="play"] body::before {
+    display: none !important;
+  }
+}
+
+/* ── GRID's greeting, by its new home (components/intro/IntroEnhancer.tsx) ─────────────────────────── */
+.intro-greeting {
+  position: fixed;
+  left: 50%;
+  bottom: calc(max(20px, env(safe-area-inset-bottom)) + 48px + 14px);
+  z-index: 45;
+  width: min(380px, calc(100vw - 32px));
+  padding: 14px 16px;
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  background: var(--surface);
+  transform: translateX(-50%);
+  animation: intro-greet var(--dur-2) var(--ease-out) both;
+}
+@media (max-width: 767.98px) {
+  .intro-greeting {
+    bottom: calc(64px + 22px + env(safe-area-inset-bottom));
+  }
+}
+@keyframes intro-greet {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+}
+.intro-chip {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--border-2);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  transition: border-color var(--dur-1);
+}
+.intro-chip:hover,
+.intro-chip-on {
+  border-color: var(--accent);
+}
+.intro-chip-on {
+  color: var(--accent);
+}
+@media (pointer: coarse) {
+  .intro-chip {
+    min-height: 44px;
+  }
+}

@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { profile } from "../../content/profile";
 import { gotoReady, ownClient, settleAnimations } from "./helpers";
 

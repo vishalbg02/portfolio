@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, settleAnimations } from "./helpers";
 
 /** V2 · Phase 4: case-study layout, auto-playing diagram, live demo + walkthroughs, transitions. */

@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { gotoHydrated, gotoReady, ownClient } from "./helpers";
 
 const mockStatus = (page: Page) =>
@@ -63,7 +64,9 @@ test.describe("GRID: the hero and the section headers", () => {
     await gotoReady(page, "/");
     // select the headline sentence by script (a real drag is not reliable across runners)
     await page.evaluate(() => {
-      const p = [...document.querySelectorAll("main p")].find((n) => (n.textContent ?? "").length > 30)!;
+      const p = [...document.querySelectorAll<HTMLElement>("main p")].find(
+        (n) => (n.textContent ?? "").length > 30 && n.offsetParent !== null,
+      )!;
       const range = document.createRange();
       range.selectNodeContents(p);
       const sel = window.getSelection()!;

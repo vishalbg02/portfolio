@@ -572,3 +572,14 @@
     transform: scaleY(0.3);
   }
 }
+
+/* a still that waits until its card is near (MediaStill defer): no alt text flashing in the empty box meanwhile,
+   and without JavaScript the <noscript> copy is shown instead of it */
+img[data-src] {
+  color: transparent;
+}
+@media (scripting: none) {
+  picture[data-deferred] {
+    display: none;
+  }
+}
