@@ -1,6 +1,5 @@
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { profile } from "@/content/profile";
-import { buildStackGroups } from "@/lib/stack/usage";
+import { buildStackGroups, buildUseNodes } from "@/lib/stack/usage";
 import { StackLoader } from "./StackLoader";
 
 export function Stack() {
@@ -13,11 +12,7 @@ export function Stack() {
         title="What I build with"
         ask="What are his strongest skills, and where is the proof?"
       />
-      <StackLoader
-        groups={buildStackGroups()}
-        projects={profile.projects.map((p) => ({ slug: p.slug, name: p.name }))}
-        note={profile.skillsNote}
-      />
+      <StackLoader groups={buildStackGroups()} nodes={buildUseNodes()} />
     </section>
   );
 }

@@ -57,6 +57,7 @@ const data = {
     {
       role: "Full-Stack Developer",
       company: "Golden Verdict, Bengaluru",
+      short: "Golden Verdict",
       period: "Jan 2026 – May 2026",
       current: false,
       kind: "freelance",
@@ -64,10 +65,12 @@ const data = {
         "Built and deployed a production legal and tax compliance SaaS (goldenverdict.com) with role-based access for four user roles.",
         "Engineered purchase, document upload and request-ID tracking workflows on Firestore; built admin dashboards for 50+ services; integrated Brevo APIs for invoicing and email.",
       ],
+      stack: ["Firestore", "Brevo API"],
     },
     {
       role: "Full-Stack & App Developer Intern",
       company: "Social Agent (Bricstal Pvt. Ltd.), Bengaluru",
+      short: "Social Agent",
       period: "Jun 2025 – Mar 2026",
       current: false,
       kind: "internship",
@@ -76,16 +79,39 @@ const data = {
         "Implemented geolocation- and NFC-based attendance with automated PDF/Excel reports for workforce analytics.",
         "Integrated Google Generative AI APIs for productivity workflows and the Agora SDK for live video/audio meetings.",
       ],
+      stack: [
+        "React",
+        "Tailwind CSS",
+        "Flutter",
+        "Dart",
+        "Firebase",
+        "Cloud Firestore",
+        "Generative AI APIs",
+        "Agora SDK",
+      ],
     },
     {
       role: "Backend Developer Intern",
       company: "Kaha Technologies Pvt. Ltd. (Cove IoT), Bengaluru",
+      short: "Cove IoT",
       period: "May 2024 – Jul 2024",
       current: false,
       kind: "internship",
       points: [
         "Optimised Java Spring Boot backend services for boAt's IoT devices, handling real-time data across concurrent connections.",
-        "Designed secure REST APIs in Java (Spring Data JPA, Spring Security) on Spring Cloud microservices; enhanced device dashboards in AngularJS and TypeScript.",
+        // MySQL: stated by Vishal (2026-10-05), "I used MySQL there with Spring Data JPA".
+        "Designed secure REST APIs in Java (Spring Data JPA with MySQL, Spring Security) on Spring Cloud microservices; enhanced device dashboards in AngularJS and TypeScript.",
+      ],
+      stack: [
+        "Java",
+        "Spring Boot",
+        "Spring Security",
+        "Spring Data JPA",
+        "MySQL",
+        "REST APIs",
+        "Microservices",
+        "AngularJS",
+        "TypeScript",
       ],
     },
   ],
@@ -213,12 +239,15 @@ const data = {
     "Skills named on this site that no project or internship shows were learned during his BCA and MCA at CHRIST (Deemed to be University), Bengaluru.",
 
   skills: {
+    // Python and C++: confirmed by Vishal (2026-10-05), from his résumé.
     backend: [
       "Java",
       "Spring Boot",
       "Spring Security",
       "Spring Data JPA",
       "Node.js",
+      "Python",
+      "C++",
       "REST APIs",
       "Microservices",
       "SQL/MySQL",
@@ -232,11 +261,13 @@ const data = {
       "CSS3",
       "Tailwind CSS",
       "Three.js",
-      "Angular",
+      "AngularJS",
     ],
     mobile: ["Flutter", "Dart", "React Native", "Kotlin", "Android"],
     dataCloud: ["Firebase", "Firestore", "MySQL", "MongoDB", "AWS"],
     ai: ["Generative AI APIs", "RAG fundamentals", "Function calling / API integration"],
+    // Named by Vishal (2026-10-05): what LanSymphony is built on.
+    networking: ["Socket programming", "Multithreading", "Encryption (AES-256)"],
     tools: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code", "Vercel"],
   },
   certifications: [

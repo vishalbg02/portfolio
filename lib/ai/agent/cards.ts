@@ -7,7 +7,7 @@ import { kindOf } from "@/lib/content/kind";
 import { LIGHTHOUSE_FILE, readLighthouse, displayScore } from "@/lib/lighthouse";
 import { resolveTarget } from "@/lib/grid/targets";
 import { clipSources, stillSources } from "@/lib/media/paths";
-import { projectsUsing } from "@/lib/stack/usage";
+import { elsewhere, projectsUsing, roleNodes, usesSkill } from "@/lib/stack/usage";
 import { site } from "@/lib/site";
 import type { ContactAction, ProjectImage, UiPart } from "../protocol";
 
@@ -133,6 +133,15 @@ const ALIASES: Record<string, string> = {
   node: "Node.js",
   nodejs: "Node.js",
   rest: "REST APIs",
+  angular: "AngularJS",
+  py: "Python",
+  cpp: "C++",
+  sockets: "Socket programming",
+  socket: "Socket programming",
+  threads: "Multithreading",
+  threading: "Multithreading",
+  aes: "Encryption (AES-256)",
+  encryption: "Encryption (AES-256)",
 };
 
 export function allSkills(): string[] {
@@ -154,15 +163,13 @@ export function matchSkill(raw: string): string | null {
 
 const clip = (t: string, n = 160) => (t.length <= n ? t : `${t.slice(0, n - 1).trimEnd()}…`);
 
-const SITE_SKILLS = ["RAG fundamentals", "Function calling / API integration"];
-
 export function skillEvidence(raw: string): UiPart {
   const skill = matchSkill(raw);
   if (!skill) return { kind: "skill", skill: raw.trim().slice(0, 40), found: false, where: [] };
   const where: Extract<UiPart, { kind: "skill" }>["where"] = [];
   for (const slug of projectsUsing(skill)) {
     const p = projectBySlug(slug)!;
-    const used = p.stack.filter((s) => norm(s).includes(norm(skill).slice(0, 5)));
+    const used = p.stack.filter((s) => usesSkill(skill, s));
     where.push({
       type: "project",
       title: p.name,
@@ -170,34 +177,31 @@ export function skillEvidence(raw: string): UiPart {
       href: `/work/${p.slug}`,
     });
   }
-  const needle = norm(skill);
-  for (const job of profile.experience) {
-    const point = job.points.find((pt) => norm(pt).includes(needle));
-    if (point)
-      where.push({
-        type: "experience",
-        title: `${job.role}, ${job.company.split(",")[0]}`,
-        detail: clip(point),
-        href: "/#experience",
-      });
-  }
-  const lead = profile.leadership.find((l) => norm(l).includes(needle));
-  if (lead)
+  // the roles that are not a project of their own (the same rule as the Stack map), from each role's own stack
+  for (const job of roleNodes()) {
+    const items = job.stack.filter((s) => usesSkill(skill, s));
+    if (!items.length) continue;
+    const point = job.points.find((pt) => items.some((it) => norm(pt).includes(norm(it)))) ?? job.points[0]!;
     where.push({
       type: "experience",
-      title: `Leadership: ${lead.split("—")[0]!.trim()}`,
-      detail: clip(lead),
+      title: `${job.role}, ${job.short}`,
+      detail: clip(point),
+      href: "/#experience",
+    });
+  }
+  // nothing on the map used it: a leadership role, this site, a certificate, or coursework & practice
+  const other = where.length ? null : elsewhere(skill);
+  if (other?.kind === "leadership")
+    where.push({
+      type: "experience",
+      title: `Leadership: ${other.text.split("—")[0]!.trim()}`,
+      detail: clip(other.text),
       href: "/resume",
     });
-  // This portfolio is itself the proof of these two: GRID retrieves from the site's content and calls tools.
-  if (SITE_SKILLS.includes(skill))
-    where.push({
-      type: "project",
-      title: "This portfolio",
-      detail:
-        "GRID answers from this site's own content with retrieval and calls typed tools to show and do things.",
-      href: "/#ask",
-    });
+  if (other?.kind === "site")
+    where.push({ type: "project", title: "This portfolio", detail: other.text, href: "/#ask" });
+  if (other?.kind === "certification")
+    where.push({ type: "education", title: "Certificate", detail: clip(other.text), href: "/resume" });
   const group = (Object.entries(profile.skills) as Array<[string, string[]]>).find(([, items]) =>
     items.includes(skill),
   );
@@ -209,10 +213,10 @@ export function skillEvidence(raw: string): UiPart {
       href: "/#stack",
     });
   // Skills no project, role or activity shows: Vishal says he learned them in his degrees.
-  if (!where.some((w) => w.type !== "skills") && group)
+  if (other?.kind === "coursework" && group)
     where.push({
       type: "education",
-      title: `Learned at ${profile.education[0]!.school.split(",")[0]!.replace(/\s*\(.*$/, "")}`,
+      title: "Coursework & practice",
       detail: profile.skillsNote,
       href: "/#experience",
     });

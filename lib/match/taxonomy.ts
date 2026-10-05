@@ -30,7 +30,7 @@ export const SKILLS: Skill[] = [
   s("typescript", "TypeScript", ["typescript"], ["typescript"], ["javascript"]),
   s("python", "Python", ["python"], ["python"]),
   s("kotlin", "Kotlin", ["kotlin"], ["kotlin"]),
-  s("cpp", "C++", ["c++", "cpp"], []),
+  s("cpp", "C++", ["c++", "cpp"], ["c++"]),
   s("csharp", "C#", ["c#", "csharp", ".net", "dotnet", "asp.net"], []),
   s("go", "Go", ["golang", "go lang"], []),
   s("rust", "Rust", ["rust"], []),

@@ -175,7 +175,7 @@ describe("the cards (built from content, never from the model)", () => {
     if (sb.kind !== "skill") throw new Error();
     expect(sb.skill).toBe("Spring Boot");
     expect(sb.found).toBe(true);
-    expect(sb.where.some((w) => w.type === "experience" && /Kaha/.test(w.title))).toBe(true);
+    expect(sb.where.some((w) => w.type === "experience" && /Cove IoT/.test(w.title))).toBe(true);
     const react = skillEvidence("react");
     if (react.kind !== "skill") throw new Error();
     expect(react.where.filter((w) => w.type === "project").map((w) => w.title)).toEqual(
@@ -422,21 +422,45 @@ describe("the planner with a scripted model", () => {
   });
 });
 
-describe("skills with no other evidence are attributed to CHRIST (Vishal's statement)", () => {
-  it.each(["MongoDB", "AWS", "Kotlin", "Git", "Node.js"])(
-    "%s: learned at CHRIST, linking to the education entry",
+describe("skills nothing on the map used say where they come from (Vishal's statement, certificates, this site)", () => {
+  it.each(["MongoDB", "Node.js", "C++", "Maven"])(
+    "%s: coursework & practice, linking to education",
     (skill) => {
       const part = skillEvidence(skill);
       if (part.kind !== "skill") throw new Error("not a skill card");
       expect(part.found).toBe(true);
       const edu = part.where.find((w) => w.type === "education")!;
-      expect(edu.title).toBe("Learned at CHRIST");
+      expect(edu.title).toBe("Coursework & practice");
       expect(edu.detail).toBe(profile.skillsNote);
       expect(edu.href).toBe("/#experience");
     },
   );
 
-  it("a skill that a project or role shows is not attributed to CHRIST", () => {
+  it.each([
+    ["Kotlin", "Certificate", /Infosys Springboard/],
+    ["AWS", "Certificate", /AWS Academy/],
+    ["Git", "This portfolio", /public on GitHub/],
+    ["RAG fundamentals", "This portfolio", /retrieval/],
+    ["React Native", "Leadership: Core Committee, Technical Team (App Development)", /GATEWAYS 2026/],
+  ])("%s: %s", (skill, title, detail) => {
+    const part = skillEvidence(skill);
+    if (part.kind !== "skill") throw new Error("not a skill card");
+    const w = part.where.find((x) => x.title === title)!;
+    expect(w.detail).toMatch(detail);
+    expect(part.where.some((x) => x.title === "Coursework & practice")).toBe(false);
+  });
+
+  it("Java and Spring Boot point at the Cove IoT internship, from its own description", () => {
+    for (const skill of ["Java", "Spring Boot", "SQL/MySQL", "AngularJS"]) {
+      const part = skillEvidence(skill);
+      if (part.kind !== "skill") throw new Error("not a skill card");
+      const role = part.where.find((w) => w.type === "experience")!;
+      expect(role.title, skill).toBe("Backend Developer Intern, Cove IoT");
+      expect(role.href).toBe("/#experience");
+    }
+  });
+
+  it("a skill that a project or role shows is never labelled coursework", () => {
     for (const skill of ["Spring Boot", "Flutter", "Firebase"]) {
       const part = skillEvidence(skill);
       if (part.kind !== "skill") throw new Error("not a skill card");

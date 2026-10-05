@@ -126,6 +126,7 @@ export function profileChunks(p: Profile = defaultProfile): Chunk[] {
     ["Mobile", p.skills.mobile],
     ["Data and cloud", p.skills.dataCloud],
     ["AI", p.skills.ai],
+    ["Networking and security", p.skills.networking],
     ["Tools", p.skills.tools],
   ];
   groups.forEach(([label, items]) =>
