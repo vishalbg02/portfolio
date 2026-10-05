@@ -45,7 +45,10 @@ function strong(item: PaletteItem, q: string): boolean {
   if (typed.length === 0) return false;
   const name = words(item.label);
   const keywords = (item.keywords ?? []).map(fold);
-  return typed.every((w) => name.some((n) => n.startsWith(w)) || keywords.includes(w));
+  // a prefix needs three letters ("con" → Contact); one or two must be a whole word ("in" is not "intro")
+  return typed.every(
+    (w) => name.some((n) => (w.length >= 3 ? n.startsWith(w) : n === w)) || keywords.includes(w),
+  );
 }
 
 export function rankInput(raw: string, groups: PaletteGroup[]): Ranked {
