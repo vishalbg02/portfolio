@@ -30,7 +30,24 @@ describe("status classifier", () => {
 describe("pingUrl / checkProject", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  const respond = (status: number) => ({ status, body: { cancel: async () => {} } }) as unknown as Response;
+  const respond = (status: number, headers: Record<string, string> = {}) =>
+    ({ status, headers: new Headers(headers), body: { cancel: async () => {} } }) as unknown as Response;
+
+  it("reports whether the site may be framed, from its own headers", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => respond(200, { "x-frame-options": "DENY" })),
+    );
+    expect(await checkProject("golden-verdict", "https://example.com")).toMatchObject({
+      state: "live",
+      embeddable: false,
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => respond(200)),
+    );
+    expect(await checkProject("virtual-tour", "https://example.com")).toMatchObject({ embeddable: true });
+  });
 
   it("uses HEAD and reports latency", async () => {
     const fetchMock = vi.fn(async (...args: [string, RequestInit?]) => (void args, respond(200)));
@@ -62,7 +79,7 @@ describe("pingUrl / checkProject", () => {
     );
     expect(await pingUrl("https://example.com")).toEqual({ ok: false, error: "timeout" });
     const s = await checkProject("x", "https://example.com");
-    expect(s).toMatchObject({ slug: "x", state: "offline", latencyMs: null });
+    expect(s).toMatchObject({ slug: "x", state: "offline", latencyMs: null, embeddable: null });
   });
 
   it("maps a network failure to offline", async () => {
@@ -77,7 +94,7 @@ describe("pingUrl / checkProject", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     const s = await checkProject("talnio", null);
-    expect(s).toMatchObject({ slug: "talnio", state: null, latencyMs: null });
+    expect(s).toMatchObject({ slug: "talnio", state: null, latencyMs: null, embeddable: null });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

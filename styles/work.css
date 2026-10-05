@@ -189,6 +189,11 @@
   line-height: 1.45;
   color: var(--muted);
 }
+/* a beat's progress tick: shown only on the pinned stage, where beats advance by themselves (ShowcaseController) */
+.beat-tick {
+  display: none;
+}
+
 .beat-note {
   margin-top: 10px;
   padding-inline: 12px;
@@ -223,20 +228,35 @@
   opacity: 1;
   transform: scale(1.2);
 }
+/* Pause / Play for the beats: only where they advance by themselves (the pinned stage) */
+.work-index .work-pause {
+  display: none;
+  margin-right: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+.work-index .work-pause:hover,
+.work-index .work-pause[aria-pressed="true"] {
+  color: var(--text);
+}
 .work-count {
   margin-right: 8px;
 }
 
-/* the live demo overlay (Virtual Tour) */
+/* a live site in the frame, once launched (a site that allows framing; see LiveSite / lib/security/embeds.ts) */
 [data-live-slot]:not([hidden]) {
   display: block;
+}
+.scene-actions [data-live-launch] {
+  display: none;
 }
 
 /* ── A · pinned stage ───────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   .work-pin {
-    /* each scene gets this much scroll; its beats share it equally */
-    height: calc(var(--scenes) * 175svh);
+    /* one screen of scroll per project; its beats advance by themselves (ShowcaseController), not by scroll */
+    height: calc(var(--scenes) * 100svh);
   }
   .work-stick {
     position: sticky;
@@ -307,8 +327,50 @@
     right: 0;
     z-index: 25;
   }
-  .scene-actions [data-live-launch] {
+  .scene[data-embeddable="true"] .scene-actions [data-live-launch] {
     display: inline-flex;
+  }
+  .work-index .work-pause {
+    display: grid;
+  }
+  /* beats advance every --beat-ms; the active tick fills in squares, and its end moves to the next beat */
+  .beat-list button {
+    position: relative;
+  }
+  .beat-tick {
+    position: absolute;
+    right: 12px;
+    bottom: 3px;
+    left: 38px;
+    display: block;
+    height: 2px;
+    overflow: hidden;
+    background: var(--grid-0);
+  }
+  .beat-list li:not([data-active]) .beat-tick {
+    visibility: hidden;
+  }
+  .beat-tick i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .scene[data-active] .beat-list li[data-active] .beat-tick i {
+    animation: beat-fill var(--beat-ms, 3500ms) steps(14, end) forwards;
+    animation-play-state: var(--beat-play, running);
+  }
+  /* paused: the button, a dialog / GRID / tour / viewer / live site on top, the tab hidden, or the pointer on the media */
+  .work-stage:is([data-paused], [data-hold]),
+  .work-stage:has(:focus-visible),
+  .scene-beats:hover {
+    --beat-play: paused;
+  }
+}
+@keyframes beat-fill {
+  to {
+    transform: scaleX(1);
   }
 }
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { gridFor, noise } from "@/lib/fx/dissolve";
-import { launchLiveTour } from "@/lib/work/live-tour";
-import { EMBED_ORIGINS } from "@/lib/security/embeds";
+import { launchLiveEmbed } from "@/lib/work/live-embed";
+import { EMBED_ORIGINS, EMBEDS, embedFor } from "@/lib/security/embeds";
 import { profile } from "@/content/profile";
 import { kindOf } from "@/lib/content/kind";
 
@@ -25,15 +25,31 @@ describe("pixel dissolve", () => {
   });
 });
 
-describe("live tour launcher", () => {
-  it("only ever embeds the one allow-listed origin, and that origin is the project's live URL", () => {
-    const tour = profile.projects.find((p) => p.slug === "virtual-tour")!;
-    expect(EMBED_ORIGINS).toEqual([new URL(tour.live!).origin]);
+describe("live site launcher", () => {
+  it("only frames allow-listed origins, which are the projects' own live URLs", () => {
+    const live = profile.projects.flatMap((p) => (p.live ? [new URL(p.live).origin] : []));
+    for (const origin of EMBED_ORIGINS) {
+      // every allowed origin belongs to a project (Golden Verdict's apex redirects to www, so both are listed)
+      expect(
+        live.some((o) => o === origin || o.replace("://", "://www.") === origin),
+        origin,
+      ).toBe(true);
+    }
     // refusals happen before any DOM is touched (no document in this environment)
     const slot = {} as HTMLElement;
-    expect(launchLiveTour(slot, "https://evil.example/")).toBe(false);
-    expect(launchLiveTour(slot, "not a url")).toBe(false);
-    expect(launchLiveTour(slot, "javascript:alert(1)")).toBe(false);
+    expect(launchLiveEmbed(slot, "https://evil.example/", "x")).toBe(false);
+    expect(launchLiveEmbed(slot, "not a url", "x")).toBe(false);
+    expect(launchLiveEmbed(slot, "javascript:alert(1)", "x")).toBe(false);
+    expect(launchLiveEmbed(slot, "http://goldenverdict.com/", "x")).toBe(false);
+  });
+
+  it("gives each site its own sandbox, and never allows top navigation", () => {
+    expect(embedFor("https://virtual-tour-opal.vercel.app/about")?.sandbox).toContain("allow-pointer-lock");
+    expect(embedFor("https://www.goldenverdict.com/")?.sandbox).toBe(
+      "allow-scripts allow-same-origin allow-forms allow-popups",
+    );
+    for (const e of EMBEDS) expect(e.sandbox).not.toContain("allow-top-navigation");
+    expect(embedFor(null)).toBeNull();
   });
 });
 

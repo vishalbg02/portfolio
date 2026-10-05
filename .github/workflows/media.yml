@@ -47,7 +47,7 @@ jobs:
       - name: Capture
         env:
           ONLY: ${{ inputs.only || 'golden-verdict' }}
-          VIDEO: ${{ inputs.video == false && 'false' || 'true' }}
+          VIDEO: ${{ github.event_name == 'workflow_dispatch' && !inputs.video && 'false' || 'true' }}
         run: pnpm media "--only=$ONLY" --force $([ "$VIDEO" = "true" ] || echo --no-video)
 
       - name: Upload the captures for review

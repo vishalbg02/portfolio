@@ -8,6 +8,7 @@ import type { ViewerItem } from "./viewer-types";
 import { cn } from "@/lib/utils/cn";
 import { identityBg } from "../identity";
 import { play } from "@/lib/sound";
+import { useStatuses } from "@/lib/status/store";
 
 const MediaViewer = dynamic(() => import("./MediaViewer").then((m) => m.MediaViewer), { ssr: false });
 
@@ -20,14 +21,19 @@ export type SceneInfo = {
 };
 
 const PINNED = "(min-width: 1024px) and (prefers-reduced-motion: no-preference)";
+/** Re-checks whether the beats should hold (e.g. the full-screen viewer opened or closed). */
+const HOLD_EVENT = "work:hold";
 const DECK = "(max-width: 1023.98px)";
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
 
 /**
  * Drives the Work section. The markup is server-rendered (Scene.tsx); this only moves between scenes and
  * beats and never renders them:
- *  - desktop (pinned): native scroll through a tall section scrubs scene and beat, and a scene change is a
- *    pixel dissolve. No scroll-jacking, no wheel handlers: it only reads where the page is.
+ *  - desktop (pinned): native scroll through the section picks the project (one screen each), and a project change is
+ *    a pixel dissolve. No scroll-jacking, no wheel handlers: it only reads where the page is. Inside a project the
+ *    beats advance by themselves: the active beat's tick fills over --beat-ms (CSS) and its animationend moves on.
+ *    They hold while the pointer is on the media, a keyboard user is inside, the visitor pressed Pause, or something
+ *    else has the visitor's attention (a dialog, GRID, the tour, the full-screen viewer, a live site, a hidden tab).
  *  - phone (deck): the card in the middle of the snap row becomes active (its clip plays, the dots follow).
  *  - without JS or with reduced motion: the scenes are plain rows and nothing moves by itself.
  * Keys when the stage has focus: ↑/↓ scenes, ←/→ beats, 1–4 a scene. Everything is also reachable by tab.
@@ -43,6 +49,9 @@ export function ShowcaseController({
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const viewingRef = useRef(false);
+  const { statuses } = useStatuses();
   const [viewing, setViewing] = useState<{ slug: string; index: number } | null>(null);
   /** What to give focus back to when the viewer closes: the button that opened it. */
   const opener = useRef<HTMLElement | null>(null);
@@ -121,13 +130,11 @@ export function ShowcaseController({
     const range = () => Math.max(1, pin.offsetHeight - stick.offsetHeight);
     const pinTop = () => pin.getBoundingClientRect().top + window.scrollY - navHeight();
 
+    /** The project the scroll position is on (beats are not scroll-driven). */
     const read = () => {
       const p = clamp((window.scrollY - pinTop()) / range(), 0, 1);
       const n = scenes.length;
-      const s = Math.min(n - 1, Math.floor(p * n));
-      const local = p * n - s;
-      const b = Math.min(scenes[s]!.beats - 1, Math.floor(local * scenes[s]!.beats));
-      return { s, b };
+      return Math.min(n - 1, Math.floor(p * n));
     };
 
     const follow = async () => {
@@ -136,7 +143,7 @@ export function ShowcaseController({
         again = true;
         return;
       }
-      const { s, b } = read();
+      const s = read();
       if (s !== scene) {
         busy = true;
         dissolveMod ??= import("@/lib/fx/dissolve");
@@ -144,7 +151,7 @@ export function ShowcaseController({
           const { dissolve } = await dissolveMod;
           await dissolve(stage, () => {
             showScene(s);
-            setBeat(s, b);
+            setBeat(s, beat[s]!);
           });
         } finally {
           busy = false;
@@ -153,9 +160,30 @@ export function ShowcaseController({
           again = false;
           void follow();
         }
-      } else if (b !== beat[s]) {
-        setBeat(s, b);
       }
+    };
+
+    /* ── beats advance by themselves (desktop) ───────────────────────────────────────────────── */
+    const onTickEnd = (e: AnimationEvent) => {
+      if (e.animationName !== "beat-fill" || !pinnedMq.matches) return;
+      const card = (e.target as HTMLElement).closest<HTMLElement>(".scene");
+      const i = Number(card?.dataset.scene);
+      if (i !== scene) return;
+      setBeat(i, (beat[i]! + 1) % scenes[i]!.beats);
+    };
+    // Something else has the visitor's attention: hold the beats (the tick's animation pauses in CSS).
+    const updateHold = () => {
+      const html = document.documentElement;
+      const live = [...el.querySelectorAll<HTMLElement>("[data-live-slot]")].some((x) => !x.hidden);
+      const hold =
+        document.hidden ||
+        !onScreen ||
+        live ||
+        viewingRef.current ||
+        html.dataset.gridPanel === "open" ||
+        html.hasAttribute("data-tour-active") ||
+        document.querySelector('[role="dialog"], [role="alertdialog"], dialog[open]') !== null;
+      stage.toggleAttribute("data-hold", hold);
     };
 
     let raf = 0;
@@ -173,11 +201,10 @@ export function ShowcaseController({
       const n = scenes.length;
       const k = clamp(i, 0, n - 1);
       if (pinnedMq.matches) {
-        const b = scenes[k]!.beats;
-        window.scrollTo({
-          top: pinTop() + ((k + (clamp(j, 0, b - 1) + 0.5) / b) / n) * range(),
-          behavior: behavior(),
-        });
+        // the beat is shown when the dissolve lands on the project (or at once, if it is already there)
+        beat[k] = clamp(j, 0, scenes[k]!.beats - 1);
+        if (k === scene) setBeat(k, beat[k]!);
+        window.scrollTo({ top: pinTop() + ((k + 0.5) / n) * range(), behavior: behavior() });
       } else if (deckMq.matches) {
         sceneEls[k]!.scrollIntoView({ behavior: behavior(), inline: "center", block: "nearest" });
       } else {
@@ -194,10 +221,7 @@ export function ShowcaseController({
       const bg = t.closest<HTMLElement>("[data-beat-go]");
       if (bg) {
         const card = bg.closest<HTMLElement>(".scene")!;
-        const i = Number(card.dataset.scene);
-        const j = Number(bg.dataset.beatGo);
-        if (pinnedMq.matches) goScene(i, j);
-        else setBeat(i, j);
+        setBeat(Number(card.dataset.scene), Number(bg.dataset.beatGo));
         return;
       }
 
@@ -224,9 +248,11 @@ export function ShowcaseController({
           (s) => s.parentElement!.offsetParent !== null,
         );
         if (slot) {
-          void import("@/lib/work/live-tour").then(({ launchLiveTour }) => {
-            if (launchLiveTour(slot, live.dataset.liveLaunch!))
-              track("demo_launch", { project: "virtual-tour" });
+          void import("@/lib/work/live-embed").then(({ launchLiveEmbed }) => {
+            if (launchLiveEmbed(slot, live.dataset.liveLaunch!, live.dataset.liveTitle ?? "The live site")) {
+              track("demo_launch", { project: card.dataset.project ?? "" });
+              updateHold();
+            }
           });
         }
         return;
@@ -265,11 +291,11 @@ export function ShowcaseController({
         goScene(scene - 1);
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        if (beat[scene]! < b - 1) goScene(scene, beat[scene]! + 1);
+        if (beat[scene]! < b - 1) setBeat(scene, beat[scene]! + 1);
         else goScene(scene + 1);
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
-        if (beat[scene]! > 0) goScene(scene, beat[scene]! - 1);
+        if (beat[scene]! > 0) setBeat(scene, beat[scene]! - 1);
         else if (scene > 0) goScene(scene - 1, scenes[scene - 1]!.beats - 1);
       }
     };
@@ -286,7 +312,17 @@ export function ShowcaseController({
 
     el.addEventListener("click", onClick);
     el.addEventListener("keydown", onKey);
+    el.addEventListener("animationend", onTickEnd);
     window.addEventListener(WORK_GO_EVENT, onWorkGo);
+    window.addEventListener(HOLD_EVENT, updateHold);
+    document.addEventListener("visibilitychange", updateHold);
+    // GRID's panel and the tour mark <html>; dialogs (Radix, the terminal, the viewer) are added to <body>
+    const holdMo = new MutationObserver(updateHold);
+    holdMo.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-grid-panel", "data-tour-active"],
+    });
+    holdMo.observe(document.body, { childList: true });
 
     /* ── observers ───────────────────────────────────────────────────────────────────────────── */
     // Read the page's scroll only while the section is near the viewport.
@@ -303,6 +339,7 @@ export function ShowcaseController({
         listen(onScreen && pinnedMq.matches);
         if (onScreen) onScroll();
         syncClips();
+        updateHold();
       },
       { rootMargin: "200px 0px" },
     );
@@ -350,7 +387,11 @@ export function ShowcaseController({
     return () => {
       el.removeEventListener("click", onClick);
       el.removeEventListener("keydown", onKey);
+      el.removeEventListener("animationend", onTickEnd);
       window.removeEventListener(WORK_GO_EVENT, onWorkGo);
+      window.removeEventListener(HOLD_EVENT, updateHold);
+      document.removeEventListener("visibilitychange", updateHold);
+      holdMo.disconnect();
       nearIo.disconnect();
       posterIo.disconnect();
       deckIo.disconnect();
@@ -363,6 +404,21 @@ export function ShowcaseController({
       el.querySelectorAll("video").forEach((v) => v.pause());
     };
   }, [scenes, viewer]);
+
+  // the full-screen viewer holds the beats too
+  useEffect(() => {
+    viewingRef.current = viewing !== null;
+    window.dispatchEvent(new Event(HOLD_EVENT));
+  }, [viewing]);
+
+  // a project whose site allows framing (and is up) gets its "Launch live site" button (CSS: [data-embeddable])
+  useEffect(() => {
+    root.current?.querySelectorAll<HTMLElement>(".scene").forEach((card) => {
+      const st = statuses[card.dataset.project ?? ""];
+      if (st?.embeddable === true && st.state !== "offline") card.dataset.embeddable = "true";
+      else delete card.dataset.embeddable;
+    });
+  }, [statuses]);
 
   const close = useCallback(() => {
     setViewing(null);
@@ -379,6 +435,7 @@ export function ShowcaseController({
           <div className="work-stick">
             <div
               className="work-stage"
+              data-paused={paused ? "" : undefined}
               tabIndex={0}
               role="group"
               aria-roledescription="project showcase"
@@ -391,6 +448,15 @@ export function ShowcaseController({
                 <span aria-hidden="true" className="work-count font-mono text-xs text-muted">
                   {String(active + 1).padStart(2, "0")} / {String(scenes.length).padStart(2, "0")}
                 </span>
+                <button
+                  type="button"
+                  className="work-pause"
+                  aria-pressed={paused}
+                  aria-label={paused ? "Play the screens" : "Pause the screens"}
+                  onClick={() => setPaused((p) => !p)}
+                >
+                  <span aria-hidden="true">{paused ? "▶" : "❚❚"}</span>
+                </button>
                 {scenes.map((s, i) => (
                   <button
                     key={s.slug}

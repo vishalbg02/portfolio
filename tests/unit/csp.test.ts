@@ -7,11 +7,11 @@ describe("Content-Security-Policy", () => {
   const prod = buildCsp({ isDev: false, isPreview: false });
   const preview = buildCsp({ isDev: false, isPreview: true });
 
-  it("frame-src allows exactly one origin, the Virtual Tour the case study embeds, and nothing else", () => {
+  it("frame-src allows exactly the live sites in lib/security/embeds.ts, and nothing else", () => {
     const tour = new URL(profile.projects.find((p) => p.slug === "virtual-tour")!.live!).origin;
-    expect([...EMBED_ORIGINS]).toEqual([tour]);
+    expect([...EMBED_ORIGINS]).toEqual([tour, "https://goldenverdict.com", "https://www.goldenverdict.com"]);
     const directive = prod.split("; ").find((d) => d.startsWith("frame-src"))!;
-    expect(directive).toBe(`frame-src ${tour}`);
+    expect(directive).toBe(`frame-src ${EMBED_ORIGINS.join(" ")}`);
     expect(prod).not.toMatch(/frame-src[^;]*\*/);
     expect(prod).not.toContain("child-src");
   });
@@ -52,7 +52,7 @@ describe("Content-Security-Policy", () => {
     expect(preview).toContain(
       "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://vercel.live",
     );
-    expect(preview).toContain(`frame-src ${EMBED_ORIGINS[0]} https://vercel.live`);
+    expect(preview).toContain(`frame-src ${EMBED_ORIGINS.join(" ")} https://vercel.live`);
     expect(preview).toContain("frame-ancestors 'none'");
     expect(preview).toContain("object-src 'none'");
     expect(preview).not.toContain("unsafe-eval");

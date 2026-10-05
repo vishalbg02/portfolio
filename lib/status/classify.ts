@@ -4,8 +4,12 @@ import type { StatusState } from "./types";
 export const SLOW_MS = 1500;
 export const TIMEOUT_MS = 4000;
 
+/** The two response headers that decide whether the page may be framed (see frame.ts). */
+export type FrameHeaders = { "x-frame-options": string | null; "content-security-policy": string | null };
+
 export type PingResult =
-  { ok: true; status: number; latencyMs: number } | { ok: false; error: "timeout" | "network" };
+  | { ok: true; status: number; latencyMs: number; frame?: FrameHeaders }
+  | { ok: false; error: "timeout" | "network" };
 
 /**
  * Pure classifier for a probe result.
