@@ -25,6 +25,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // The home page is where most visits start: merge its client chunks more eagerly, so its first load makes fewer
+    // requests (each one before the hero paints adds to Lighthouse's simulated LCP). Other routes may load an extra chunk.
+    turbopackChunking: { priorityRoutes: [/^\/$/], minChunkSize: 120_000 },
+  },
   poweredByHeader: false,
   env: {
     NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),

@@ -78,6 +78,30 @@ The PDF at `/resume.pdf` and the page at `/resume` are generated from `content/p
 
 The full V3 write-up (before/after, numbers, environment variables, what still needs Vishal): [docs/V3-REPORT.md](docs/V3-REPORT.md).
 
+## What V4 added
+
+V4 gives the site an entrance, makes GRID the centre of the home page, rolls out one design language, and fixes the
+V3 defect list. The full write-up (numbers before and after, what still needs Vishal): [docs/V4-REPORT.md](docs/V4-REPORT.md).
+
+- **Opening sequence** (`components/intro`, [docs/INTRO.md](docs/INTRO.md)): a cold home visit wakes up as GRID
+  assembles from contribution squares and flies to the Omnibar, about 1.8 s on desktops, CSS only, skippable, once per
+  session. Phones get a sparse version (the hero is visible from the first frame). An inline head script decides
+  before the first paint; replay it from the palette or the `intro` terminal command.
+- **Meet GRID** (`components/sections/MeetGrid.tsx`, [docs/GRID-AGENT.md](docs/GRID-AGENT.md)): a stage with GRID's
+  face and counts read from the code, eight tiles that run real requests in the inline chat, and a "How GRID works"
+  strip lit by the stream's new `stage` events (route, retrieve, rank, tools, answer). The new `brief_me` tool draws a
+  30-second brief card.
+- **Design system** ([docs/DESIGN-V4.md](docs/DESIGN-V4.md)): chapter openers with pixel numerals, one hard pixel shadow,
+  corner brackets, `PixelText` (numerals, LET'S BUILD, the footer wordmark), a 52 px nav that marks the chapter you are
+  reading, designed empty, error, offline and loading states (`DataState`), and a display type scale on every page.
+- **Phones**: pull-to-close sheets, a raised GRID button in the dock, and 44 px tap targets everywhere
+  (`tests/e2e/mobile-feel.spec.ts`).
+- **Fix list** (V4 Phase 0): Golden Verdict beats and `embeddable` live status, roles on the Stack map, `pnpm
+interview`, an Omnibar that never covers a control, message slots pre-filled from what the visitor said, showcase
+  intents, a shorter Work section with auto-advancing beats, the pixel apostrophe.
+- **Guards**: home ≤ 11,000 px at 1440 × 900 (`tests/e2e/rhythm.spec.ts`), home JS ≤ 170 KB gz, Lighthouse ≥ 0.95,
+  no gradients, static pages, zero environment variables required.
+
 ## How the V3 pieces fit together
 
 Pages are static. Only `/api/*` runs on demand, and `pnpm check:static` (also a CI step) fails the build if a page stops being static. Every integration is optional and the site builds and runs with no environment variables.
