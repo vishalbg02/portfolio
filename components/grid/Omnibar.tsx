@@ -232,6 +232,8 @@ export function Omnibar() {
         <button
           ref={puck}
           type="button"
+          inert={mode === "pill"}
+          aria-hidden={mode === "pill" || undefined}
           aria-haspopup="dialog"
           aria-label="Ask GRID or run a command"
           aria-keyshortcuts="Control+K Meta+K /"
@@ -245,6 +247,8 @@ export function Omnibar() {
         <button
           ref={pill}
           type="button"
+          inert={mode !== "pill"}
+          aria-hidden={mode !== "pill" || undefined}
           aria-haspopup="dialog"
           aria-label="Ask GRID or run a command"
           aria-keyshortcuts="Control+K Meta+K /"

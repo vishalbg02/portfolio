@@ -52,7 +52,7 @@ export function LiveSite({
 
   return (
     <figure
-      data-demo={slug}
+      data-live={slug}
       data-live-site={canEmbed ? "embeddable" : offline ? "offline" : "captures"}
       className="my-8 rounded-card border border-border bg-surface p-3 sm:p-4"
     >

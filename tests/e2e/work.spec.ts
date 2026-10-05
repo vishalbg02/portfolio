@@ -55,15 +55,19 @@ test.describe("work cards & status", () => {
       await expect(panel.locator(".beat[data-active]").getByRole("img")).toBeVisible();
       await expect(panel.getByRole("link", { name: /Case study/ })).toHaveAttribute("href", `/work/${slug}`);
     }
-    // Live ↗ only where a live URL exists; Code ↗ only where a repo exists; Google Play only for Talnio
+    // "Visit live site ↗" only where a live URL exists; Code ↗ only where a repo exists; Google Play only for Talnio
     const has = async (slug: string, name: RegExp) => {
       await showProject(page, slug);
       return page.locator(`.scene[data-project='${slug}']`).getByRole("link", { name }).count();
     };
-    expect([await has("golden-verdict", /^Live/), await has("golden-verdict", /^Code/)]).toEqual([1, 0]);
-    expect([await has("talnio", /^Live/), await has("talnio", /^Google Play/)]).toEqual([0, 1]);
-    expect([await has("lansymphony", /^Live/), await has("lansymphony", /^Code/)]).toEqual([0, 0]);
-    expect([await has("virtual-tour", /^Live/), await has("virtual-tour", /^Code/)]).toEqual([1, 1]);
+    expect([await has("golden-verdict", /^Visit live site/), await has("golden-verdict", /^Code/)]).toEqual([
+      1, 0,
+    ]);
+    expect([await has("talnio", /^Visit live site/), await has("talnio", /^Google Play/)]).toEqual([0, 1]);
+    expect([await has("lansymphony", /^Visit live site/), await has("lansymphony", /^Code/)]).toEqual([0, 0]);
+    expect([await has("virtual-tour", /^Visit live site/), await has("virtual-tour", /^Code/)]).toEqual([
+      1, 1,
+    ]);
     await expect(work.getByRole("link", { name: /^Code/ })).toHaveAttribute(
       "href",
       "https://github.com/vishalbg02/virtual_tour",
@@ -80,8 +84,10 @@ test.describe("work cards & status", () => {
   });
 
   test("status badges: skeleton first, then Live · ms / Degraded / static badges", async ({ page }) => {
-    await mockStatus(page, statusBody(), 700);
-    await gotoReady(page, "/"); // not networkidle: we want to see the skeleton before the status arrives
+    await mockStatus(page, statusBody(), 2500);
+    // not gotoReady (it waits for the idle-loaded hosts) nor networkidle: we want the skeleton before the status
+    await page.goto("/");
+    await page.locator("html[data-omnibar='ready']").waitFor({ state: "attached" });
     const gv = page.locator(".scene[data-project='golden-verdict']");
     await expect(gv.getByRole("status").getByText("Checking status")).toBeVisible();
     await expect(gv.getByText("Live · 142 ms")).toBeVisible();

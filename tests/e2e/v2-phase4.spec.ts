@@ -5,9 +5,30 @@ import { gotoHydrated, settleAnimations } from "./helpers";
 /** V2 · Phase 4: case-study layout, auto-playing diagram, live demo + walkthroughs, transitions. */
 const TOUR = "https://virtual-tour-opal.vercel.app";
 
+// the tour allows framing (so "Launch live site" shows); Golden Verdict refuses it (captures + Visit live site)
 const mockStatus = (page: Page) =>
   page.route("**/api/status", (r) =>
-    r.fulfill({ json: { checkedAt: new Date().toISOString(), statuses: {} } }),
+    r.fulfill({
+      json: {
+        checkedAt: new Date().toISOString(),
+        statuses: {
+          "virtual-tour": {
+            slug: "virtual-tour",
+            state: "live",
+            latencyMs: 80,
+            embeddable: true,
+            checkedAt: "x",
+          },
+          "golden-verdict": {
+            slug: "golden-verdict",
+            state: "live",
+            latencyMs: 90,
+            embeddable: false,
+            checkedAt: "x",
+          },
+        },
+      },
+    }),
   );
 
 const axe = async (page: Page, include?: string) => {
@@ -46,7 +67,10 @@ test.describe("case-study layout (desktop ≥ 1100)", () => {
   });
 
   test("the ToC highlights the section you are reading and links jump to it", async ({ page }) => {
-    await mockStatus(page);
+    // no status rows: the rail's height (and so where it steps aside for the diagram) stays what this test measures
+    await page.route("**/api/status", (r) =>
+      r.fulfill({ json: { checkedAt: new Date().toISOString(), statuses: {} } }),
+    );
     await gotoHydrated(page, "/work/golden-verdict");
     const link = (name: string) => page.locator("[data-rail]").getByRole("link", { name, exact: true });
     await expect(link("The problem")).toHaveAttribute("aria-current", "location");
@@ -164,7 +188,7 @@ test.describe("architecture diagram", () => {
   });
 });
 
-test.describe("virtual tour: live demo only on click", () => {
+test.describe("virtual tour: the live site only on click", () => {
   test("no iframe and no request to the tour before the click; the CSP allows only that origin", async ({
     page,
   }) => {
@@ -176,20 +200,22 @@ test.describe("virtual tour: live demo only on click", () => {
     expect(await page.locator("iframe").count()).toBe(0);
     expect(toTour).toEqual([]);
     const csp = res!.headers()["content-security-policy"]!;
-    expect(csp.split("; ").find((d) => d.startsWith("frame-src"))).toBe(`frame-src ${TOUR}`);
+    expect(csp.split("; ").find((d) => d.startsWith("frame-src"))).toBe(
+      `frame-src ${TOUR} https://goldenverdict.com https://www.goldenverdict.com`,
+    );
     // the poster state: sketch + button, with an Open in new tab link beside it
-    const demo = page.locator("[data-demo='virtual-tour']");
+    const demo = page.locator("[data-live='virtual-tour']");
     await expect(demo.getByRole("img")).toBeVisible();
     await expect(demo.getByRole("link", { name: /Open in new tab/ })).toHaveAttribute("href", TOUR);
   });
 
-  test("Launch live demo creates one sandboxed iframe with the right attributes", async ({ page }) => {
+  test("Launch live site creates one sandboxed iframe with the right attributes", async ({ page }) => {
     await mockStatus(page);
     await page.route(`${TOUR}/**`, (r) =>
       r.fulfill({ contentType: "text/html", body: "<!doctype html><title>tour</title><p>tour</p>" }),
     );
     await gotoHydrated(page, "/work/virtual-tour");
-    await page.getByRole("button", { name: /Launch live demo/ }).click();
+    await page.getByRole("button", { name: /Launch live site/ }).click();
     const frame = page.locator("iframe");
     await expect(frame).toHaveCount(1);
     await expect(frame).toHaveAttribute("src", TOUR);
@@ -198,7 +224,7 @@ test.describe("virtual tour: live demo only on click", () => {
     await expect(frame).toHaveAttribute("loading", "lazy");
     await expect(frame).toHaveAttribute("title", /Virtual Tour/);
     await expect(page.getByRole("button", { name: "Full screen" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Launch live demo/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Launch live site/ })).toHaveCount(0);
   });
 
   test("axe is clean before and after launching", async ({ page }) => {
@@ -208,9 +234,9 @@ test.describe("virtual tour: live demo only on click", () => {
     );
     await gotoHydrated(page, "/work/virtual-tour");
     expect(await axe(page)).toEqual([]);
-    await page.getByRole("button", { name: /Launch live demo/ }).click();
+    await page.getByRole("button", { name: /Launch live site/ }).click();
     await expect(page.locator("iframe")).toHaveCount(1);
-    expect(await axe(page, "[data-demo='virtual-tour']")).toEqual([]);
+    expect(await axe(page, "[data-live='virtual-tour']")).toEqual([]);
   });
 });
 
@@ -262,10 +288,9 @@ test.describe("walkthroughs (Golden Verdict, Talnio, LanSymphony)", () => {
     await mockStatus(page);
     await gotoHydrated(page, "/work/golden-verdict");
     const demo = page.locator("[data-demo='golden-verdict']");
-    await expect(demo.getByRole("link", { name: /Visit live site/ })).toHaveAttribute(
-      "href",
-      "https://goldenverdict.com",
-    );
+    await expect(
+      page.locator("[data-live='golden-verdict']").getByRole("link", { name: /Visit live site/ }),
+    ).toHaveAttribute("href", "https://goldenverdict.com");
     const stage = demo.locator("[aria-hidden='true']").filter({ hasText: "Choose a service" });
     await expect(stage).toContainText("Choose a service"); // Customer
     await demo.getByRole("group", { name: "View as" }).getByRole("button", { name: "Admin" }).click();

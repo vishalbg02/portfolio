@@ -72,7 +72,7 @@ test.describe("the 60-second tour", () => {
     await page.clock.install();
     await gotoReady(page, "/");
     await expect(page.locator("html")).toHaveAttribute("data-tour", "ready");
-    await page.getByRole("link", { name: /Take the 60-second tour/ }).click();
+    await page.getByRole("link", { name: /60-second tour/ }).click();
     await expect(page).toHaveURL(/\/$/); // the link did not navigate
     await expect(tour(page)).toBeVisible();
     await expect(tour(page)).toContainText("Stop 1 of 6");

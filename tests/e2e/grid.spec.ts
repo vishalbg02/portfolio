@@ -24,15 +24,11 @@ test.beforeEach(async ({ context }) => ownClient(context));
 test.describe("GRID: the hero and the section headers", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test("the hero has Ask GRID as a third primary action, with the promise line, and it opens the chat", async ({
-    page,
-  }) => {
+  test("the hero has Ask GRID as its second primary action, and it opens the chat", async ({ page }) => {
     await mockStatus(page);
     await gotoReady(page, "/");
     await expect(page.getByRole("link", { name: "View work" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Résumé" }).first()).toBeVisible();
     await expect(heroAsk(page)).toBeVisible();
-    await expect(page.getByText("Ask anything about my work, or let GRID show you around.")).toBeVisible();
     await openSheet(page);
   });
 

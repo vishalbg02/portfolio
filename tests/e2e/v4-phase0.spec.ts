@@ -35,7 +35,9 @@ const workTop = (page: Page) =>
   page.evaluate(() => document.getElementById("work")!.getBoundingClientRect().top + window.scrollY);
 
 test.describe("A1 · Golden Verdict opens on its home page", () => {
-  test("the first beat is the real home page capture, and no menu capture exists anywhere", async ({ page }) => {
+  test("the first beat is the real home page capture, and no menu capture exists anywhere", async ({
+    page,
+  }) => {
     await status(page);
     await gotoReady(page, "/");
     await page.evaluate((y) => window.scrollTo(0, y + 200), await workTop(page));
@@ -62,7 +64,9 @@ test.describe("A7 · Work: one screen per project; beats advance by themselves",
     await status(page);
     await gotoReady(page, "/");
     await page.evaluate((y) => window.scrollTo(0, y + 200), await workTop(page));
-    const active = page.locator('.scene[data-project="golden-verdict"] .beat-list li[data-active] .beat-label');
+    const active = page.locator(
+      '.scene[data-project="golden-verdict"] .beat-list li[data-active] .beat-label',
+    );
     await expect(active).toHaveText("The home page");
     await page.mouse.move(5, 5);
     await page.clock.runFor(3700);
@@ -77,7 +81,10 @@ test.describe("A7 · Work: one screen per project; beats advance by themselves",
     await page.mouse.move(5, 5);
     await page.clock.runFor(5000);
     await expect(active).toHaveText("Read a service");
-    await expect(page.getByRole("button", { name: "Play the screens" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "Play the screens" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     // keys still step through
     await page.locator(".work-stage").focus();
     await page.keyboard.press("ArrowRight");
@@ -86,12 +93,17 @@ test.describe("A7 · Work: one screen per project; beats advance by themselves",
 });
 
 test.describe("§4 · the live site: framed only when the site allows it", () => {
-  test("Golden Verdict refuses framing today: real captures and Visit live site, never a frame", async ({ page }) => {
+  test("Golden Verdict refuses framing today: real captures and Visit live site, never a frame", async ({
+    page,
+  }) => {
     await status(page, { gv: false, vt: true });
     await gotoReady(page, "/work/golden-verdict");
-    const live = page.locator('[data-demo="golden-verdict"]');
+    const live = page.locator('[data-live="golden-verdict"]');
     await expect(live).toHaveAttribute("data-live-site", "captures");
-    await expect(live.getByRole("link", { name: /Visit live site/ })).toHaveAttribute("href", "https://goldenverdict.com");
+    await expect(live.getByRole("link", { name: /Visit live site/ })).toHaveAttribute(
+      "href",
+      "https://goldenverdict.com",
+    );
     await expect(live.getByRole("button", { name: /Launch live site/ })).toHaveCount(0);
     expect(await page.locator("iframe").count()).toBe(0);
   });
@@ -102,18 +114,21 @@ test.describe("§4 · the live site: framed only when the site allows it", () =>
       r.fulfill({ contentType: "text/html", body: "<!doctype html><title>gv</title><p>gv</p>" }),
     );
     await gotoReady(page, "/work/golden-verdict");
-    const live = page.locator('[data-demo="golden-verdict"]');
+    const live = page.locator('[data-live="golden-verdict"]');
     await expect(live).toHaveAttribute("data-live-site", "embeddable");
     await live.getByRole("button", { name: /Launch live site/ }).click();
     const frame = live.locator("iframe");
-    await expect(frame).toHaveAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups");
+    await expect(frame).toHaveAttribute(
+      "sandbox",
+      "allow-scripts allow-same-origin allow-forms allow-popups",
+    );
     await expect(frame).toHaveAttribute("referrerpolicy", "no-referrer");
   });
 
   test("a site that is down shows captures and says so", async ({ page }) => {
     await status(page, { gv: null, vt: true, gvState: "offline" });
     await gotoReady(page, "/work/golden-verdict");
-    const live = page.locator('[data-demo="golden-verdict"]');
+    const live = page.locator('[data-live="golden-verdict"]');
     await expect(live).toHaveAttribute("data-live-site", "offline");
     await expect(live.getByText(/Offline right now/)).toBeVisible();
   });
@@ -130,8 +145,14 @@ test.describe("§4 · the live site: framed only when the site allows it", () =>
     await page.setViewportSize({ width: 1440, height: 900 });
     await status(page, { gv: false, vt: true });
     await gotoReady(page, "/");
-    await expect(page.locator('.scene[data-project="virtual-tour"]')).toHaveAttribute("data-embeddable", "true");
-    await expect(page.locator('.scene[data-project="golden-verdict"]')).not.toHaveAttribute("data-embeddable", /.*/);
+    await expect(page.locator('.scene[data-project="virtual-tour"]')).toHaveAttribute(
+      "data-embeddable",
+      "true",
+    );
+    await expect(page.locator('.scene[data-project="golden-verdict"]')).not.toHaveAttribute(
+      "data-embeddable",
+      /.*/,
+    );
   });
 });
 
@@ -177,7 +198,9 @@ test.describe("A4 · the Omnibar never covers something you can click or type in
       const covered = () =>
         page.evaluate(() => {
           const bar = document.querySelector(".omnibar")!;
-          const shown = [...bar.querySelectorAll("button")].filter((b) => getComputedStyle(b).visibility !== "hidden");
+          const shown = [...bar.querySelectorAll("button")].filter(
+            (b) => getComputedStyle(b).visibility !== "hidden",
+          );
           const hits: string[] = [];
           for (const b of shown) {
             const r = b.getBoundingClientRect();
@@ -188,7 +211,9 @@ test.describe("A4 · the Omnibar never covers something you can click or type in
               const q = el.getBoundingClientRect();
               if (!q.width || !q.height || getComputedStyle(el).visibility === "hidden") continue;
               if (q.right > r.left && q.left < r.right && q.bottom > r.top && q.top < r.bottom)
-                hits.push((el.textContent || el.getAttribute("aria-label") || el.tagName).trim().slice(0, 40));
+                hits.push(
+                  (el.textContent || el.getAttribute("aria-label") || el.tagName).trim().slice(0, 40),
+                );
             }
           }
           return hits;
@@ -259,14 +284,19 @@ test.describe("A8 · LET'S BUILD stays clear of the sticky nav", () => {
     await status(page);
     await gotoReady(page, "/#contact");
     await page.waitForTimeout(400);
-    const navBottom = await page.locator("header").first().evaluate((el) => el.getBoundingClientRect().bottom);
+    const navBottom = await page
+      .locator("header")
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().bottom);
     const bannerTop = await page.locator(".px-banner").evaluate((el) => el.getBoundingClientRect().top);
     expect(bannerTop).toBeGreaterThanOrEqual(navBottom);
   });
 });
 
 test.describe("A9 · the hero has two actions", () => {
-  test("View work and Ask GRID as buttons; résumé, contact and the tour as one quiet row", async ({ page }) => {
+  test("View work and Ask GRID as buttons; résumé, contact and the tour as one quiet row", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await status(page);
     await gotoReady(page, "/");
@@ -276,7 +306,7 @@ test.describe("A9 · the hero has two actions", () => {
     await expect(hero.getByRole("link", { name: /résumé/ })).toHaveAttribute("href", /resume\.pdf$/);
     await expect(hero.getByRole("link", { name: "contact" })).toHaveAttribute("href", "/#contact");
     await expect(hero.getByRole("link", { name: /60-second tour/ })).toBeVisible();
-    await expect(hero.getByRole("link", { name: "Résumé" })).toHaveCount(0);
+    await expect(hero.getByRole("link", { name: "Résumé", exact: true })).toHaveCount(0);
   });
 
   test("the nav ticker shows from 1280 px only", async ({ page }) => {

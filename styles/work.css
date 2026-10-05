@@ -330,6 +330,10 @@
   .scene[data-embeddable="true"] .scene-actions [data-live-launch] {
     display: inline-flex;
   }
+  /* a site that allows framing: Launch replaces Visit here (one row of actions; the case study has "Open in new tab") */
+  .scene[data-embeddable="true"] [data-visit-live] {
+    display: none;
+  }
   .work-index .work-pause {
     display: grid;
   }

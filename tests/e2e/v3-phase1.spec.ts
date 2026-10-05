@@ -8,25 +8,48 @@ import { gotoReady, settleAnimations } from "./helpers";
  * The media are real captures (public/media), the frames are drawn in code.
  */
 const SLUGS = ["golden-verdict", "talnio", "lansymphony", "virtual-tour"] as const;
-const BEATS = [4, 4, 3, 3];
 const mockStatus = (page: Page) =>
   page.route("**/api/status", (r) =>
-    r.fulfill({ json: { checkedAt: new Date().toISOString(), statuses: {} } }),
+    r.fulfill({
+      json: {
+        checkedAt: new Date().toISOString(),
+        // the tour allows framing (its "Launch live site" shows); nothing else is probed here
+        statuses: {
+          "virtual-tour": {
+            slug: "virtual-tour",
+            state: "live",
+            latencyMs: 80,
+            embeddable: true,
+            checkedAt: new Date().toISOString(),
+          },
+        },
+      },
+    }),
   );
 
-/** Scrolls the page to the middle of a beat of the pinned stage. */
+/**
+ * Scrolls the page to the middle of a scene of the pinned stage (V4: scroll picks the project, one screen each), then
+ * picks a beat with its caption button (beats advance by themselves, or by click, ←/→).
+ */
 async function toBeat(page: Page, scene: number, beat: number) {
-  const y = await page.evaluate(
-    ([s, b, beats]) => {
-      const pin = document.querySelector(".work-pin")!;
-      const stick = document.querySelector(".work-stick")!;
-      const top = pin.getBoundingClientRect().top + window.scrollY - 56;
-      const range = pin.clientHeight - stick.clientHeight;
-      return top + ((s! + (b! + 0.5) / beats![s!]!) / 4) * range;
-    },
-    [scene, beat, BEATS] as [number, number, number[]],
-  );
+  const y = await page.evaluate((s) => {
+    const pin = document.querySelector(".work-pin")!;
+    const stick = document.querySelector(".work-stick")!;
+    const top = pin.getBoundingClientRect().top + window.scrollY - 56;
+    const range = pin.clientHeight - stick.clientHeight;
+    return top + ((s + 0.5) / 4) * range;
+  }, scene);
   await page.evaluate((top) => window.scrollTo(0, top), y);
+  await expect(page.locator(".scene[data-active]")).toHaveAttribute("data-project", SLUGS[scene]!, {
+    timeout: 8000,
+  });
+  if (beat > 0) {
+    await page.locator(`.scene[data-active] [data-beat-go="${beat}"]`).click();
+    await expect(page.locator(`.scene[data-active] .beat-list li[data-beat="${beat}"]`)).toHaveAttribute(
+      "data-active",
+      "",
+    );
+  }
 }
 const activeScene = (page: Page) => page.locator(".scene[data-active]");
 const dissolveGone = (page: Page) =>
@@ -53,10 +76,10 @@ test.describe("pinned stage (desktop 1440)", () => {
     const img = scene.locator(".beat[data-active] img");
     await expect(img).toBeVisible();
     expect(await img.evaluate((el: HTMLImageElement) => el.currentSrc)).toContain(
-      "/media/golden-verdict/gv-menu-desktop",
+      "/media/golden-verdict/gv-home-desktop",
     );
     expect(await img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(300);
-    await expect(img).toHaveAttribute("alt", /Business Setup menu/);
+    await expect(img).toHaveAttribute("alt", /One platform for all your legal & tax compliance/);
     // all four scenes are in the DOM, in order, each labelled by its heading
     expect(await page.locator(".scene h3").allTextContents()).toEqual([
       "Golden Verdict",
@@ -66,19 +89,23 @@ test.describe("pinned stage (desktop 1440)", () => {
     ]);
   });
 
-  test("scrolling scrubs the beats of a scene, then dissolves into the next scene", async ({ page }) => {
+  test("scroll picks the project (one screen each, a dissolve between), the beats are chosen inside it", async ({
+    page,
+  }) => {
     await mockStatus(page);
     await gotoReady(page, "/");
     await toBeat(page, 0, 0);
-    await expect(activeScene(page).locator(".beat-list li[data-active]")).toHaveText(/Browse services/);
+    await expect(activeScene(page).locator(".beat-list li[data-active]")).toHaveText(/The home page/);
     await toBeat(page, 0, 2);
-    await expect(activeScene(page).locator(".beat-list li[data-active]")).toContainText("Upload documents");
+    await expect(activeScene(page).locator(".beat-list li[data-active]")).toContainText("How it works");
     await expect(activeScene(page).locator(".beat-list li[data-active] button")).toHaveAttribute(
       "aria-current",
       "step",
     );
     // an illustration beat is labelled as one
-    await expect(activeScene(page).getByText(/illustrations: the real dashboards are private/)).toBeVisible();
+    await expect(
+      activeScene(page).getByText(/an illustration: the real dashboards are private/),
+    ).toBeVisible();
     await toBeat(page, 1, 0);
     await expect(activeScene(page)).toHaveAttribute("data-project", "talnio", { timeout: 6000 });
     await dissolveGone(page);
@@ -100,7 +127,8 @@ test.describe("pinned stage (desktop 1440)", () => {
     await gotoReady(page, "/");
     await toBeat(page, 0, 0);
     const index = page.getByRole("navigation", { name: "Projects" });
-    await expect(index.getByRole("button")).toHaveCount(4);
+    await expect(index.getByRole("button", { name: /^0\d / })).toHaveCount(4);
+    await expect(index.getByRole("button", { name: "Pause the screens" })).toBeVisible();
     await expect(index.getByRole("button", { name: "01 Golden Verdict" })).toHaveAttribute(
       "aria-current",
       "true",
@@ -153,7 +181,7 @@ test.describe("pinned stage (desktop 1440)", () => {
     await open.click();
     const dialog = page.getByRole("dialog", { name: /Golden Verdict/ });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText("2 / 6")).toBeVisible(); // second capture of six
+    await expect(dialog.getByText("2 / 5")).toBeVisible(); // second capture of five
     // opened at the second beat's capture ("Read a service" = the GST page)
     await expect(dialog.getByRole("img")).toHaveAttribute("alt", /GST Registration page/);
     await page.keyboard.press("ArrowRight");
@@ -165,7 +193,7 @@ test.describe("pinned stage (desktop 1440)", () => {
     await expect(open).toBeFocused();
   });
 
-  test("Virtual Tour: nothing from its origin until Launch live demo, then one sandboxed iframe in place", async ({
+  test("Virtual Tour: nothing from its origin until Launch live site, then one sandboxed iframe in place", async ({
     page,
   }) => {
     await mockStatus(page);
@@ -181,7 +209,7 @@ test.describe("pinned stage (desktop 1440)", () => {
     await expect(activeScene(page)).toHaveAttribute("data-project", "virtual-tour", { timeout: 8000 });
     expect(requested).toEqual([]);
     await activeScene(page)
-      .getByRole("button", { name: /Launch live demo/ })
+      .getByRole("button", { name: /Launch live site/ })
       .click();
     const frame = activeScene(page).locator("iframe");
     await expect(frame).toHaveCount(1);
@@ -463,7 +491,7 @@ test.describe("media on the other pages", () => {
     await mockStatus(page);
     await page.goto("/work/golden-verdict");
     const gallery = page.getByRole("region", { name: "Captured from the live product" });
-    await expect(gallery.getByRole("button", { name: /View larger/ })).toHaveCount(6);
+    await expect(gallery.getByRole("button", { name: /View larger/ })).toHaveCount(5);
     await expect(gallery.locator("video[controls]")).toHaveCount(1);
     await expect(gallery.locator("video")).toHaveAttribute("preload", "none");
     await gallery

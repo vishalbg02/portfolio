@@ -7,18 +7,22 @@ import { DelightHost } from "@/components/delight/DelightHost";
 import { RouteWipe } from "@/components/delight/RouteWipe";
 import { ShortcutsHost } from "@/components/palette/ShortcutsHost";
 import { TourHost } from "@/components/tour/TourHost";
+import type { Replay } from "./IdleHosts";
 
 /**
  * The listeners nothing needs before the page is usable: keyboard navigation and `?`, the terminal and the game keys,
  * the tour, personal company links, the route dissolve and the context cursor. `IdleHosts` loads them as one chunk.
  *
- * `replay` is the key press that made `IdleHosts` load this chunk early. The hosts' listeners are attached by the time
- * this effect runs (children's effects run first), so the key is sent again and is not lost.
+ * `handOver` tells `IdleHosts` the listeners are attached (children's effects run before this one) and returns the
+ * keys and requests that arrived before that; they are sent again, in order, so none is lost.
  */
-export default function LateHosts({ replay }: { replay: string | null }) {
+export default function LateHosts({ handOver }: { handOver: () => Replay[] }) {
   useEffect(() => {
-    if (replay) window.dispatchEvent(new KeyboardEvent("keydown", { key: replay }));
-  }, [replay]);
+    for (const r of handOver()) {
+      if ("key" in r) window.dispatchEvent(new KeyboardEvent("keydown", { key: r.key }));
+      else window.dispatchEvent(new Event(r.event));
+    }
+  }, [handOver]);
 
   return (
     <>

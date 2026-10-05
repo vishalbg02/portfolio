@@ -9,12 +9,7 @@ import { ProjectSlugSchema } from "./profile-schema";
  */
 const text = z.string().trim().min(3);
 
-export const IllustrationIdSchema = z.enum([
-  "gv-track",
-  "ls-discover",
-  "ls-encrypt",
-  "ls-calls",
-]);
+export const IllustrationIdSchema = z.enum(["gv-track", "ls-discover", "ls-encrypt", "ls-calls"]);
 export type IllustrationId = z.infer<typeof IllustrationIdSchema>;
 
 const MediaRef = z.discriminatedUnion("type", [

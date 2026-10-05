@@ -18,7 +18,7 @@ async function openStack(page: Page) {
 test.describe("Stack map, desktop", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
-  test("skills sit on the left grouped by area, projects on the right, with a faint wire for every real connection", async ({
+  test("skills sit on the left grouped by area, projects and internships on the right, with a faint wire for every real connection", async ({
     page,
   }) => {
     const stack = await openStack(page);
@@ -28,15 +28,17 @@ test.describe("Stack map, desktop", () => {
       "Mobile",
       "Data & Cloud",
       "AI",
+      "Networking & security",
       "Tools",
     ]);
     const skill = (await stack.getByRole("button", { name: "Firebase" }).boundingBox())!;
     const project = (await stack.locator("[data-marker='talnio']").boundingBox())!;
     expect(skill.x + skill.width).toBeLessThan(project.x - 60); // a clear gutter for the wires
-    // one project dot per project that used a skill, named for a screen reader
+    // one square per place that used a skill (projects, then internships), named for a screen reader
     await expect(
-      stack.getByRole("button", { name: /Firebase.*used in Golden Verdict, Talnio/ }),
+      stack.getByRole("button", { name: /Firebase.*used in Golden Verdict, Talnio, Social Agent/ }),
     ).toBeVisible();
+    await expect(stack.locator("[data-marker='role-coveiot']")).toContainText("internship");
     const wires = await stack.locator("[data-layer=base] path").count();
     expect(wires).toBeGreaterThanOrEqual(15);
     expect(await stack.locator("[data-layer=base] path").first().getAttribute("stroke-width")).toBe("1");
@@ -50,7 +52,7 @@ test.describe("Stack map, desktop", () => {
     await firebase.click();
     await expect(firebase).toHaveAttribute("aria-pressed", "true");
     await page.mouse.move(2, 2);
-    await expect(stack.locator(".stack-line")).toHaveCount(2); // Golden Verdict and Talnio
+    await expect(stack.locator(".stack-line")).toHaveCount(3); // Golden Verdict, Talnio and the Social Agent internship
     await expect(stack.locator("[data-marker='golden-verdict']")).toBeVisible();
     const dash = await stack
       .locator(".stack-wire")
@@ -68,7 +70,7 @@ test.describe("Stack map, desktop", () => {
     const stack = await openStack(page);
     await stack.getByRole("button", { name: /^Firebase/ }).click();
     await page.mouse.move(2, 2);
-    await expect(stack.locator(".stack-line")).toHaveCount(2);
+    await expect(stack.locator(".stack-line")).toHaveCount(3);
     const style = await stack
       .locator(".stack-wire")
       .first()
@@ -99,7 +101,7 @@ test.describe("Stack map, phone", () => {
     const stack = await openStack(page);
     await expect(stack.getByTestId("stack-lines")).toHaveCount(0);
     const areas = stack.getByRole("heading", { level: 3 }).getByRole("button");
-    await expect(areas).toHaveCount(6);
+    await expect(areas).toHaveCount(7);
     await expect(areas.first()).toHaveAttribute("aria-expanded", "true");
     await expect(areas.nth(1)).toHaveAttribute("aria-expanded", "false");
     await expect(stack.getByRole("button", { name: /^Spring Boot/ })).toBeVisible();
