@@ -4,7 +4,7 @@ import { IntroOverlay } from "@/components/intro/IntroOverlay";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { homeJsonLd } from "@/lib/seo/jsonld";
 import { RailLoader } from "@/components/rail/RailLoader";
-import { AskVishal } from "@/components/sections/AskVishal";
+import { MeetGrid } from "@/components/sections/MeetGrid";
 import { Contact } from "@/components/sections/Contact";
 import { Experience } from "@/components/sections/Experience";
 import { LiveGitHub } from "@/components/sections/LiveGitHub";
@@ -40,7 +40,7 @@ export default function HomePage() {
 
       <LiveGitHub />
 
-      <AskVishal />
+      <MeetGrid />
 
       <Contact />
     </>

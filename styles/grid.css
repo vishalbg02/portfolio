@@ -263,3 +263,83 @@ html[data-grid-dock="open"] body {
     opacity: 0.55;
   }
 }
+
+/* ── Meet GRID (components/sections/MeetGrid.tsx) ──────────────────────────────────────────────── */
+/* the big face's eyes look toward the pointer: MeetGridLive sets --ex / --ey (in face units) */
+.gf-live:not([data-state="thinking"]) rect[data-row="1"][data-on],
+.gf-live[data-state="thinking"] rect[data-row="0"][data-on~="thinking"] {
+  transform: translate(var(--ex, 0px), var(--ey, 0px));
+  transition:
+    transform var(--dur-1) var(--ease-out),
+    fill 160ms linear;
+}
+
+/* a deck tile: on hover or focus its four squares fill in turn, left to right */
+.grid-tile-sq {
+  display: inline-flex;
+  gap: 2px;
+}
+.grid-tile-sq i {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--grid-1);
+  transition: background-color var(--dur-1) steps(1, end) calc(var(--i) * var(--stagger));
+}
+.grid-tile:hover .grid-tile-sq i,
+.grid-tile:focus-visible .grid-tile-sq i {
+  background: var(--accent);
+}
+
+/* "How GRID works": each step lights from the stream's real stage events */
+.grid-step {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card, 6px);
+  background: var(--color-surface);
+  padding: 10px 12px;
+  transition: border-color var(--dur-2) linear;
+}
+.grid-step-sq {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--grid-1);
+  transition: background-color var(--dur-1) linear;
+}
+.grid-step[data-state="active"] {
+  border-color: var(--accent);
+}
+.grid-step[data-state="active"] .grid-step-sq {
+  background: var(--accent);
+  animation: grid-step-blink 0.8s steps(2, jump-none) infinite;
+}
+.grid-step[data-state="done"] .grid-step-sq {
+  background: var(--grid-4);
+}
+.grid-step[data-state="skip"] {
+  border-style: dashed;
+}
+.grid-step[data-state="skip"] .grid-step-sq {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--grid-2);
+}
+.grid-step[data-state="error"] .grid-step-sq {
+  background: var(--color-danger);
+}
+@keyframes grid-step-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grid-tile-sq i {
+    transition: none;
+  }
+  .grid-step[data-state="active"] .grid-step-sq {
+    animation: none;
+  }
+  .gf-live rect {
+    transition: none !important;
+  }
+}

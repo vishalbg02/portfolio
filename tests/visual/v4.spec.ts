@@ -63,5 +63,31 @@ for (const size of SIZES) {
         mask: [page.locator("[data-visual-mask]"), page.locator("canvas"), page.getByRole("status")],
       });
     });
+
+    for (const run of [false, true]) {
+      test(`meet grid: ${run ? "after a tile run" : "idle"}`, async ({ page }) => {
+        test.skip(run && size.isMobile, "on a phone a tile opens the full-screen sheet (covered by e2e)");
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await status(page);
+        await page.goto("/");
+        await page.evaluate(() => document.fonts.ready);
+        const section = page.locator("#ask");
+        await section.locator("[data-grid-inline]").scrollIntoViewIfNeeded();
+        await expect(section.getByRole("log", { name: /Conversation/ })).toBeVisible();
+        if (run) {
+          // a router tile: the same answer every time, no model
+          await section.getByRole("link", { name: /^Shows projects/ }).click();
+          const log = section.getByRole("log", { name: /Conversation/ });
+          await expect(log.locator('[data-grid-card="project"]')).toBeVisible();
+          await expect(section.locator("[data-pipeline]")).toHaveAttribute("data-running", "false");
+        }
+        await page.mouse.move(0, 0);
+        await expect(section).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
+          animations: "disabled",
+          maxDiffPixelRatio: 0.01,
+          mask: [page.locator("[data-visual-mask]"), page.locator("canvas"), section.locator("img, video")],
+        });
+      });
+    }
   });
 }

@@ -386,8 +386,17 @@ describe("the planner with a scripted model", () => {
     expect(kinds.indexOf("meta")).toBeGreaterThanOrEqual(0);
     expect(kinds.indexOf("meta")).toBeLessThan(kinds.indexOf("text"));
     expect(kinds.indexOf("meta")).toBeLessThan(kinds.indexOf("part"));
-    const stages = events.filter((e) => e.t === "stage").map((e) => `${(e as { s: string }).s}:${(e as { state: string }).state}`);
-    expect(stages).toEqual(["route:skip", "retrieve:start", "retrieve:done", "rank:done", "answer:start", "answer:done"]);
+    const stages = events
+      .filter((e) => e.t === "stage")
+      .map((e) => `${(e as { s: string }).s}:${(e as { state: string }).state}`);
+    expect(stages).toEqual([
+      "route:skip",
+      "retrieve:start",
+      "retrieve:done",
+      "rank:done",
+      "answer:start",
+      "answer:done",
+    ]);
     expect(kinds).toEqual(expect.arrayContaining(["tool", "part", "text", "followups", "done"]));
     const part = events.find((e) => e.t === "part") as Extract<ChatEvent, { t: "part" }>;
     expect(part.part).toMatchObject({ kind: "project", slug: "talnio", name: "Talnio" });

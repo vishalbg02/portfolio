@@ -321,7 +321,9 @@ export function PartView({
           <p className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">The 30-second brief</p>
           <p className="mt-1.5 text-[15px] font-medium text-text">{part.who}</p>
           <p className="mt-0.5 text-sm text-muted">{part.status}</p>
-          <p className="mt-3.5 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">Strongest proof</p>
+          <p className="mt-3.5 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+            Strongest proof
+          </p>
           <ol className="mt-1.5 space-y-2">
             {part.proofs.map((x, i) => (
               <li key={x.title} className="flex gap-2.5 text-sm">
@@ -345,7 +347,10 @@ export function PartView({
               <li key={f.skill} className="flex items-baseline gap-2 text-sm">
                 <span
                   aria-hidden="true"
-                  className={cn("size-2 shrink-0 rounded-[2px]", f.where ? "bg-accent" : "border border-border-2")}
+                  className={cn(
+                    "size-2 shrink-0 rounded-[2px]",
+                    f.where ? "bg-accent" : "border border-border-2",
+                  )}
                 />
                 <span className="min-w-0 text-text">
                   {f.skill}

@@ -256,13 +256,21 @@ export function briefPart(): UiPart {
   const proofs = [
     ...live.map((x) => ({ title: x.name, line: x.summary, href: `/work/${x.slug}` })),
     ...(backendRole
-      ? [{ title: `${backendRole.short} · ${backendRole.kind}`, line: clip(backendRole.points[0]!, 140), href: "/#experience" }]
+      ? [
+          {
+            title: `${backendRole.short} · ${backendRole.kind}`,
+            line: clip(backendRole.points[0]!, 140),
+            href: "/#experience",
+          },
+        ]
       : []),
   ].slice(0, 3);
   const fit = p.targetRole.coreSkills.map((skill) => {
     const ev = skillEvidence(skill);
     const where =
-      ev.kind === "skill" ? (ev.where.find((w) => w.type !== "skills" && w.type !== "education")?.title ?? null) : null;
+      ev.kind === "skill"
+        ? (ev.where.find((w) => w.type !== "skills" && w.type !== "education")?.title ?? null)
+        : null;
     return { skill, where };
   });
   return {

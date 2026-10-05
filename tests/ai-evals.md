@@ -1,6 +1,6 @@
 # AI evaluation set
 
-46 questions for GRID (`/api/chat`): 12 factual, 6 that use tools, 6 adversarial, 6 multilingual or voice-style, 10 actions (A1–A10) and 6 that chain tools (M1–M6). Each has an expected behaviour; none of them asserts a fact that is not in `content/profile.ts` or a case study.
+56 questions for GRID (`/api/chat`): 12 factual, 6 that use tools, 6 adversarial, 6 multilingual or voice-style, 10 actions (A1–A10), 6 that chain tools (M1–M6) and 10 for the Meet GRID showpiece (S1–S10: the deck, the brief card and the pipeline strip's stages). Each has an expected behaviour; none of them asserts a fact that is not in `content/profile.ts` or a case study.
 
 How to run: set `GEMINI_API_KEY` and `GROQ_API_KEY` in `.env.local`, run `pnpm dev`, and ask each question in GRID (the Omnibar, `/`, or the Ask section). Repeat on each route:
 
@@ -88,6 +88,23 @@ Pass criteria for every answer: third person ("Vishal…"), at most a short para
 | M5  | Which of his work shows he can build REST APIs at scale?    | Model: `search_profile`, then `show_role` (Cove IoT) and, if the passages name one, `show_project`; at most three tools; then offers the case study or the architecture. States nothing beyond the passages ("at scale" is not claimed).                                                        |
 | M6  | Where did he use Firestore, and can I see how it was built? | Model or router: where it was used (Golden Verdict, Talnio, Social Agent), then `show_diagram` for Golden Verdict when asked to see how it was built, or an offer to.                                                                                                                           |
 
+## Meet GRID showpiece (V4, Phase 2)
+
+The deck's tiles send these exact requests; the "How GRID works" strip under the deck must light from the stream's own `stage` events, never from a timer. Watch the strip as you ask.
+
+| #   | Question                                | Expected                                                                                                                                                                                                                                   |
+| --- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S1  | Brief me in 30 seconds                  | Router, no model: one `brief` card. Who he is, his status and start date, up to three proofs that link to a case study or a section, every core skill of the target role with where he used it (or none), and email, LinkedIn and booking. |
+| S2  | tl;dr                                   | The same brief card (the router's brief phrasings). No model call.                                                                                                                                                                         |
+| S3  | What has he built with Spring Boot?     | Model: strip shows route skipped, retrieve with a count, rank with a count, then the answer; sources cited. Offline: the same stages, then a labelled excerpt.                                                                             |
+| S4  | Show me Talnio                          | Router: strip shows retrieve and rank skipped, Tools · 1, then the answer; the note says the router answered with no model. A project card.                                                                                                |
+| S5  | Show me the Golden Verdict architecture | Router: a `diagram` card for Golden Verdict.                                                                                                                                                                                               |
+| S6  | Play the LanSymphony walkthrough        | Router: a `demo` card; on the home page the Work section moves to LanSymphony.                                                                                                                                                             |
+| S7  | Where did he use Java?                  | Router: a skill card listing the projects and roles (Cove IoT) that used Java.                                                                                                                                                             |
+| S8  | (the deck's sample job description)     | Router: a `match` card; every requirement shows matched evidence or "not on the site"; no fit verdict.                                                                                                                                     |
+| S9  | Tailor his résumé for a backend role    | Router: a `resume` card. Nothing added, dropped or invented (the tailoring invariants).                                                                                                                                                    |
+| S10 | I'd like to send Vishal a message       | Router: a confirm card with **empty** name and email (nothing invented); nothing is sent until the visitor fills it and presses Send.                                                                                                      |
+
 ## Automated coverage
 
 The same behaviours are asserted without a live model:
@@ -96,4 +113,5 @@ The same behaviours are asserted without a live model:
 - `tests/unit/ai-routes.test.ts`: the provider chain (Gemini, then Groq 120B, then Groq 20B, then offline), cooldowns after a quota error, the first-token timeout, no switching once a route has started answering, one budget unit per question, the matcher's own fallback, and 【n】 normalisation.
 - `tests/unit/chat-route.test.ts` (refusal, offline fallback, budget, injection, limits, streaming protocol) and `tests/unit/rag.test.ts` (retrieval ranking for the grounded questions).
 - `tests/unit/actions.test.ts`, `message-route.test.ts`, `tailor-route.test.ts`, `voice.test.ts` and `tests/e2e/grid-actions.spec.ts`: the gate (a message is only prepared, sending needs the visitor's press and its own validated, rate-limited route), drafts, booking, interview notes, tailoring invariants (nothing added, dropped or invented), language, and voice with the browser's speech APIs faked.
+- `tests/unit/stages.test.ts` and `tests/e2e/grid-showpiece.spec.ts`: the strip's reducer for router, model and error runs, the brief card, every deck tile's card, the computed badges, and the strip lighting from a real run (S1–S10).
 - `tests/unit/grid-store.test.ts` and `tests/e2e/grid.spec.ts`: the conversation (memory, export, errors), the panel, the Omnibar, and the "show me" actions in a browser.

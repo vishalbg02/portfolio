@@ -111,7 +111,12 @@ export async function* chatEvents(
   yield { t: "stage", s: "retrieve", state: "start" };
   const retrieval = await retrieveFor(messages, opts.project);
   yield { t: "stage", s: "retrieve", state: "done", n: retrieval.results.length };
-  yield { t: "stage", s: "rank", state: "done", n: retrieval.coverage >= RELEVANCE_MIN ? retrieval.results.length : 0 };
+  yield {
+    t: "stage",
+    s: "rank",
+    state: "done",
+    n: retrieval.coverage >= RELEVANCE_MIN ? retrieval.results.length : 0,
+  };
   if (retrieval.coverage < RELEVANCE_MIN) {
     log({ mode: "refusal", coverage: +retrieval.coverage.toFixed(2), retrieval: retrieval.mode });
     yield { t: "meta", mode: "refusal", sources: [], reason: "off_topic" };
@@ -152,7 +157,10 @@ export async function* chatEvents(
       const first = !hasText;
       hasText = true;
       return first
-        ? [{ t: "stage", s: "answer", state: "start" }, { t: "text", d: part.text }]
+        ? [
+            { t: "stage", s: "answer", state: "start" },
+            { t: "text", d: part.text },
+          ]
         : [{ t: "text", d: part.text }];
     }
     if (part.type === "tool-call" && typeof part.toolName === "string" && isToolName(part.toolName)) {

@@ -12,19 +12,43 @@ import { corpusInfo } from "@/lib/rag/store";
  * by the deterministic router, so they work with no AI key; "Answers with sources" goes through retrieval.
  */
 const TILES = [
-  { label: "Answers with sources", example: "What has he built with Spring Boot?", run: "What has he built with Spring Boot?" },
+  {
+    label: "Answers with sources",
+    example: "What has he built with Spring Boot?",
+    run: "What has he built with Spring Boot?",
+  },
   { label: "Shows projects", example: "Show me Talnio", run: "Show me Talnio" },
-  { label: "Draws architecture", example: "Show me the Golden Verdict architecture", run: "Show me the Golden Verdict architecture" },
-  { label: "Plays walkthroughs", example: "Play the LanSymphony walkthrough", run: "Play the LanSymphony walkthrough" },
+  {
+    label: "Draws architecture",
+    example: "Show me the Golden Verdict architecture",
+    run: "Show me the Golden Verdict architecture",
+  },
+  {
+    label: "Plays walkthroughs",
+    example: "Play the LanSymphony walkthrough",
+    run: "Play the LanSymphony walkthrough",
+  },
   { label: "Proves skills", example: "Where did he use Java?", run: "Where did he use Java?" },
   { label: "Matches a job description", example: "Paste a JD: here, a sample one", run: SAMPLE_JD },
-  { label: "Tailors a résumé", example: "Tailor his résumé for a backend role", run: "Tailor his résumé for a backend role" },
-  { label: "Messages Vishal", example: "I'd like to send Vishal a message", run: "I'd like to send Vishal a message" },
+  {
+    label: "Tailors a résumé",
+    example: "Tailor his résumé for a backend role",
+    run: "Tailor his résumé for a backend role",
+  },
+  {
+    label: "Messages Vishal",
+    example: "I'd like to send Vishal a message",
+    run: "I'd like to send Vishal a message",
+  },
 ] as const;
 
 /** "How GRID works": the pipeline a real request lights up as it passes (lib/grid/stages.ts drives it live). */
 const STEPS = [
-  { id: "question", title: "Your question", caption: "Anything about his work; a pasted job description too" },
+  {
+    id: "question",
+    title: "Your question",
+    caption: "Anything about his work; a pasted job description too",
+  },
   { id: "retrieve", title: "Retrieve", caption: "BM25 and embeddings over this site's own text" },
   { id: "rank", title: "Rank", caption: "Fused by rank; too weak a match is refused" },
   { id: "tools", title: "Tools", caption: "Cards built from content, never by the model" },
@@ -51,7 +75,17 @@ function SquareGlyph({ i }: { i: number }) {
       {[0, 1, 2, 3, 4].map((k) => {
         const x = [0, 6, 3, 0, 6][k]!;
         const y = [0, 0, 3, 6, 6][k]!;
-        return <rect key={k} x={x} y={y} width="5" height="5" rx="1" fill={on.includes(k) ? "var(--accent)" : "var(--grid-1)"} />;
+        return (
+          <rect
+            key={k}
+            x={x}
+            y={y}
+            width="5"
+            height="5"
+            rx="1"
+            fill={on.includes(k) ? "var(--accent)" : "var(--grid-1)"}
+          />
+        );
       })}
     </svg>
   );
@@ -74,25 +108,25 @@ export function MeetGrid() {
 
       <div className="grid gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,45fr)_minmax(0,55fr)]">
         {/* the stage */}
-        <div className="brackets flex flex-col items-center justify-center rounded-card border border-border bg-surface px-6 py-8 text-center">
+        <div className="brackets flex flex-col items-center justify-center rounded-card border border-border bg-surface px-4 py-6 text-center px-shadow sm:px-6 sm:py-8">
           <div data-grid-stage="" className="relative">
             <GridFace state="idle" size={168} className="gf-live max-sm:hidden" />
             <GridFace state="idle" size={112} className="gf-live sm:hidden" />
           </div>
-          <p className="mt-6 max-w-sm text-xl leading-snug font-semibold text-balance text-text md:text-2xl">
+          <p className="mt-5 max-w-sm text-lg leading-snug font-semibold text-balance text-text sm:mt-6 sm:text-xl md:text-2xl">
             It has read every page of this site, so you don&apos;t have to.
           </p>
-          <ul className="mt-5 flex flex-wrap justify-center gap-2" aria-label="GRID in numbers">
+          <ul className="mt-5 flex flex-wrap justify-center gap-1.5 sm:gap-2" aria-label="GRID in numbers">
             {[
-              [passages, "passages indexed"],
+              [passages, "passages"],
               [TOOL_NAMES.length, "tools"],
               [languages, "languages"],
             ].map(([n, what]) => (
               <li
                 key={what}
-                className="inline-flex items-baseline gap-1.5 rounded-pill border border-border px-3 py-1 font-mono text-xs text-muted"
+                className="inline-flex items-baseline gap-1.5 rounded-pill border border-border px-2.5 py-1 font-mono text-xs text-muted sm:px-3"
               >
-                <span className="font-tabular text-text">{n}</span> {what}
+                <span className="text-text font-tabular">{n}</span> {what}
               </li>
             ))}
           </ul>
@@ -100,8 +134,10 @@ export function MeetGrid() {
 
         {/* the command deck */}
         <div className="min-w-0">
-          <h3 className="mb-3 font-mono text-xs tracking-[0.12em] text-muted uppercase">Run a real request</h3>
-          <ul className="grid gap-2 sm:grid-cols-2" data-grid-deck="">
+          <h3 className="mb-3 font-mono text-xs tracking-[0.12em] text-muted uppercase">
+            Run a real request
+          </h3>
+          <ul className="grid grid-cols-2 gap-2" data-grid-deck="">
             {TILES.map((t, i) => (
               <li key={t.label}>
                 <Link
@@ -110,63 +146,79 @@ export function MeetGrid() {
                   data-grid-run={t.run}
                   data-tile={i}
                   data-cursor="ask"
-                  className="grid-tile group flex h-full min-h-[76px] flex-col rounded-card border border-border bg-surface px-3.5 py-3 transition-colors hover:border-accent focus-visible:border-accent"
+                  className="grid-tile group flex h-full min-h-14 flex-col justify-center rounded-card border border-border bg-surface px-3 py-2.5 transition-colors hover:border-accent focus-visible:border-accent sm:min-h-[76px] sm:justify-start sm:px-3.5 sm:py-3"
                 >
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs tracking-[0.08em] text-text uppercase">{t.label}</span>
+                  <span className="flex items-start justify-between gap-2">
+                    <span className="font-mono text-[11px] leading-snug tracking-[0.08em] text-text uppercase sm:text-xs">
+                      {t.label}
+                    </span>
                     <span
                       aria-hidden="true"
-                      className="inline-flex items-center gap-1 font-mono text-[11px] text-muted transition-colors group-hover:text-accent"
+                      className="mt-0.5 inline-flex shrink-0 items-center gap-1 font-mono text-[11px] text-muted transition-colors group-hover:text-accent"
                     >
-                      Run <span>▶</span>
+                      <span className="grid-tile-sq">
+                        {[0, 1, 2, 3].map((k) => (
+                          <i key={k} style={{ ["--i" as string]: k }} />
+                        ))}
+                      </span>
+                      <span className="max-sm:hidden">Run</span>
                     </span>
                   </span>
-                  <span className="mt-1.5 block text-[13px] leading-snug text-muted">{t.example}</span>
+                  <span className="mt-1.5 block text-[13px] leading-snug text-muted max-sm:hidden">
+                    {t.example}
+                  </span>
                 </Link>
               </li>
             ))}
           </ul>
           <p className="mt-3 font-mono text-[11px] text-muted">
-            Each one runs in the chat below, for real. Press <kbd className="font-mono text-text">/</kbd> anywhere to
-            ask your own.
+            Each one runs for real<span className="max-md:hidden">, in the chat below</span>.
+            <span className="max-md:hidden pointer-coarse:hidden">
+              {" "}
+              Press <kbd className="font-mono text-text">/</kbd> anywhere to ask your own.
+            </span>
           </p>
         </div>
       </div>
 
-      {/* the chat */}
+      {/* how it works, lit live by the stream's stage events. A tile scrolls here: the strip and the chat fit one screen, so a run is seen lighting up as it answers */}
       <div className="mx-auto mt-10 max-w-[960px]" data-grid-inline="">
-        <LazyGridChat />
-      </div>
-
-      {/* how it works: lit live by the stream's stage events */}
-      <div className="mx-auto mt-10 max-w-[960px]">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h3 className="font-mono text-xs tracking-[0.12em] text-muted uppercase">How GRID works</h3>
+          <p data-pipeline-note="" className="min-w-0 flex-1 truncate font-mono text-[11px] text-muted" />
           <Link
             href="/log/an-assistant-that-says-i-dont-know"
-            className="font-mono text-[11px] text-link underline-offset-4 hover:underline"
+            className="inline-flex min-h-6 items-center font-mono text-[11px] text-link underline-offset-4 hover:underline pointer-coarse:min-h-11"
           >
             Read how it was built →
           </Link>
         </div>
-        <ol data-pipeline="" data-router="false" className="grid-pipeline grid gap-2 sm:grid-cols-5">
+        <ol
+          data-pipeline=""
+          data-router="false"
+          className="grid-pipeline grid gap-1.5 sm:grid-cols-5 sm:gap-2"
+        >
           {STEPS.map((s, i) => (
             <li key={s.id} data-step={s.id} data-state="idle" className="grid-step">
               <span className="flex items-center gap-2 font-mono text-xs text-text">
                 <span aria-hidden="true" className="grid-step-sq" />
-                <span className="font-tabular text-muted">{i + 1}</span>
+                <span className="text-muted font-tabular">{i + 1}</span>
                 {s.title}
-                <span data-count="" className="font-tabular text-muted" />
+                <span data-count="" className="text-muted font-tabular" />
               </span>
-              <span className="mt-1 block text-[12px] leading-snug text-muted">{s.caption}</span>
+              <span className="mt-1 block text-[12px] leading-snug text-muted max-sm:hidden">
+                {s.caption}
+              </span>
             </li>
           ))}
         </ol>
-        <p data-pipeline-note="" className="mt-2 min-h-5 font-mono text-[11px] text-muted" aria-live="polite" />
+        <div className="mt-4">
+          <LazyGridChat />
+        </div>
       </div>
 
       {/* what the code promises */}
-      <ul className="mx-auto mt-8 grid max-w-[960px] gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="mx-auto mt-8 grid max-w-[960px] grid-cols-2 gap-x-4 gap-y-3 sm:gap-x-6 lg:grid-cols-4">
         {HONESTY.map((h, i) => (
           <li key={h.title} className="flex gap-2.5">
             <SquareGlyph i={i} />
