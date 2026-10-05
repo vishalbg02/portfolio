@@ -25,6 +25,7 @@ import {
 import { currentPresence } from "@/lib/live/read";
 import { draftPart } from "./drafts";
 import { interviewCard } from "./interview";
+import { extractSlots } from "./slots";
 import { cleanRole, requirementsFor, resumeCard } from "./resume";
 import { embedQuery, inScope, SCOPES } from "./retrieval";
 import type { SourceRegistry } from "./sources";
@@ -37,7 +38,14 @@ import type { SourceRegistry } from "./sources";
  */
 export type ToolResult = { part: UiPart | null; summary: string; error?: boolean };
 
-export type ToolContext = { sources: SourceRegistry };
+const withoutEmpty = <T extends Record<string, unknown>>(o: T) =>
+  Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== "")) as Partial<T>;
+
+export type ToolContext = {
+  sources: SourceRegistry;
+  /** The visitor's latest message: who they said they are fills any card field the model left empty. */
+  visitorText?: string;
+};
 
 const result = (r: ToolResult): ToolResult => r;
 const modelText = (o: ToolResult) => ({ type: "text" as const, value: o.summary });
@@ -201,15 +209,18 @@ export function buildTools(ctx: ToolContext) {
     // and that press goes to /api/grid/message, which validates and rate-limits it. The model has no way to send.
     send_message_to_vishal: tool({
       description:
-        "Prepare a message from the visitor to Vishal. This does NOT send anything: it shows a card where the visitor reviews, edits and confirms. Use when they want to message him, send him an invite, or pass on a question you could not answer. Put only what the visitor said into the fields.",
+        "Prepare a message from the visitor to Vishal. This does NOT send anything: it shows a card where the visitor reviews, edits and confirms. Use when they want to message him, send him an invite, or pass on a question you could not answer. Put only what the visitor said into the fields: their name, email, company and the role they are hiring for when they said them.",
       inputSchema: z.object({
         name: z.string().trim().max(80).optional(),
         email: z.string().trim().max(200).optional(),
+        company: z.string().trim().max(80).optional(),
+        role: z.string().trim().max(80).optional(),
         message: z.string().trim().min(1).max(1500),
       }),
       execute: async (input): Promise<ToolResult> =>
         result({
-          part: confirmPart(input),
+          // the model's fields win; anything it left out comes from the visitor's own words (validated slots)
+          part: confirmPart({ ...extractSlots(ctx.visitorText ?? ""), ...withoutEmpty(input) }),
           summary:
             "Prepared a message for the visitor to review. NOTHING has been sent. Tell them to check it and press Send (or edit or cancel).",
         }),

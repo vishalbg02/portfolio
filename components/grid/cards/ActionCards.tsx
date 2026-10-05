@@ -45,6 +45,8 @@ export function BookCard({ part, mailto }: { part: Extract<UiPart, { kind: "book
             action: "send_message",
             name: "",
             email: "",
+            company: "",
+            role: "",
             message: "Hi Vishal, I'd like to book a short call. Times that suit me: ",
             mailto,
           }}
@@ -92,6 +94,8 @@ export function InterviewCard({
             action: "send_message",
             name: "",
             email: "",
+            company: "",
+            role: "",
             message: `Hi Vishal, a question for you: ${part.question}`,
             mailto,
           }}

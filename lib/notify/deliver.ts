@@ -20,7 +20,7 @@ const real: Deps = {
           await startConversation({
             name: m.name,
             email: m.email,
-            org: null,
+            org: m.org ?? null,
             message: m.message,
             page: m.page ?? "/",
             ipHash: m.ipHash ?? "grid",
@@ -29,7 +29,10 @@ const real: Deps = {
         ).ok
       : sendTelegram(ownerPing(m)),
   email: (m) =>
-    sendOwnerEmail({ name: m.name, email: m.email, message: m.message }, "GRID, the chat on the site"),
+    sendOwnerEmail(
+      { name: m.name, email: m.email, org: m.org ?? null, message: m.message },
+      "GRID, the chat on the site",
+    ),
 };
 
 /**

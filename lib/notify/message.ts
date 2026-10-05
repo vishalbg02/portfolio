@@ -7,6 +7,9 @@ export const MESSAGE_LIMITS = {
   name: { min: 2, max: 80 },
   email: { max: 200 },
   message: { min: 10, max: 1500 },
+  /** Optional, one line each: the sender's company and the role they are writing about. */
+  company: { max: 80 },
+  role: { max: 80 },
   /** More than this many links in one message is refused (a spam tell). */
   links: 2,
 } as const;

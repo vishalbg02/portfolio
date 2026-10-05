@@ -116,6 +116,9 @@ export type UiPart =
       action: "send_message";
       name: string;
       email: string;
+      /** Optional: the sender's company and the role they are writing about (pre-filled from what they typed). */
+      company: string;
+      role: string;
       message: string;
       /** Where to write instead if delivery is not possible (built on the server from the profile). */
       mailto: string;

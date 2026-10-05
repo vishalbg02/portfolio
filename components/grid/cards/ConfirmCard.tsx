@@ -3,11 +3,15 @@
 import { useId, useRef, useState } from "react";
 import type { UiPart } from "@/lib/ai/protocol";
 import { track } from "@/lib/analytics";
-import { MESSAGE_LIMITS, validateMessage, type MessageErrors } from "@/lib/notify/message";
+import { MESSAGE_LIMITS, oneLine, validateMessage, type MessageErrors } from "@/lib/notify/message";
 import { mailtoHref } from "@/lib/contact/rules";
 import { card, field, label, primary, quiet } from "./styles";
 
 type Confirm = Extract<UiPart, { kind: "confirm" }>;
+
+/** "Backend Engineer role · Acme", from whichever of the two the visitor gave. */
+const orgLine = (company: string, role: string) =>
+  [role.trim() ? `${role.trim()} role` : "", company.trim()].filter(Boolean).join(" · ");
 type Status = "idle" | "sending" | "sent" | "error";
 
 /**
@@ -27,6 +31,8 @@ export function ConfirmCard({
   const uid = useId();
   const [name, setName] = useState(part.name);
   const [email, setEmail] = useState(part.email);
+  const [company, setCompany] = useState(part.company ?? "");
+  const [role, setRole] = useState(part.role ?? "");
   const [message, setMessage] = useState(part.message);
   const [editing, setEditing] = useState(!part.name || !part.email || !part.message);
   const [status, setStatus] = useState<Status>("idle");
@@ -71,6 +77,8 @@ export function ConfirmCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...v.data,
+          company: oneLine(company).slice(0, MESSAGE_LIMITS.company.max),
+          role: oneLine(role).slice(0, MESSAGE_LIMITS.role.max),
           requestId: requestId.current,
           page: window.location.pathname,
           website: "",
@@ -148,6 +156,34 @@ export function ConfirmCard({
               </p>
             ) : null}
           </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor={`${uid}-c`} className={label}>
+                Company <span className="text-muted">(optional)</span>
+              </label>
+              <input
+                id={`${uid}-c`}
+                value={company}
+                maxLength={MESSAGE_LIMITS.company.max}
+                autoComplete="organization"
+                onChange={(e) => setCompany(e.target.value)}
+                className={field}
+              />
+            </div>
+            <div>
+              <label htmlFor={`${uid}-r`} className={label}>
+                Role you&apos;re hiring for <span className="text-muted">(optional)</span>
+              </label>
+              <input
+                id={`${uid}-r`}
+                value={role}
+                maxLength={MESSAGE_LIMITS.role.max}
+                autoComplete="organization-title"
+                onChange={(e) => setRole(e.target.value)}
+                className={field}
+              />
+            </div>
+          </div>
           <div>
             <label htmlFor={`${uid}-m`} className={label}>
               Message
@@ -180,6 +216,14 @@ export function ConfirmCard({
               {name} &lt;{email}&gt;
             </dd>
           </div>
+          {company.trim() || role.trim() ? (
+            <div className="flex gap-3">
+              <dt className="w-14 shrink-0 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+                About
+              </dt>
+              <dd className="min-w-0 break-words text-text">{orgLine(company, role)}</dd>
+            </div>
+          ) : null}
           <div className="flex gap-3">
             <dt className="w-14 shrink-0 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
               Message

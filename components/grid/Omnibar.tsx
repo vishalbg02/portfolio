@@ -6,6 +6,15 @@ import { Kbd } from "@/components/palette/Kbd";
 import { useIsMac } from "@/components/palette/useIsMac";
 import { track } from "@/lib/analytics";
 import { OPEN_OMNIBAR_EVENT } from "@/lib/grid/events";
+import {
+  INTERACTIVE,
+  omniMode,
+  pillRect,
+  puckRect,
+  samplePoints,
+  type OmniMode,
+  type Rect,
+} from "@/lib/grid/overlap";
 import { isTypingTarget } from "@/lib/shortcuts";
 import { shipped } from "@/lib/site";
 import { GridFace } from "./GridFace";
@@ -24,7 +33,28 @@ const HINTS = [
  * The persistent bar at the bottom of the page (desktop): one input for commands and questions. This is only the
  * pill and the keys (⌘K, `/`); the panel itself is a separate chunk, fetched on first intent. On a phone the dock's
  * GRID button does this job.
+ *
+ * It never sits on top of something you could click or type in (lib/grid/overlap.ts): the full pill at rest and while
+ * scrolling up; a 48 px GRID face at the bottom right while scrolling down, while a field has focus, over the footer,
+ * after Esc, or when the pill would cover a control; tucked into the edge when even that would.
  */
+/** Is something clickable the topmost thing at any sample point inside this rect (the Omnibar itself aside)? */
+function covers(r: Rect): boolean {
+  return samplePoints(r).some(({ x, y }) => {
+    for (const el of document.elementsFromPoint(x, y)) {
+      if (el.closest(".omnibar")) continue;
+      if (el === document.documentElement || el === document.body) return false;
+      return el.closest(INTERACTIVE) !== null;
+    }
+    return false;
+  });
+}
+
+const isField = (el: Element | null) =>
+  el instanceof HTMLElement &&
+  !el.closest(".omnibar") &&
+  (el.matches("input, textarea, select") || el.isContentEditable);
+
 export function Omnibar() {
   const isMac = useIsMac();
   const [open, setOpen] = useState(false);
@@ -32,7 +62,9 @@ export function Omnibar() {
   const [prefill, setPrefill] = useState("");
   const [hint, setHint] = useState(0);
   const [still, setStill] = useState(false);
+  const [mode, setMode] = useState<OmniMode>("pill");
   const pill = useRef<HTMLButtonElement>(null);
+  const puck = useRef<HTMLButtonElement>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const openRef = useRef(false);
   /** False until the panel is on screen; keys typed in that gap are kept and handed over, never lost. */
@@ -42,7 +74,9 @@ export function Omnibar() {
 
   const show = useCallback((text = "") => {
     const active = document.activeElement;
-    returnFocus.current = active instanceof HTMLElement && active !== document.body ? active : pill.current;
+    const bar =
+      pill.current && getComputedStyle(pill.current).visibility !== "hidden" ? pill.current : puck.current;
+    returnFocus.current = active instanceof HTMLElement && active !== document.body ? active : bar;
     panelReady.current = false;
     pendingEnter.current = false;
     setPrefill(text);
@@ -118,6 +152,69 @@ export function Omnibar() {
     };
   }, [show, setOpenSynced]);
 
+  // Pill or puck: decided on scroll (one frame at a time), focus changes, the footer coming into view, resize and Esc.
+  useEffect(() => {
+    const wide = window.matchMedia("(min-width: 768px)");
+    const state = { dir: "none" as "up" | "down" | "none", field: false, footer: false, escaped: false };
+    let lastY = window.scrollY;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (!wide.matches) return;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const collapsed = state.field || state.footer || state.escaped || state.dir === "down";
+      const coversPill = !collapsed && covers(pillRect(vw, vh));
+      const coversPuck = (collapsed || coversPill) && covers(puckRect(vw, vh));
+      setMode(omniMode({ ...state, coversPill, coversPuck }));
+    };
+    const soon = () => {
+      if (!raf) raf = window.requestAnimationFrame(update);
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      const dy = y - lastY;
+      if (Math.abs(dy) < 6) return;
+      lastY = y;
+      state.dir = dy > 0 ? "down" : "up";
+      if (state.dir === "up") state.escaped = false;
+      soon();
+    };
+    const onFocus = () => {
+      state.field = isField(document.activeElement);
+      soon();
+    };
+    const onBlur = () => window.setTimeout(onFocus, 0); // activeElement is updated after focusout
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || openRef.current || isTypingTarget(e.target)) return;
+      state.escaped = true;
+      soon();
+    };
+    const footer = document.querySelector("body > footer, footer");
+    const io = footer
+      ? new IntersectionObserver(([entry]) => {
+          state.footer = Boolean(entry?.isIntersecting);
+          soon();
+        })
+      : null;
+    if (footer) io?.observe(footer);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", soon);
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onBlur);
+    window.addEventListener("keydown", onEsc);
+    soon();
+    return () => {
+      window.cancelAnimationFrame(raf);
+      io?.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", soon);
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onBlur);
+      window.removeEventListener("keydown", onEsc);
+    };
+  }, []);
+
   // The suggestion changes every few seconds; with reduced motion, or while you point at it, it holds still.
   useEffect(() => {
     if (still || HINTS.length < 2) return;
@@ -128,7 +225,23 @@ export function Omnibar() {
 
   return (
     <>
-      <div className="omnibar needs-grid pointer-events-none fixed inset-x-0 bottom-5 z-40 hidden justify-center md:flex">
+      <div
+        data-mode={mode}
+        className="omnibar needs-grid pointer-events-none fixed inset-x-0 z-40 hidden justify-center md:flex"
+      >
+        <button
+          ref={puck}
+          type="button"
+          aria-haspopup="dialog"
+          aria-label="Ask GRID or run a command"
+          aria-keyshortcuts="Control+K Meta+K /"
+          onClick={() => show()}
+          onPointerEnter={() => void loadPanel()}
+          onFocus={() => void loadPanel()}
+          className="omni-puck pointer-events-auto absolute right-5 bottom-0 grid size-12 place-items-center rounded-card border border-border-2 bg-surface transition-colors hover:border-accent focus-visible:border-accent"
+        >
+          <GridFace state="idle" size={24} label="" />
+        </button>
         <button
           ref={pill}
           type="button"
@@ -146,7 +259,7 @@ export function Omnibar() {
             void loadPanel();
           }}
           onBlur={() => setStill(false)}
-          className="pointer-events-auto flex h-12 w-[min(520px,calc(100vw-48px))] items-center gap-3 rounded-pill border border-border-2 bg-surface pr-3 pl-4 text-left transition-colors hover:border-accent focus-visible:border-accent"
+          className="omni-pill pointer-events-auto flex h-12 w-[min(520px,calc(100vw-48px))] items-center gap-3 rounded-pill border border-border-2 bg-surface pr-3 pl-4 text-left transition-colors hover:border-accent focus-visible:border-accent"
         >
           <GridFace state="idle" size={22} label="" />
           <span

@@ -102,6 +102,32 @@ describe("what lands on Vishal's phone", () => {
     expect(text.length).toBeLessThan(4096);
   });
 
+  it("shows the company and role from the card, escaped, on an About line", async () => {
+    const { ownerPing, orgOf } = await import("@/lib/notify/telegram");
+    expect(orgOf("Acme", "Backend Engineer")).toBe("Backend Engineer role · Acme");
+    expect(orgOf("", "")).toBeNull();
+    const text = ownerPing({
+      name: "Priya",
+      email: "p@acme.dev",
+      message: "Hello there!",
+      org: orgOf("<b>Acme</b>", ""),
+    });
+    expect(text).toContain("<b>About:</b> &lt;b&gt;Acme&lt;/b&gt;");
+    expect(ownerPing({ name: "Priya", email: "p@acme.dev", message: "Hello there!" })).not.toContain(
+      "About:",
+    );
+  });
+
+  it("the route accepts the optional company and role (and refuses one that is too long)", async () => {
+    const { route } = await load("telegram");
+    const ok = await route.POST(
+      send({ ...GOOD, requestId: crypto.randomUUID(), company: "Acme", role: "SDE" }),
+    );
+    expect(ok.status).toBe(200);
+    const long = await route.POST(send({ ...GOOD, requestId: crypto.randomUUID(), company: "x".repeat(81) }));
+    expect(long.status).toBe(400);
+  });
+
   it("posts to Telegram with the chat id, HTML mode and no link preview, and never leaks the token", async () => {
     const { route } = await load("telegram");
     const res = await route.POST(send(GOOD));

@@ -24,6 +24,7 @@ import {
 import { looksLikeJobDescription, norm } from "./jd";
 import { draftPart, type DraftContext } from "./drafts";
 import { findInterviewNote, interviewCard } from "./interview";
+import { extractSlots } from "./slots";
 import { currentPresence } from "@/lib/live/read";
 import { cleanRole, requirementsFor, resumeCard } from "./resume";
 import { SourceRegistry } from "./sources";
@@ -249,7 +250,8 @@ async function routeAction(text: string, q: string, mode?: GridMode): Promise<Ro
   }
 
   if (MESSAGE.test(lead)) {
-    const part = confirmPart({ message: messageBody(text) });
+    // who is writing ("I'm Priya from Acme, priya@acme.dev") pre-fills the card; the visitor can change every field
+    const part = confirmPart({ ...extractSlots(text), message: messageBody(text) });
     return {
       parts: [{ tool: "send_message_to_vishal", part }],
       text: "Here's your message to him for review. Nothing is sent until you press Send.",

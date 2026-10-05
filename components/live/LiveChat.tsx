@@ -258,6 +258,8 @@ export default function LiveChat({
             action: "send_message",
             name: "",
             email: "",
+            company: "",
+            role: "",
             message: prefill ?? "",
             mailto: presence?.email ?? "",
           }}

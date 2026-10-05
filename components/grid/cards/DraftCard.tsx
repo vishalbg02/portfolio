@@ -83,7 +83,16 @@ export function DraftCard({ part, mailto }: { part: Draft; mailto: string }) {
       </section>
       {sending ? (
         <ConfirmCard
-          part={{ kind: "confirm", action: "send_message", name: "", email: "", message: body, mailto }}
+          part={{
+            kind: "confirm",
+            action: "send_message",
+            name: "",
+            email: "",
+            company: "",
+            role: "",
+            message: body,
+            mailto,
+          }}
         />
       ) : null}
     </div>

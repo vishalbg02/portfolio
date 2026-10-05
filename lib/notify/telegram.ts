@@ -6,7 +6,19 @@ import { site } from "@/lib/site";
 /** Telegram's HTML mode needs only these three escaped. Everything a visitor typed goes through this. */
 export const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-export type OwnerPing = { name: string; email: string; message: string; page?: string; ipHash?: string };
+export type OwnerPing = {
+  name: string;
+  email: string;
+  message: string;
+  /** "Backend Engineer role · Acme": the sender's company and the role they wrote about, when given. */
+  org?: string | null;
+  page?: string;
+  ipHash?: string;
+};
+
+/** The org line from the card's two optional fields. */
+export const orgOf = (company?: string, role?: string) =>
+  [role?.trim() ? `${role.trim()} role` : "", company?.trim() ?? ""].filter(Boolean).join(" · ") || null;
 
 /**
  * What lands on Vishal's phone. The visitor's text is escaped and placed after a fixed header; Telegram caps a message
@@ -16,6 +28,7 @@ export function ownerPing(m: OwnerPing, now: Date = new Date()): string {
   return [
     "💬 <b>New message via GRID</b>",
     `<b>From:</b> ${escapeHtml(m.name)} &lt;${escapeHtml(m.email)}&gt;`,
+    m.org ? `<b>About:</b> ${escapeHtml(m.org)}` : null,
     m.page ? `<b>Page:</b> ${escapeHtml(site.url.replace(/^https?:\/\//, ""))}${escapeHtml(m.page)}` : null,
     `<b>Sent:</b> ${escapeHtml(istStamp(now))}`,
     "",

@@ -245,11 +245,19 @@ export const livePart = (
 export const tourPart = (): UiPart => ({ kind: "tour", stops: TOUR.length });
 
 /** A message for the visitor to review. The fields are only a proposal: nothing is sent until they confirm. */
-export const confirmPart = (m: { name?: string; email?: string; message?: string }): UiPart => ({
+export const confirmPart = (m: {
+  name?: string;
+  email?: string;
+  company?: string;
+  role?: string;
+  message?: string;
+}): UiPart => ({
   kind: "confirm",
   action: "send_message",
   name: (m.name ?? "").slice(0, 80),
   email: (m.email ?? "").slice(0, 200),
+  company: (m.company ?? "").slice(0, 80),
+  role: (m.role ?? "").slice(0, 80),
   message: (m.message ?? "").slice(0, 1500),
   mailto: profile.contact.email,
 });

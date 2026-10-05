@@ -1,5 +1,6 @@
 import { json, sameOrigin } from "@/lib/http";
 import { deliverToVishal } from "@/lib/notify/deliver";
+import { orgOf } from "@/lib/notify/telegram";
 import { claimOnce, releaseClaim, underDailyCap } from "@/lib/notify/once";
 import { GridMessageSchema } from "@/lib/notify/schema";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
@@ -54,6 +55,7 @@ export async function POST(req: Request) {
     name: m.name,
     email: m.email,
     message: m.message,
+    org: orgOf(m.company, m.role),
     page: m.page,
     ipHash: key,
   });
