@@ -1,10 +1,12 @@
+import AxeBuilder from "@axe-core/playwright";
 import { type Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { gotoHydrated, ownClient } from "./helpers";
 
 /**
  * V4 Phase 5: cross-device QA from tablet to wide desktop (phones are covered by mobile-feel.spec.ts). Every route:
- * no sideways scroll at any width, no console errors, and every image has its intrinsic size (no layout shift).
+ * no sideways scroll at any width, no console errors, every image has its intrinsic size (no layout shift), and axe
+ * finds nothing at 1440.
  */
 const ROUTES = [
   "/",
@@ -53,3 +55,15 @@ for (const width of WIDTHS) {
     expect(errors).toEqual([]);
   });
 }
+
+test("@1440px: axe finds nothing on any route", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockStatus(page);
+  const found: string[] = [];
+  for (const route of ROUTES) {
+    await gotoHydrated(page, route);
+    const r = await new AxeBuilder({ page }).analyze();
+    found.push(...r.violations.map((v) => `${route} ${v.id}: ${v.nodes.length}`));
+  }
+  expect(found).toEqual([]);
+});
