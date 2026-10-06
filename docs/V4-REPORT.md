@@ -90,12 +90,12 @@ Nothing here blocks the site; each one is hidden or labelled until it is filled 
 2. **Golden Verdict embedding**: the client's site sends `X-Frame-Options: DENY`. If the client agrees, apply the two
    edits in [EMBEDDING-GOLDEN-VERDICT](EMBEDDING-GOLDEN-VERDICT.md) on that site; the portfolio switches to the live
    embed by itself. Nothing was changed in that repository.
-3. **LanSymphony**: the repository URL (`profile.projects[lansymphony].repo`), so the Code button appears.
-4. **LanSymphony's encryption**: the site lists "Encryption (AES-256)" (approved in V4). Notes from interview prep say the
-   code uses Fernet (AES-128-CBC with HMAC). Confirm which one should be shown.
-5. **Case studies**: the "Why / Trade-off" lines are written from the properties of each technology, and the code
+3. **LanSymphony** (done on 6 October): linked to its public code as ZeroConnect, the case study now quotes real code
+   from it, shows the app itself, and says what its encryption is (Fernet: AES-128 + HMAC, for chat, files and voice,
+   under a PBKDF2 key), checked in the code.
+4. **Case studies**: the "Why / Trade-off" lines are written from the properties of each technology, and the code
    snippets are labelled illustrations. Replace either with your own notes and code when you want to.
-6. **Milestones**: the month Talnio launched on Google Play, for a launch pin on the activity calendar.
-7. **/now**: a book or paper you are reading (hidden while empty).
-8. **Keys**: finish rotating the keys pasted during V3. No values appear in this report, the logs or any PR.
-9. **Email**: a verified Resend sender domain is still a purchase decision.
+5. **Milestones**: the month Talnio launched on Google Play, for a launch pin on the activity calendar.
+6. **/now**: a book or paper you are reading (hidden while empty).
+7. **Keys**: finish rotating the keys pasted during V3. No values appear in this report, the logs or any PR.
+8. **Email**: a verified Resend sender domain is still a purchase decision.

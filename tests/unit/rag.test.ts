@@ -191,7 +191,9 @@ describe("keyword retrieval ranking", () => {
       top("How does Talnio sync data in real time?", 5).some((id) => id.startsWith("case-talnio-")),
     ).toBe(true);
     expect(
-      top("Tell me about the AES-256 handshake", 5).some((id) => id.startsWith("case-lansymphony-")),
+      top("How does LanSymphony encrypt chat with Fernet?", 5).some((id) =>
+        id.startsWith("case-lansymphony-"),
+      ),
     ).toBe(true);
   });
 
