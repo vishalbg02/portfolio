@@ -15,6 +15,12 @@ const PAGES = [
   { name: "not-found", path: "/no-such-page" },
 ];
 
+// One moment for every run: the hero's availability line and other time-of-day text (IST) change with the clock, and
+// a baseline recorded at night must match a check run at noon.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-06-15T06:30:00Z")); // 12:00 IST
+});
+
 async function prepare(page: Page, path: string) {
   await page.route("**/api/status", (r) =>
     r.fulfill({
