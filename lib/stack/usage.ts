@@ -24,7 +24,7 @@ const RULES: Record<string, (stackItem: string) => boolean> = {
   "Generative AI APIs": (s) => s.includes("generativeai"),
   "SQL/MySQL": (s) => s === "mysql" || s === "sql",
   "Socket programming": (s) => s.startsWith("socket"),
-  "Encryption (AES-256)": (s) => s.startsWith("aes"),
+  "Encryption (Fernet)": (s) => s.startsWith("fernet") || s === "encryption",
 };
 
 /** Does one stack entry ("React 19", "Cloud Firestore") count as using this skill from profile.skills? */

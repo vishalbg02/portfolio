@@ -51,7 +51,7 @@ export function LanSymphonySketch({ live = false }: { live?: boolean }) {
           fill="var(--bg)"
           textAnchor="middle"
         >
-          AES
+          ENC
         </text>
       </g>
     </svg>

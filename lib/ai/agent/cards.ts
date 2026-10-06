@@ -140,8 +140,9 @@ const ALIASES: Record<string, string> = {
   socket: "Socket programming",
   threads: "Multithreading",
   threading: "Multithreading",
-  aes: "Encryption (AES-256)",
-  encryption: "Encryption (AES-256)",
+  aes: "Encryption (Fernet)",
+  fernet: "Encryption (Fernet)",
+  encryption: "Encryption (Fernet)",
 };
 
 export function allSkills(): string[] {

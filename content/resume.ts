@@ -25,11 +25,11 @@ export const resumeConfig = ResumeConfigSchema.parse({
   projects: [
     {
       slug: "lansymphony",
-      title: "LAN Communication System – Offline P2P",
-      stack: "Python, Sockets, AES-256",
+      title: "LanSymphony (ZeroConnect) – Offline P2P",
+      stack: "Python, Sockets, Fernet",
       date: "Aug 2025",
       bullets: [
-        "Built an AES-256 encrypted, multi-threaded P2P system with auto peer discovery, HD video calling, VoIP audio and screen sharing.",
+        "Built a serverless P2P app (team of 2): video calls, voice, screen sharing, UDP peer discovery, Fernet-encrypted chat and files.",
       ],
     },
     {

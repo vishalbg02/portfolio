@@ -4,9 +4,10 @@ import { ScenesSchema, type Scene } from "@/lib/content/scene-schema";
  * How each project is told in the Work showcase (desktop: pinned scenes scrubbed by scroll; phone: story cards).
  * Facts come from content/profile.ts: `outcome` and `proof` are checked against it by a unit test. Beat
  * captions only say what is visible in the capture. Golden Verdict's dashboards are private, so its last two
- * beats are labelled illustrations; LanSymphony has no public UI, so its beats are the protocol drawn in code.
+ * beats are labelled illustrations; LanSymphony is a desktop app, so its beats are the protocol drawn in code.
  *
- * (The brief also listed "key exchange" for LanSymphony. profile.ts does not say it, so it is not shown.)
+ * (The brief also listed "key exchange" for LanSymphony. Its code has none: both peers derive the key from a shared
+ * passphrase with PBKDF2, so it is not shown.)
  */
 const scenes: Scene[] = [
   {
@@ -91,29 +92,35 @@ const scenes: Scene[] = [
     frame: "diagram",
     frameLabel: "local network · no server · no internet",
     outcome: "2nd place at the Windsurf × The AI Collective OpenBuild.",
-    proof: ["AES-256 encryption", "Automatic peer discovery", "HD video, VoIP audio and screen sharing"],
+    proof: [
+      "HD video, voice and screen sharing",
+      "Peer discovery over UDP",
+      "Fernet-encrypted chat, files and voice",
+    ],
     hero: { type: "illustration", id: "ls-discover" },
     beats: [
       {
         id: "discover",
         label: "Peers find each other",
-        caption: "No server: peers discover each other on the local network by themselves.",
+        caption: "No server: each peer announces itself by UDP broadcast, and the others list it.",
         media: { type: "illustration", id: "ls-discover" },
       },
       {
         id: "encrypt",
-        label: "AES-256 on the wire",
-        caption: "Everything sent between peers is encrypted with AES-256.",
+        label: "Encrypted on the wire",
+        caption:
+          "Chat, files and voice are encrypted with Fernet (AES-128 + HMAC) before they leave the device.",
         media: { type: "illustration", id: "ls-encrypt" },
       },
       {
         id: "calls",
         label: "Video, voice, screen",
-        caption: "HD video calling, VoIP audio and screen sharing, side by side.",
+        caption: "HD video calling, voice and screen sharing, side by side, each on its own thread.",
         media: { type: "illustration", id: "ls-calls" },
       },
     ],
-    illustrationNote: "LanSymphony has no public UI, so this is its protocol drawn in code.",
+    illustrationNote:
+      "LanSymphony is a desktop app, so its protocol is drawn in code here; the case study shows the app itself.",
   },
   {
     slug: "virtual-tour",

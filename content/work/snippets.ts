@@ -1,8 +1,9 @@
 /**
  * "Code in the wild" snippets for the case studies.
- * ILLUSTRATIVE ONLY — written to show the shape of the technique, not copied from the
- * production codebases. They are labelled as such on the site.
- * TODO(vishal): replace with real excerpts if you want to show actual code.
+ * Most are ILLUSTRATIVE — written to show the shape of the technique, not copied from the production codebases —
+ * and labelled as such on the site. A snippet with a `source` is a real excerpt (lines elided with "…"), labelled
+ * "from the project" and linked to where it comes from.
+ * TODO(vishal): replace the illustrative ones with real excerpts if you want to show actual code.
  */
 export type Snippet = {
   id: string;
@@ -10,6 +11,13 @@ export type Snippet = {
   lang: "ts" | "tsx" | "dart" | "python";
   caption: string;
   code: string;
+  /** A real excerpt: where it is from. Without it the snippet is illustrative. */
+  source?: { label: string; href: string };
+};
+
+const ZEROCONNECT = {
+  label: "ZeroConnect · Lan_research.py",
+  href: "https://github.com/sambhav302005-coder/ZeroConnect---Secure-P2P-Communication-Platform/blob/main/Lan_research.py",
 };
 
 export const snippets: Record<string, Snippet> = {
@@ -103,41 +111,59 @@ export function useTodaysAttendance(employeeId: string, since: Date) {
   return rows;
 }`,
   },
-  "ls-handshake": {
-    id: "ls-handshake",
-    title: "Deriving a session key over a socket",
+  "ls-discovery": {
+    id: "ls-discovery",
+    title: "Announcing a peer on the local network",
     lang: "python",
-    caption: "Peers swap public keys, then derive the same 32-byte key for AES-256.",
-    code: `import socket
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+    caption:
+      "Every peer broadcasts its name, address and TCP port every 3 seconds; the others listen on UDP 9998.",
+    source: ZEROCONNECT,
+    code: `def broadcast_presence(self):
+    """Broadcast presence to network"""
+    try:
+        self.broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
+        while self.running:
+            message = {
+                "type": "peer_announcement",
+                "name": getattr(self.callback, 'user_name', {}).get() or "Anonymous",
+                "ip": self.get_local_ip(),
+                "port": 9999
+            }
 
-def handshake(sock: socket.socket) -> bytes:
-    private = X25519PrivateKey.generate()
-    sock.sendall(private.public_key().public_bytes_raw())
-    peer = X25519PublicKey.from_public_bytes(sock.recv(32))
-
-    shared = private.exchange(peer)
-    return HKDF(
-        algorithm=hashes.SHA256(), length=32, salt=None, info=b"lan-session"
-    ).derive(shared)`,
+            data = json.dumps(message).encode('utf-8')
+            # Broadcast immediately on start, then every 3 seconds
+            self.broadcast_socket.sendto(data, ('<broadcast>', self.discovery_port))
+            time.sleep(3)  # Reduced from 5 to 3 for faster discovery
+    …`,
   },
-  "ls-encrypted-frame": {
-    id: "ls-encrypted-frame",
-    title: "Sending an encrypted frame",
+  "ls-frame": {
+    id: "ls-frame",
+    title: "One TCP session, many streams",
     lang: "python",
-    caption: "Each frame is length-prefixed and sealed with AES-256-GCM using a fresh nonce.",
-    code: `import os
-import struct
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    caption:
+      "Every message is framed with its type and length; chat (3) and files (5) are encrypted with Fernet first, video (1) and screen (10) frames are pickled.",
+    source: ZEROCONNECT,
+    code: `def send_data(self, data_type, data):
+    """Send data to peer"""
+    if not self.is_connected or not self.client_socket:
+        return
 
+    try:
+        if data_type in [3, 5]:
+            if isinstance(data, str):
+                data = data.encode('utf-8')
+            data = self.security_manager.encrypt_data(data)
+        elif isinstance(data, str):
+            data = data.encode('utf-8')
+        elif data_type in [1, 10]:
+            data = pickle.dumps(data)
 
-def send_frame(sock, key: bytes, payload: bytes) -> None:
-    nonce = os.urandom(12)
-    sealed = nonce + AESGCM(key).encrypt(nonce, payload, None)
-    sock.sendall(struct.pack("!I", len(sealed)) + sealed)`,
+        header = struct.pack("!II", data_type, len(data))
+        self.client_socket.sendall(header + data)
+    …`,
   },
   "vt-hotspot": {
     id: "vt-hotspot",

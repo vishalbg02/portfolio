@@ -30,7 +30,7 @@
 ## Recommended next steps
 
 - **Get a custom domain** (e.g. `vishalbg.dev` or `vishalbg.in`). A `*.vercel.app` subdomain shares reputation with every Vercel site and is harder to brand and rank. Buying a domain needs your approval; once you own it, set `NEXT_PUBLIC_SITE_URL`, add it in Vercel, and I'll add a permanent redirect from the old URL.
-- **Publish the first Ship Log posts** (Phase 6). Specific, technical titles ("Offline P2P video calls with AES-256 in Python", "Role-based workflows on Firestore") are what a new site actually ranks for, long before it ranks for a common name.
+- **Publish the first Ship Log posts** (Phase 6). Specific, technical titles ("Offline P2P video calls in Python", "Role-based workflows on Firestore") are what a new site actually ranks for, long before it ranks for a common name.
 - **Keep the résumé page fresh** — `Last updated` and the sitemap date change when you bump `updatedAt` in `content/resume.ts`.
 
 ## Expectations
