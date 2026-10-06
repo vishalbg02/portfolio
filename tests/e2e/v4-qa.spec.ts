@@ -58,6 +58,9 @@ for (const width of WIDTHS) {
 
 test("@1440px: axe finds nothing on any route", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
+  // final states: mid-fade text (the hero terminal typing in) would read as low contrast; motion-on axe for the home
+  // page, after its entrances, is in rhythm.spec.ts
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await mockStatus(page);
   const found: string[] = [];
   for (const route of ROUTES) {

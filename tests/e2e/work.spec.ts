@@ -65,14 +65,14 @@ test.describe("work cards & status", () => {
       1, 0,
     ]);
     expect([await has("talnio", /^Visit live site/), await has("talnio", /^Google Play/)]).toEqual([0, 1]);
-    expect([await has("lansymphony", /^Visit live site/), await has("lansymphony", /^Code/)]).toEqual([0, 0]);
+    // a desktop app: no live site, and its code is public as ZeroConnect
+    expect([await has("lansymphony", /^Visit live site/), await has("lansymphony", /^Code/)]).toEqual([0, 1]);
     expect([await has("virtual-tour", /^Visit live site/), await has("virtual-tour", /^Code/)]).toEqual([
       1, 1,
     ]);
-    await expect(work.getByRole("link", { name: /^Code/ })).toHaveAttribute(
-      "href",
-      "https://github.com/vishalbg02/virtual_tour",
-    );
+    await expect(
+      work.locator(".scene[data-project='virtual-tour']").getByRole("link", { name: /^Code/ }),
+    ).toHaveAttribute("href", "https://github.com/vishalbg02/virtual_tour");
   });
 
   test("a project shows at most 6 stack chips plus a +N overflow", async ({ page }) => {
@@ -210,7 +210,8 @@ test.describe("case studies", () => {
       expect(await decisions.count()).toBeLessThanOrEqual(3);
       await expect(decisions.first().getByText("Why")).toBeVisible();
       await expect(decisions.first().getByText("Trade-off")).toBeVisible();
-      await expect(page.getByText("illustrative snippet").first()).toBeVisible();
+      // every snippet says what it is: an illustration, or a real excerpt linked to its source (LanSymphony's)
+      await expect(page.getByText(/^(illustrative snippet|from the project: )/).first()).toBeVisible();
       await expect(page.locator(".code-block pre").first()).toBeVisible();
       await expect(page.getByRole("navigation", { name: "More projects" }).getByRole("link")).toHaveCount(2);
     });

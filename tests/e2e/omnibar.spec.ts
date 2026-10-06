@@ -166,7 +166,7 @@ test.describe("Omnibar: commands and questions in one input", () => {
     await gotoReady(page, "/");
     await loadIslands(page);
     await page.waitForLoadState("networkidle");
-    const message = page.getByLabel("Message");
+    const message = page.locator("#contact").getByLabel("Message", { exact: true });
     await message.scrollIntoViewIfNeeded();
     await message.focus();
     await page.keyboard.type("a/b?c");
