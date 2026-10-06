@@ -53,10 +53,15 @@ export function StatusBadge({
     return <span className={cn(base, "text-muted")}>Status unknown</span>;
   if (!status || !status.state) {
     return (
-      // No invisible text: it fails contrast checks. The label is for screen readers only.
+      // No invisible text: it fails contrast checks. The label is for screen readers only. As wide as "Status
+      // unknown" (14 mono characters) and one line tall, so nothing reflows when the answer arrives.
       <span
         role="status"
-        className={cn(base, "animate-pulse", bare ? "w-20 rounded-sm bg-surface-2" : "w-24 bg-surface-2")}
+        className={cn(
+          base,
+          "animate-pulse",
+          bare ? "h-4 w-[14ch] rounded-sm bg-surface-2" : "w-[calc(14ch+20px)] bg-surface-2",
+        )}
       >
         <span className="sr-only">Checking status</span>
       </span>
