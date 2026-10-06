@@ -5,8 +5,8 @@ import type { ArchitectureGraph, GraphLayout } from "./types";
  * Architecture graphs for the four case studies.
  * Node descriptions restate facts from content/profile.ts. The request flows follow the
  * walkthroughs in the project brief.
- * TODO(vishal): review the flows/labels marked "brief" below — they are simplified walkthroughs
- * (e.g. LanSymphony "Key exchange" is a step named in the brief, not a documented fact).
+ * TODO(vishal): review the flows/labels marked "brief" below — they are simplified walkthroughs.
+ * LanSymphony's flow is checked against ZeroConnect's code (2026-10-06): UDP discovery, a PBKDF2 key, one TCP session.
  */
 
 const D_NODE = { w: 124, h: 56 };
@@ -174,32 +174,34 @@ const lanSymphony: ArchitectureGraph = {
     {
       id: "discovery",
       label: "Peer discovery",
-      sub: "automatic",
+      sub: "UDP broadcast",
       kind: "actor",
-      description: "Peers find each other automatically on the local network — no server, no internet.",
+      description:
+        "Every peer broadcasts its name and address on UDP port 9998 every 3 seconds; the others list it. No server, no internet.",
     },
     {
       id: "keyx",
-      label: "Key exchange",
-      sub: "session key",
+      label: "Shared key",
+      sub: "PBKDF2",
       kind: "service",
-      description: "Peers agree on a session key before any media flows.",
+      description:
+        "Both peers derive the same Fernet key from a shared passphrase with PBKDF2-HMAC-SHA256 (100,000 iterations). No key crosses the network.",
     },
     {
       id: "chan",
-      label: "AES-256 channel",
-      sub: "multi-threaded",
+      label: "TCP session",
+      sub: "port 9999",
       kind: "service",
       description:
-        "Traffic is encrypted with AES-256. A multi-threaded architecture keeps connections running side by side.",
+        "One TCP connection carries every stream as length-prefixed frames. Chat, files and voice are encrypted with Fernet (AES-128 + HMAC); each stream runs on its own thread.",
     },
     {
       id: "streams",
-      label: "Video · VoIP · Screen",
+      label: "Video · Voice · Screen",
       sub: "streams",
       kind: "service",
       description:
-        "HD video calling, VoIP audio and screen sharing with customisable quality and Picture-in-Picture.",
+        "HD video calling with Picture-in-Picture (OpenCV), voice (PyAudio), screen sharing and file transfer up to 100 MB.",
     },
   ],
   edges: lanSymphonyIds.slice(1).map((to, i) => ({ from: lanSymphonyIds[i]!, to })),

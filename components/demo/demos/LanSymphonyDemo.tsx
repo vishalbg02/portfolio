@@ -10,17 +10,19 @@ const STEPS: DemoStep[] = [
   {
     id: "discovery",
     label: "Peer discovery",
-    caption: "Peers on the same network find each other automatically. No internet and no server.",
+    caption: "Each peer announces itself by UDP broadcast, so the others list it. No internet and no server.",
   },
   {
-    id: "key-exchange",
-    label: "Key exchange",
-    caption: "The two peers agree a key before anything is sent. Everything after that is AES-256 encrypted.",
+    id: "shared-key",
+    label: "Shared key",
+    caption:
+      "Both peers derive the same key from a shared passphrase (PBKDF2, 100,000 iterations), so no key crosses the network.",
   },
   {
     id: "call",
-    label: "Encrypted call",
-    caption: "HD video calling, VoIP audio and screen sharing, all over the encrypted link.",
+    label: "Call",
+    caption:
+      "HD video, voice and screen sharing run side by side over one TCP connection; chat, files and voice are encrypted with Fernet.",
   },
 ];
 
@@ -68,7 +70,7 @@ function Stage({ step }: DemoCtx) {
           ))}
           {step === 1 ? (
             <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-sm border border-[var(--c)] bg-bg px-3 py-1 font-mono text-[11px] text-text">
-              AES-256 key agreed
+              Same key on both sides
             </span>
           ) : (
             <span className="absolute bottom-3 left-1/2 -translate-x-1/2 font-mono text-[11px] text-muted">
@@ -81,9 +83,6 @@ function Stage({ step }: DemoCtx) {
           <div className="stage-grid relative grid place-items-center rounded-sm border border-border">
             <span className="size-10 rounded-pill border border-[var(--c)]" />
             <span className="absolute bottom-2 left-2 font-mono text-[10px] text-text">HD video</span>
-            <span className="absolute top-2 right-2 inline-flex items-center gap-1 font-mono text-[10px] text-muted">
-              AES-256 encrypted
-            </span>
           </div>
           <div className="flex flex-col gap-3">
             <div className="grid flex-1 place-items-center rounded-sm border border-border">
@@ -92,7 +91,7 @@ function Stage({ step }: DemoCtx) {
                   <i key={i} className="block w-1.5 bg-[var(--c)]" style={{ height: `${h}%` }} />
                 ))}
               </span>
-              <span className="font-mono text-[10px] text-text">VoIP audio</span>
+              <span className="font-mono text-[10px] text-text">Voice · encrypted</span>
             </div>
             <div className="grid flex-1 place-items-center rounded-sm border border-border font-mono text-[10px] text-text">
               Screen sharing

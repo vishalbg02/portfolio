@@ -97,7 +97,7 @@ describe("roles on the Stack map", () => {
       .flatMap((g) => g.items)
       .filter((i) => i.used.includes("lansymphony"))
       .map((i) => i.name);
-    expect(used).toEqual(["Python", "Socket programming", "Multithreading", "Encryption (AES-256)"]);
+    expect(used).toEqual(["Python", "Socket programming", "Multithreading", "Encryption (Fernet)"]);
   });
 });
 

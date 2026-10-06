@@ -167,18 +167,22 @@ const data = {
     {
       slug: "lansymphony",
       name: "LanSymphony",
-      tagline: "Offline, encrypted peer-to-peer communication over LAN",
-      type: "Personal · Built live at Windsurf × The AI Collective OpenBuild (2nd place)",
+      tagline: "Offline peer-to-peer video, voice, screen sharing and files over a local network",
+      // Facts from the code (2026-10-06): the OpenBuild build is vishalbg02/Windsurf_EVENT (Aug 2025, no encryption);
+      // ZeroConnect (Nov 2025, with Sambhav Jain) added UDP discovery and Fernet encryption for chat, files and voice.
+      type: "Team of 2 · Built live at Windsurf × The AI Collective OpenBuild (2nd place), continued as ZeroConnect",
       period: "Aug 2025",
       badge: "2nd place · OpenBuild",
       live: null,
-      repo: null, // TODO(vishal): repository URL
+      repo: "https://github.com/sambhav302005-coder/ZeroConnect---Secure-P2P-Communication-Platform",
       store: null,
-      stack: ["Python", "Sockets", "AES-256", "Multi-threading"],
-      summary: "Serverless, internet-free communication system for local networks.",
+      stack: ["Python", "Sockets", "Multi-threading", "OpenCV", "CustomTkinter", "Fernet encryption"],
+      summary:
+        "Serverless, internet-free video calls, voice, screen sharing and file transfer for local networks.",
       highlights: [
-        "AES-256 encryption, automatic peer discovery, multi-threaded architecture.",
-        "HD video calling, VoIP audio, screen sharing with customisable quality and Picture-in-Picture.",
+        "Built live at OpenBuild: HD video calling with Picture-in-Picture, voice, screen sharing and file transfer between two peers over TCP, with no server and no internet.",
+        "Continued as ZeroConnect with Sambhav Jain: automatic peer discovery over UDP broadcast, and chat, files and voice encrypted with Fernet (AES-128 + HMAC) under a PBKDF2-derived key.",
+        "Under the hood: discovery on UDP port 9998 every 3 seconds, one TCP session on port 9999, a key from PBKDF2-HMAC-SHA256 with 100,000 iterations, and file transfers up to 100 MB.",
       ],
     },
     {
@@ -266,8 +270,8 @@ const data = {
     mobile: ["Flutter", "Dart", "React Native", "Kotlin", "Android"],
     dataCloud: ["Firebase", "Firestore", "MySQL", "MongoDB", "AWS"],
     ai: ["Generative AI APIs", "RAG fundamentals", "Function calling / API integration"],
-    // Named by Vishal (2026-10-05): what LanSymphony is built on.
-    networking: ["Socket programming", "Multithreading", "Encryption (AES-256)"],
+    // Named by Vishal (2026-10-05): what LanSymphony is built on. The encryption is Fernet (checked in its code, 2026-10-06).
+    networking: ["Socket programming", "Multithreading", "Encryption (Fernet)"],
     tools: ["Git", "GitHub", "Maven", "Postman", "IntelliJ IDEA", "VS Code", "Vercel"],
   },
   certifications: [

@@ -4,6 +4,7 @@ import { ArchitectureDiagram } from "@/components/diagram/ArchitectureDiagram";
 import { graphs } from "@/components/diagram/graphs";
 import type { ProjectSlug } from "@/lib/content/profile-schema";
 import { slugify } from "@/lib/utils/slugify";
+import { AppShot } from "./AppShot";
 import { Decision, Decisions } from "./Decisions";
 import { Snippet } from "./Snippet";
 
@@ -66,6 +67,7 @@ export function getMdxComponents(slug: ProjectSlug) {
     Decisions,
     Decision,
     Snippet,
+    AppShot,
     Demo: () => <Demo slug={slug} />,
     Architecture: () => <ArchitectureDiagram graph={graphs[slug]} />,
   };

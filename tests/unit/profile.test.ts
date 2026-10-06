@@ -19,7 +19,11 @@ describe("profile (single source of truth)", () => {
   it("keeps unknown values null instead of inventing them", () => {
     expect(profile.contact.calLink).toBe("https://cal.com/vishal-b-g-02/15min"); // his public Cal.com page
     expect(projectBySlug("talnio")?.live).toBeNull();
-    expect(projectBySlug("lansymphony")?.repo).toBeNull();
+    // its public code, ZeroConnect (Vishal named it, 2026-10-06); still no live URL: it is a desktop app
+    expect(projectBySlug("lansymphony")?.repo).toBe(
+      "https://github.com/sambhav302005-coder/ZeroConnect---Secure-P2P-Communication-Platform",
+    );
+    expect(projectBySlug("lansymphony")?.live).toBeNull();
     expect(projectBySlug("golden-verdict")?.period).toBe("Jan 2026 – May 2026"); // he confirmed it ended in May 2026
     expect(projectBySlug("virtual-tour")?.period).toBe("Jan 2025"); // from his résumé
   });
