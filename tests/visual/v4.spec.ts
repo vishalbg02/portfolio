@@ -120,18 +120,17 @@ for (const size of SIZES) {
           await expect(section.locator("[data-pipeline]")).toHaveAttribute("data-running", "false");
         }
         await page.mouse.move(0, 0);
-        // A locator screenshot of a section taller than the viewport was clipped at a shifted scroll offset (it began
-        // mid-face and ran into Contact). Shoot the page from the top instead and clip to the section's place in the
-        // document, which also keeps the sticky nav and the dock out of the picture.
-        await page.evaluate(() => window.scrollTo(0, 0));
-        await settle(page);
-        const clip = await section.evaluate((el) => {
-          const r = el.getBoundingClientRect();
-          return { x: r.left + window.scrollX, y: r.top + window.scrollY, width: r.width, height: r.height };
+        // The whole section must fit in the viewport: a screenshot taller than the viewport is captured "beyond" it,
+        // which on the emulated phone re-lays the page out and shifted the shot by ~216 px (it began mid-face). The
+        // fixed nav and dock would sit on top of the section, so they are hidden for the picture.
+        const { height } = await section.boundingBox().then((b) => b!);
+        await page.setViewportSize({ width: size.width, height: Math.ceil(height) + 200 });
+        await page.addStyleTag({
+          content: "header, nav[aria-label='Quick links'] { visibility: hidden !important; }",
         });
-        await expect(page).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
-          fullPage: true,
-          clip,
+        await settle(page);
+        await section.scrollIntoViewIfNeeded();
+        await expect(section).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
           animations: "disabled",
           maxDiffPixelRatio: 0.01,
           mask: [page.locator("[data-visual-mask]"), page.locator("canvas"), section.locator("img, video")],
