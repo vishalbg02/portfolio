@@ -33,9 +33,11 @@ async function status(page: Page) {
  * and the two "stable" screenshots Playwright compares start at different places (1947 vs 2016 px at 390).
  */
 async function settle(page: Page) {
+  // islands load from an IntersectionObserver that only exists once the page has hydrated
+  await page.waitForLoadState("networkidle");
   const { width, height } = page.viewportSize()!;
   await page.setViewportSize({ width, height: 12_000 });
-  await expect(page.locator(".skel")).toHaveCount(0);
+  await expect(page.locator(".skel")).toHaveCount(0, { timeout: 15_000 });
   await page.setViewportSize({ width, height });
   await expect
     .poll(
