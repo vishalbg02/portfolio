@@ -57,10 +57,11 @@ async function prepare(page: Page, path: string) {
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
   // Relative times ("13 minutes ago") are computed when the page is built, so they differ between the
-  // baseline run and the compare run and can wrap onto another line. Pin their text; the block is masked anyway.
-  await page.evaluate(() => {
-    for (const el of document.querySelectorAll("#github time, #github [role=status]"))
-      el.textContent = "xx ago";
+  // baseline run and the compare run and can wrap onto another line. The block is masked, so only its layout
+  // matters: pin the boxes' size with CSS, which (unlike rewriting their text) survives React re-rendering them.
+  await page.addStyleTag({
+    content:
+      "#github time, #github [role=status] { display: inline-block !important; width: 16ch !important; height: 1lh !important; overflow: hidden !important; white-space: nowrap !important; vertical-align: bottom; }",
   });
   // A stray pointer over the project list would switch the active project (hover previews it).
   await page.mouse.move(0, 0);

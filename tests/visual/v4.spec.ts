@@ -122,11 +122,12 @@ for (const size of SIZES) {
         await page.mouse.move(0, 0);
         // The whole section must fit in the viewport: a screenshot taller than the viewport is captured "beyond" it,
         // which on the emulated phone re-lays the page out and shifted the shot by ~216 px (it began mid-face). The
-        // fixed nav and dock would sit on top of the section, so they are hidden for the picture.
+        // sticky site nav and the dock would sit on top of the section, so they are hidden for the picture (only those: the
+        // section's own heading is a <header> too).
         const { height } = await section.boundingBox().then((b) => b!);
         await page.setViewportSize({ width: size.width, height: Math.ceil(height) + 200 });
         await page.addStyleTag({
-          content: "header, nav[aria-label='Quick links'] { visibility: hidden !important; }",
+          content: "header[data-scrolled], nav[aria-label='Quick links'] { visibility: hidden !important; }",
         });
         await settle(page);
         await section.scrollIntoViewIfNeeded();
