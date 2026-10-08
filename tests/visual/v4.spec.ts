@@ -130,7 +130,14 @@ for (const size of SIZES) {
           content: "header[data-scrolled], nav[aria-label='Quick links'] { visibility: hidden !important; }",
         });
         await settle(page);
-        await section.scrollIntoViewIfNeeded();
+        // place the section 100 px below the top, wholly inside the viewport (scrollIntoViewIfNeeded leaves a section
+        // that is already partly visible where it is, and the shot then reaches beyond the viewport again)
+        await section.evaluate((el) =>
+          window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100),
+        );
+        await expect
+          .poll(() => section.evaluate((el) => el.getBoundingClientRect().bottom <= window.innerHeight))
+          .toBe(true);
         await expect(section).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
           animations: "disabled",
           maxDiffPixelRatio: 0.01,
