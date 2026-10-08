@@ -27,6 +27,28 @@ async function status(page: Page) {
   );
 }
 
+/**
+ * Load every lazy island (activity, stack map, contact form) before an element screenshot, and wait until the page
+ * stops changing height. Otherwise an island near the section swaps in mid-capture, the page moves under the section,
+ * and the two "stable" screenshots Playwright compares start at different places (1947 vs 2016 px at 390).
+ */
+async function settle(page: Page) {
+  const { width, height } = page.viewportSize()!;
+  await page.setViewportSize({ width, height: 12_000 });
+  await expect(page.locator(".skel")).toHaveCount(0);
+  await page.setViewportSize({ width, height });
+  await expect
+    .poll(
+      async () => {
+        const a = await page.evaluate(() => document.documentElement.scrollHeight);
+        await page.waitForTimeout(300);
+        return a === (await page.evaluate(() => document.documentElement.scrollHeight));
+      },
+      { timeout: 10_000 },
+    )
+    .toBe(true);
+}
+
 for (const size of SIZES) {
   test.describe(`@${size.name}`, () => {
     test.use({
@@ -83,9 +105,11 @@ for (const size of SIZES) {
         await status(page);
         await page.goto("/");
         await page.evaluate(() => document.fonts.ready);
+        await settle(page);
         const section = page.locator("#ask");
         await section.locator("[data-grid-inline]").scrollIntoViewIfNeeded();
         await expect(section.getByRole("log", { name: /Conversation/ })).toBeVisible();
+        await settle(page);
         if (run) {
           // a router tile: the same answer every time, no model
           await section.getByRole("link", { name: /^Shows projects/ }).click();

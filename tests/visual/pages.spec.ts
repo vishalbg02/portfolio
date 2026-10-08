@@ -75,13 +75,15 @@ for (const { name, path } of PAGES) {
         fullPage: true,
         animations: "disabled",
         maxDiffPixelRatio: 0.01,
-        // live clock, build date/SHA, canvas hero and status badges change between runs
+        // live clock, build date/SHA, canvas hero and status badges change between runs; clip posters are set by an
+        // IntersectionObserver and decode at their own pace, and a live embed shows someone else's site
         mask: [
           page.locator("[data-visual-mask]"),
           page.locator("footer"),
           page.locator("canvas"),
           page.locator("#github"),
           page.getByRole("status"),
+          page.locator("video, iframe"),
         ],
       });
     });
