@@ -120,7 +120,18 @@ for (const size of SIZES) {
           await expect(section.locator("[data-pipeline]")).toHaveAttribute("data-running", "false");
         }
         await page.mouse.move(0, 0);
-        await expect(section).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
+        // A locator screenshot of a section taller than the viewport was clipped at a shifted scroll offset (it began
+        // mid-face and ran into Contact). Shoot the page from the top instead and clip to the section's place in the
+        // document, which also keeps the sticky nav and the dock out of the picture.
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await settle(page);
+        const clip = await section.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return { x: r.left + window.scrollX, y: r.top + window.scrollY, width: r.width, height: r.height };
+        });
+        await expect(page).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
+          fullPage: true,
+          clip,
           animations: "disabled",
           maxDiffPixelRatio: 0.01,
           mask: [page.locator("[data-visual-mask]"), page.locator("canvas"), section.locator("img, video")],
