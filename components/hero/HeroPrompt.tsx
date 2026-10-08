@@ -178,7 +178,7 @@ export function HeroPrompt() {
               spellCheck={false}
               enterKeyHint="send"
               maxLength={300}
-              className="h-6 w-full min-w-0 bg-transparent font-mono text-sm text-text caret-accent focus:outline-none"
+              className="h-6 w-full min-w-0 bg-transparent font-mono text-sm text-text caret-accent focus:outline-none pointer-coarse:h-11"
             />
           </form>
         ) : (

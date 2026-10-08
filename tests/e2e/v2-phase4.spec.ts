@@ -75,11 +75,12 @@ test.describe("case-study layout (desktop ≥ 1100)", () => {
     await gotoHydrated(page, "/work/golden-verdict");
     const link = (name: string) => page.locator("[data-rail]").getByRole("link", { name, exact: true });
     await expect(link("The problem")).toHaveAttribute("aria-current", "location");
-    await page.locator("#key-decisions").scrollIntoViewIfNeeded();
+    // a section well clear of the architecture diagram: near it, the rail steps aside (hidden) by design
+    await page.locator("#what-i-built").scrollIntoViewIfNeeded();
     await page.evaluate(() =>
-      document.getElementById("key-decisions")!.scrollIntoView({ behavior: "instant" }),
+      document.getElementById("what-i-built")!.scrollIntoView({ behavior: "instant" }),
     );
-    await expect(link("Key decisions")).toHaveAttribute("aria-current", "location");
+    await expect(link("What I built")).toHaveAttribute("aria-current", "location");
     await expect(link("The problem")).not.toHaveAttribute("aria-current", "location");
     await page.evaluate(() => window.scrollTo(0, 0));
     await link("Outcome").click();

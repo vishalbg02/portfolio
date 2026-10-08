@@ -36,3 +36,18 @@ nav[aria-label="Primary"] a[aria-current]::after {
 nav[aria-label="Primary"] a[aria-current] {
   color: var(--text);
 }
+
+/* ── inner pages: one title size (H2 on the display scale, docs/DESIGN-V4.md §5) ───────────────────── */
+.page-title {
+  font-size: 2.25rem;
+  line-height: 1.06;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  color: var(--text);
+}
+@media (width >= 48rem) {
+  .page-title {
+    font-size: 3.5rem;
+  }
+}

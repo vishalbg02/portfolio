@@ -261,7 +261,7 @@ export function GridChat({
               aria-pressed={mode === m}
               onClick={() => gridStore.setMode(m)}
               className={cn(
-                "inline-flex min-h-7 shrink-0 items-center rounded-pill px-3 font-mono text-xs whitespace-nowrap transition-colors pointer-coarse:min-h-10",
+                "inline-flex min-h-7 shrink-0 items-center rounded-pill px-3 font-mono text-xs whitespace-nowrap transition-colors pointer-coarse:min-h-11",
                 mode === m ? "bg-surface-2 text-text" : "text-muted hover:text-text",
               )}
             >

@@ -70,7 +70,7 @@ export function LiveSite({
           href={src}
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-auto text-link underline-offset-4 hover:underline"
+          className="tap-slop ml-auto text-link underline-offset-4 hover:underline"
           data-track="project_live_click"
           data-track-project={slug}
         >
@@ -136,7 +136,7 @@ export function LiveSite({
                       rel="noopener noreferrer"
                       data-track="project_live_click"
                       data-track-project={slug}
-                      className="inline-flex h-10 items-center gap-2 rounded-sm bg-accent px-4 font-mono text-sm font-semibold text-bg"
+                      className="inline-flex h-10 items-center gap-2 rounded-sm bg-accent px-4 font-mono text-sm font-semibold text-bg pointer-coarse:h-11"
                     >
                       Visit live site <span aria-hidden="true">↗</span>
                       <span className="sr-only"> ({name}, opens in a new tab)</span>

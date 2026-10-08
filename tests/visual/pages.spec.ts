@@ -15,6 +15,12 @@ const PAGES = [
   { name: "not-found", path: "/no-such-page" },
 ];
 
+// One moment for every run: the hero's availability line and other time-of-day text (IST) change with the clock, and
+// a baseline recorded at night must match a check run at noon.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-06-15T06:30:00Z")); // 12:00 IST
+});
+
 async function prepare(page: Page, path: string) {
   await page.route("**/api/status", (r) =>
     r.fulfill({
@@ -51,10 +57,11 @@ async function prepare(page: Page, path: string) {
   await page.waitForLoadState("networkidle");
   await page.evaluate(() => document.fonts.ready);
   // Relative times ("13 minutes ago") are computed when the page is built, so they differ between the
-  // baseline run and the compare run and can wrap onto another line. Pin their text; the block is masked anyway.
-  await page.evaluate(() => {
-    for (const el of document.querySelectorAll("#github time, #github [role=status]"))
-      el.textContent = "xx ago";
+  // baseline run and the compare run and can wrap onto another line. The block is masked, so only its layout
+  // matters: pin the boxes' size with CSS, which (unlike rewriting their text) survives React re-rendering them.
+  await page.addStyleTag({
+    content:
+      "#github time, #github [role=status] { display: inline-block !important; width: 16ch !important; height: 1lh !important; overflow: hidden !important; white-space: nowrap !important; vertical-align: bottom; }",
   });
   // A stray pointer over the project list would switch the active project (hover previews it).
   await page.mouse.move(0, 0);
@@ -69,13 +76,15 @@ for (const { name, path } of PAGES) {
         fullPage: true,
         animations: "disabled",
         maxDiffPixelRatio: 0.01,
-        // live clock, build date/SHA, canvas hero and status badges change between runs
+        // live clock, build date/SHA, canvas hero and status badges change between runs; clip posters are set by an
+        // IntersectionObserver and decode at their own pace, and a live embed shows someone else's site
         mask: [
           page.locator("[data-visual-mask]"),
           page.locator("footer"),
           page.locator("canvas"),
           page.locator("#github"),
           page.getByRole("status"),
+          page.locator("video, iframe"),
         ],
       });
     });

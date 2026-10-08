@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils/cn";
 import dynamic from "next/dynamic";
 import { GridChat } from "./GridChat";
 import { useRevealRef } from "@/lib/fx/use-reveal";
+import { PULL_HANDLE_CLASS, usePullToClose } from "@/components/ui/usePullToClose";
 
 const LiveChat = dynamic(() => import("@/components/live/LiveChat"), { ssr: false });
 
@@ -149,13 +150,7 @@ export default function GridSheet({
   const revealRef = useRevealRef<HTMLDivElement>();
 
   // Phone: pull the sheet down by its handle to close it (the close button does the same for keyboards).
-  const pull = useRef<number | null>(null);
-  const [dy, setDy] = useState(0);
-  const endPull = () => {
-    if (pull.current !== null && dy > 120) onOpenChange(false);
-    pull.current = null;
-    setDy(0);
-  };
+  const { handle, dy } = usePullToClose(() => onOpenChange(false));
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} modal={!wide}>
@@ -186,23 +181,7 @@ export default function GridSheet({
         >
           <Dialog.Title className="sr-only">GRID, Vishal&apos;s AI</Dialog.Title>
           {wide ? null : (
-            <div
-              aria-hidden="true"
-              data-grid-handle=""
-              onPointerDown={(e) => {
-                pull.current = e.clientY;
-                e.currentTarget.setPointerCapture(e.pointerId);
-              }}
-              onPointerMove={(e) => {
-                if (pull.current !== null) setDy(Math.max(0, e.clientY - pull.current));
-              }}
-              onPointerUp={endPull}
-              onPointerCancel={() => {
-                pull.current = null;
-                setDy(0);
-              }}
-              className="flex h-5 shrink-0 cursor-grab touch-none items-center justify-center gap-[3px]"
-            >
+            <div aria-hidden="true" data-grid-handle="" {...handle} className={PULL_HANDLE_CLASS}>
               {[0, 1, 2, 3, 4].map((k) => (
                 <span key={k} className="size-1 rounded-[1px] bg-border-2" />
               ))}

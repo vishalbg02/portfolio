@@ -15,10 +15,40 @@ const FRAMES = [
   { name: "hand-over", ms: 1180 },
 ];
 
+// One moment for every run: the hero's availability line and other time-of-day text (IST) change with the clock, and
+// a baseline recorded at night must match a check run at noon.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-06-15T06:30:00Z")); // 12:00 IST
+});
+
 async function status(page: Page) {
   await page.route("**/api/status", (r) =>
     r.fulfill({ json: { checkedAt: "2026-01-01T00:00:00.000Z", statuses: {} } }),
   );
+}
+
+/**
+ * Load every lazy island (activity, stack map, contact form) before an element screenshot, and wait until the page
+ * stops changing height. Otherwise an island near the section swaps in mid-capture, the page moves under the section,
+ * and the two "stable" screenshots Playwright compares start at different places (1947 vs 2016 px at 390).
+ */
+async function settle(page: Page) {
+  // islands load from an IntersectionObserver that only exists once the page has hydrated
+  await page.waitForLoadState("networkidle");
+  const { width, height } = page.viewportSize()!;
+  await page.setViewportSize({ width, height: 12_000 });
+  await expect(page.locator(".skel")).toHaveCount(0, { timeout: 15_000 });
+  await page.setViewportSize({ width, height });
+  await expect
+    .poll(
+      async () => {
+        const a = await page.evaluate(() => document.documentElement.scrollHeight);
+        await page.waitForTimeout(300);
+        return a === (await page.evaluate(() => document.documentElement.scrollHeight));
+      },
+      { timeout: 10_000 },
+    )
+    .toBe(true);
 }
 
 for (const size of SIZES) {
@@ -34,6 +64,9 @@ for (const size of SIZES) {
       test(`intro: ${frame.name}`, async ({ page }) => {
         await status(page);
         await page.goto("/", { waitUntil: "domcontentloaded" });
+        // the hero's trail canvas mounts lazily, sometimes before this frame and sometimes after: the frames are about
+        // the overlay, so leave it out (on phones the hero shows through the sparse intro)
+        await page.addStyleTag({ content: "canvas { display: none !important; }" });
         // freeze everything at once, then move every animation to the same moment
         await page.evaluate(() => document.getAnimations().forEach((a) => a.pause()));
         await page.evaluate(() => document.fonts.ready);
@@ -74,9 +107,11 @@ for (const size of SIZES) {
         await status(page);
         await page.goto("/");
         await page.evaluate(() => document.fonts.ready);
+        await settle(page);
         const section = page.locator("#ask");
         await section.locator("[data-grid-inline]").scrollIntoViewIfNeeded();
         await expect(section.getByRole("log", { name: /Conversation/ })).toBeVisible();
+        await settle(page);
         if (run) {
           // a router tile: the same answer every time, no model
           await section.getByRole("link", { name: /^Shows projects/ }).click();
@@ -85,6 +120,24 @@ for (const size of SIZES) {
           await expect(section.locator("[data-pipeline]")).toHaveAttribute("data-running", "false");
         }
         await page.mouse.move(0, 0);
+        // The whole section must fit in the viewport: a screenshot taller than the viewport is captured "beyond" it,
+        // which on the emulated phone re-lays the page out and shifted the shot by ~216 px (it began mid-face). The
+        // sticky site nav and the dock would sit on top of the section, so they are hidden for the picture (only those: the
+        // section's own heading is a <header> too).
+        const { height } = await section.boundingBox().then((b) => b!);
+        await page.setViewportSize({ width: size.width, height: Math.ceil(height) + 200 });
+        await page.addStyleTag({
+          content: "header[data-scrolled], nav[aria-label='Quick links'] { visibility: hidden !important; }",
+        });
+        await settle(page);
+        // place the section 100 px below the top, wholly inside the viewport (scrollIntoViewIfNeeded leaves a section
+        // that is already partly visible where it is, and the shot then reaches beyond the viewport again)
+        await section.evaluate((el) =>
+          window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100),
+        );
+        await expect
+          .poll(() => section.evaluate((el) => el.getBoundingClientRect().bottom <= window.innerHeight))
+          .toBe(true);
         await expect(section).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
           animations: "disabled",
           maxDiffPixelRatio: 0.01,
