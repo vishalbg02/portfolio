@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { loadEverything } from "./helpers";
 
 /**
  * Visual regression. Runs ONLY on Linux CI inside the Playwright Docker image (VISUAL=1), so font
@@ -44,18 +45,8 @@ async function prepare(page: Page, path: string) {
     }),
   );
   await page.goto(path);
-  await page.waitForLoadState("networkidle");
-  // Lazy islands (activity, stack map, contact form) load as they near the viewport, and a full-page screenshot
-  // never scrolls. Scrolling to them would leave the hero's will-change layers re-rastered with different
-  // anti-aliasing every screenshot, so make the viewport tall enough for all of them to be "near", wait for the
-  // real content, and put the viewport back. Layer promotion is switched off for the same reason.
-  const { width } = page.viewportSize()!;
-  await page.setViewportSize({ width, height: 12_000 });
-  await expect(page.locator(".skel")).toHaveCount(0);
-  await page.setViewportSize({ width, height: 900 });
+  // layer promotion off: will-change layers are re-rastered with different anti-aliasing every screenshot
   await page.addStyleTag({ content: "*, *::before, *::after { will-change: auto !important; }" });
-  await page.waitForLoadState("networkidle");
-  await page.evaluate(() => document.fonts.ready);
   // Relative times ("13 minutes ago") are computed when the page is built, so they differ between the
   // baseline run and the compare run and can wrap onto another line. The block is masked, so only its layout
   // matters: pin the boxes' size with CSS, which (unlike rewriting their text) survives React re-rendering them.
@@ -63,6 +54,7 @@ async function prepare(page: Page, path: string) {
     content:
       "#github time, #github [role=status] { display: inline-block !important; width: 16ch !important; height: 1lh !important; overflow: hidden !important; white-space: nowrap !important; vertical-align: bottom; }",
   });
+  await loadEverything(page);
   // A stray pointer over the project list would switch the active project (hover previews it).
   await page.mouse.move(0, 0);
 }

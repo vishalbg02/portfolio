@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { loadEverything } from "./helpers";
 
 /**
  * V4 visual baselines (Linux CI only, like pages.spec.ts): the opening sequence's three key frames and the hero,
@@ -25,30 +26,6 @@ async function status(page: Page) {
   await page.route("**/api/status", (r) =>
     r.fulfill({ json: { checkedAt: "2026-01-01T00:00:00.000Z", statuses: {} } }),
   );
-}
-
-/**
- * Load every lazy island (activity, stack map, contact form) before an element screenshot, and wait until the page
- * stops changing height. Otherwise an island near the section swaps in mid-capture, the page moves under the section,
- * and the two "stable" screenshots Playwright compares start at different places (1947 vs 2016 px at 390).
- */
-async function settle(page: Page) {
-  // islands load from an IntersectionObserver that only exists once the page has hydrated
-  await page.waitForLoadState("networkidle");
-  const { width, height } = page.viewportSize()!;
-  await page.setViewportSize({ width, height: 12_000 });
-  await expect(page.locator(".skel")).toHaveCount(0, { timeout: 15_000 });
-  await page.setViewportSize({ width, height });
-  await expect
-    .poll(
-      async () => {
-        const a = await page.evaluate(() => document.documentElement.scrollHeight);
-        await page.waitForTimeout(300);
-        return a === (await page.evaluate(() => document.documentElement.scrollHeight));
-      },
-      { timeout: 10_000 },
-    )
-    .toBe(true);
 }
 
 for (const size of SIZES) {
@@ -107,11 +84,11 @@ for (const size of SIZES) {
         await status(page);
         await page.goto("/");
         await page.evaluate(() => document.fonts.ready);
-        await settle(page);
+        await loadEverything(page);
         const section = page.locator("#ask");
         await section.locator("[data-grid-inline]").scrollIntoViewIfNeeded();
         await expect(section.getByRole("log", { name: /Conversation/ })).toBeVisible();
-        await settle(page);
+        await loadEverything(page);
         if (run) {
           // a router tile: the same answer every time, no model
           await section.getByRole("link", { name: /^Shows projects/ }).click();
@@ -129,7 +106,7 @@ for (const size of SIZES) {
         await page.addStyleTag({
           content: "header[data-scrolled], nav[aria-label='Quick links'] { visibility: hidden !important; }",
         });
-        await settle(page);
+        await loadEverything(page);
         // place the section 100 px below the top, wholly inside the viewport (scrollIntoViewIfNeeded leaves a section
         // that is already partly visible where it is, and the shot then reaches beyond the viewport again)
         await section.evaluate((el) =>
