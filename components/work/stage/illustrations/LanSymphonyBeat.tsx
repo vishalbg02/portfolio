@@ -98,7 +98,7 @@ function Encrypt() {
     <svg
       viewBox="0 0 960 600"
       role="img"
-      aria-label="Illustration of plain text leaving one peer, crossing the network as scrambled squares under an AES-256 lock, and arriving at the other peer"
+      aria-label="Illustration of a chat message leaving one peer, crossing the network as scrambled squares under a Fernet lock, and arriving at the other peer"
       className="ill block size-full"
     >
       <rect width="960" height="600" fill="var(--bg)" />
@@ -130,7 +130,7 @@ function Encrypt() {
           <circle cx="0" cy="12" r="4" fill="var(--bg)" />
         </g>
         <text x="480" y="82" fontSize="36" fill="var(--text)" textAnchor="middle" style={mono}>
-          AES-256
+          Fernet
         </text>
         <rect
           x="632"

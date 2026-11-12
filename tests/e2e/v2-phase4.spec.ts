@@ -249,7 +249,7 @@ test.describe("walkthroughs (Golden Verdict, Talnio, LanSymphony)", () => {
       steps: ["Choose service", "Upload documents", "Track request REQ-····", "Status update"],
     },
     { slug: "talnio", steps: ["Check in", "Attendance recorded", "Report generated"] },
-    { slug: "lansymphony", steps: ["Peer discovery", "Key exchange", "Encrypted call"] },
+    { slug: "lansymphony", steps: ["Peer discovery", "Shared key", "Call"] },
   ];
 
   for (const { slug, steps } of demos) {

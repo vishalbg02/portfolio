@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { intersects, omniMode, pillRect, puckRect, samplePoints, type OmniInput } from "@/lib/grid/overlap";
+import { readFileSync } from "node:fs";
+import {
+  LAYOUT_EVENT,
+  intersects,
+  omniMode,
+  pillRect,
+  puckRect,
+  samplePoints,
+  type OmniInput,
+} from "@/lib/grid/overlap";
 
 const calm: OmniInput = {
   dir: "none",
@@ -47,5 +56,12 @@ describe("pill, puck or tab", () => {
     expect(omniMode({ ...calm, dir: "down", coversPuck: true })).toBe("tab");
     // the puck's own overlap only matters once collapsed
     expect(omniMode({ ...calm, coversPuck: true })).toBe("pill");
+  });
+});
+
+describe("the layout event", () => {
+  it("the Work showcase dispatches the same name the Omnibar listens for (written out there to keep a chunk split away)", () => {
+    const src = readFileSync("components/work/stage/ShowcaseController.tsx", "utf8");
+    expect(src).toContain(`new Event("${LAYOUT_EVENT}")`);
   });
 });

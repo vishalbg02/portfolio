@@ -1,30 +1,30 @@
 ---
 slug: lansymphony
-description: Case study of LanSymphony, an offline, AES-256 encrypted peer-to-peer communication system for local networks, built live at the Windsurf x The AI Collective OpenBuild.
+description: Case study of LanSymphony, offline peer-to-peer calls, screen sharing and file transfer on a local network. 2nd place at OpenBuild, continued as ZeroConnect with Fernet encryption.
 glance:
-  role: Personal project
-  platform: Local network (LAN)
-  status: 2nd place at OpenBuild
+  role: Team of 2 (with Sambhav Jain)
+  platform: Desktop app on a local network (LAN)
+  status: 2nd place at OpenBuild · continued as ZeroConnect
 todo:
-  - "TODO(vishal): add the repository URL (profile.projects[lansymphony].repo) so the Code button appears."
-  - "TODO(vishal): confirm the 'Key exchange' step in the diagram and the Why / Trade-off lines; they are written from the properties of each technology, not from your own notes."
-  - "TODO(vishal): replace the illustrative snippets with real code if you want to show it."
+  - "TODO(vishal): the Why / Trade-off lines are written from what the code does, not from your own notes. Replace with your real reasoning if you want to."
 ---
 
 ## The problem
 
-Communication that works on a local network with no server and no internet connection, and stays private while doing it.
+Calls, screen sharing and file transfer between people on the same network, with no server and no internet connection.
 
 ## What I built
 
-LanSymphony is a serverless, internet-free communication system for local networks, written in Python with sockets and multi-threading. I built it live at the Windsurf × The AI Collective OpenBuild in Bengaluru.
+LanSymphony is a desktop app in Python that connects two people on a local network directly. We built it live at the Windsurf × The AI Collective OpenBuild in Bengaluru, as a team of two, and it placed 2nd. We then kept going and published it as **ZeroConnect**.
 
-- **Security and discovery:** AES-256 encryption and automatic peer discovery, on a multi-threaded architecture.
-- **Calls:** HD video calling, VoIP audio and screen sharing, with customisable quality and Picture-in-Picture.
+- **At OpenBuild (Aug 2025):** HD video calling with Picture-in-Picture and quality settings, voice, screen sharing and file transfer, all over one TCP connection between two peers, in a CustomTkinter interface.
+- **As ZeroConnect (Nov 2025):** automatic peer discovery over UDP broadcast, encryption with Fernet (AES-128 in CBC mode with an HMAC-SHA256 check) for chat, files and voice under a key derived with PBKDF2, file transfers up to 100 MB, and an optional assistant that runs a local model through Ollama.
+
+<AppShot id="ls-app" />
 
 ## Try it
 
-A click-through of how two peers find each other and start an encrypted call. It is an illustration, not the app.
+A click-through of how two peers find each other, share a key and start a call. It is an illustration, not the app.
 
 <Demo />
 
@@ -32,19 +32,19 @@ A click-through of how two peers find each other and start an encrypted call. It
 
 <Decisions>
   <Decision
-    title="Peer-to-peer with automatic discovery"
-    why="With no central server there is nothing to host and nothing that needs the internet. Peers find each other on the network by themselves."
-    tradeoff="Every client carries the networking logic, and peers have to discover each other without help."
+    title="Peer-to-peer with discovery by broadcast"
+    why="With no central server there is nothing to host and nothing that needs the internet. Each peer announces itself on the network every 3 seconds, so the others can list it without typing an address."
+    tradeoff="Broadcast only reaches the local network: connecting across the internet would need NAT traversal, which the app does not do."
   />
   <Decision
-    title="AES-256 for everything on the wire"
-    why="Other devices on a shared local network can see its traffic. Encryption keeps the conversation private."
-    tradeoff="Encrypting every frame costs CPU, which matters most for real-time video."
+    title="A shared passphrase instead of a key exchange"
+    why="Both peers derive the same Fernet key with PBKDF2, so a connection needs no handshake and works the moment two peers find each other."
+    tradeoff="Every peer must share the same passphrase, and anyone holding it can read the traffic. A key exchange per session would remove that."
   />
   <Decision
-    title="A multi-threaded architecture"
-    why="Video, audio and screen sharing run at the same time and shouldn't block one another."
-    tradeoff="Threads bring synchronisation and shutdown complexity that a single loop avoids."
+    title="Encrypt chat, files and voice; stream video and screen as they are"
+    why="Messages, files and audio are small enough to encrypt on every send without hurting the call."
+    tradeoff="Video and screen frames cross the network unencrypted, so anyone on the same network could see them."
   />
 </Decisions>
 
@@ -56,12 +56,12 @@ From discovery to a live call. Hover or focus a step for details, or press **Run
 
 ## Code in the wild
 
-Two short snippets show the shape of the handshake and the encrypted frames. They are illustrative and not lifted from the project.
+Two excerpts from ZeroConnect: how a peer announces itself, and how every stream shares one TCP connection.
 
-<Snippet id="ls-handshake" />
+<Snippet id="ls-discovery" />
 
-<Snippet id="ls-encrypted-frame" />
+<Snippet id="ls-frame" />
 
 ## Outcome
 
-LanSymphony placed 2nd at the Windsurf × The AI Collective OpenBuild in Bengaluru, among 20+ teams, in August 2025.
+LanSymphony placed 2nd at the Windsurf × The AI Collective OpenBuild in Bengaluru, among 20+ teams, in August 2025. Its code is public as ZeroConnect, under the MIT licence.
