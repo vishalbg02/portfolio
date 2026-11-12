@@ -31,7 +31,7 @@ export default function NowPage() {
         ])}
       />
       <SectionHeader prefix="~" label="Now" id="now-label" />
-      <h1 className="text-3xl font-semibold md:text-4xl">What I&apos;m doing now</h1>
+      <h1 className="page-title">What I&apos;m doing now</h1>
       <p className="mt-3 font-mono text-xs text-muted">
         Updated <time dateTime={now.updatedAt}>{formatIsoDate(now.updatedAt)}</time>
       </p>

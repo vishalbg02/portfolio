@@ -105,7 +105,6 @@ export function ProductDemo({
       ref={root}
       data-demo={slug}
       data-auto={state.auto}
-      role="group"
       aria-label={`${url} interactive illustration`}
       onKeyDown={onKey}
       className="my-8 rounded-card border border-border bg-surface p-3 sm:p-4"
@@ -120,7 +119,7 @@ export function ProductDemo({
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto font-mono text-xs text-link underline-offset-4 hover:underline"
+            className="tap-slop ml-auto font-mono text-xs text-link underline-offset-4 hover:underline"
           >
             {link.label}
             <span className="sr-only"> (opens in a new tab)</span>

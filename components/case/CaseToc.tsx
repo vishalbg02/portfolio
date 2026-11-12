@@ -27,7 +27,11 @@ export function CaseToc({ headings }: { headings: Heading[] }) {
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    // lazy parts of the page (captures, the diagram, a demo) settle after a jump and move the headings without a scroll
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(onScroll);
+    ro?.observe(document.getElementById("case-article") ?? document.body);
     return () => {
+      ro?.disconnect();
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);

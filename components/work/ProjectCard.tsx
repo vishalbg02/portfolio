@@ -28,7 +28,7 @@ export function ProjectCard({
     <article
       data-project={project.slug}
       className={cn(
-        "group relative flex h-full flex-col rounded-card border border-border bg-surface p-5",
+        "group relative flex h-full flex-col rounded-card border border-border bg-surface p-5 px-shadow",
         "transition-[border-color,transform] duration-200 ease-out",
         "focus-within:border-border-2 hover:-translate-y-0.5 hover:border-border-2",
       )}

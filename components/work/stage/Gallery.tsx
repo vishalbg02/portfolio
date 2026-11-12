@@ -25,7 +25,7 @@ export function Gallery({ project }: { project: Project }) {
       <GalleryViewer slug={project.slug} name={project.name} items={items}>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((it, i) => (
-            <li key={it.id}>
+            <li key={it.id} className="brackets focus-within:brackets-on hover:brackets-on">
               <button
                 type="button"
                 data-gallery-open={i}

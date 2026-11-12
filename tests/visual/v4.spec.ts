@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { loadEverything } from "./helpers";
 
 /**
  * V4 visual baselines (Linux CI only, like pages.spec.ts): the opening sequence's three key frames and the hero,
@@ -14,6 +15,12 @@ const FRAMES = [
   { name: "assemble", ms: 760 },
   { name: "hand-over", ms: 1180 },
 ];
+
+// One moment for every run: the hero's availability line and other time-of-day text (IST) change with the clock, and
+// a baseline recorded at night must match a check run at noon.
+test.beforeEach(async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-06-15T06:30:00Z")); // 12:00 IST
+});
 
 async function status(page: Page) {
   await page.route("**/api/status", (r) =>
@@ -34,6 +41,9 @@ for (const size of SIZES) {
       test(`intro: ${frame.name}`, async ({ page }) => {
         await status(page);
         await page.goto("/", { waitUntil: "domcontentloaded" });
+        // the hero's trail canvas mounts lazily, sometimes before this frame and sometimes after: the frames are about
+        // the overlay, so leave it out (on phones the hero shows through the sparse intro)
+        await page.addStyleTag({ content: "canvas { display: none !important; }" });
         // freeze everything at once, then move every animation to the same moment
         await page.evaluate(() => document.getAnimations().forEach((a) => a.pause()));
         await page.evaluate(() => document.fonts.ready);
@@ -74,9 +84,11 @@ for (const size of SIZES) {
         await status(page);
         await page.goto("/");
         await page.evaluate(() => document.fonts.ready);
+        await loadEverything(page);
         const section = page.locator("#ask");
         await section.locator("[data-grid-inline]").scrollIntoViewIfNeeded();
         await expect(section.getByRole("log", { name: /Conversation/ })).toBeVisible();
+        await loadEverything(page);
         if (run) {
           // a router tile: the same answer every time, no model
           await section.getByRole("link", { name: /^Shows projects/ }).click();
@@ -85,6 +97,24 @@ for (const size of SIZES) {
           await expect(section.locator("[data-pipeline]")).toHaveAttribute("data-running", "false");
         }
         await page.mouse.move(0, 0);
+        // The whole section must fit in the viewport: a screenshot taller than the viewport is captured "beyond" it,
+        // which on the emulated phone re-lays the page out and shifted the shot by ~216 px (it began mid-face). The
+        // sticky site nav and the dock would sit on top of the section, so they are hidden for the picture (only those: the
+        // section's own heading is a <header> too).
+        const { height } = await section.boundingBox().then((b) => b!);
+        await page.setViewportSize({ width: size.width, height: Math.ceil(height) + 200 });
+        await page.addStyleTag({
+          content: "header[data-scrolled], nav[aria-label='Quick links'] { visibility: hidden !important; }",
+        });
+        await loadEverything(page);
+        // place the section 100 px below the top, wholly inside the viewport (scrollIntoViewIfNeeded leaves a section
+        // that is already partly visible where it is, and the shot then reaches beyond the viewport again)
+        await section.evaluate((el) =>
+          window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100),
+        );
+        await expect
+          .poll(() => section.evaluate((el) => el.getBoundingClientRect().bottom <= window.innerHeight))
+          .toBe(true);
         await expect(section).toHaveScreenshot(`meet-grid-${run ? "run" : "idle"}-${size.name}.png`, {
           animations: "disabled",
           maxDiffPixelRatio: 0.01,

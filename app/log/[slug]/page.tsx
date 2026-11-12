@@ -50,7 +50,7 @@ export default async function PostPage({ params }: PageProps<"/log/[slug]">) {
   return (
     <article className="container-page py-10 md:py-16">
       <JsonLd data={postJsonLd(f)} />
-      <Link href="/log" className="font-mono text-sm text-muted transition-colors hover:text-text">
+      <Link href="/log" className="tap-slop font-mono text-sm text-muted transition-colors hover:text-text">
         <span aria-hidden="true">←</span> Ship Log
       </Link>
 
@@ -69,7 +69,7 @@ export default async function PostPage({ params }: PageProps<"/log/[slug]">) {
           ) : null}
           {f.draft ? <Chip className="border-warning text-warning">Draft — hidden in production</Chip> : null}
         </p>
-        <h1 className="mt-3 text-3xl font-semibold md:text-5xl">{f.title}</h1>
+        <h1 className="page-title mt-3">{f.title}</h1>
         <p className="mt-3 text-lg text-muted md:text-xl">{f.description}</p>
         <ul className="mt-5 flex flex-wrap gap-1.5" aria-label="Tags">
           {f.tags.map((t) => (

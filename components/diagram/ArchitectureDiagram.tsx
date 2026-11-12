@@ -276,6 +276,14 @@ export function ArchitectureDiagram({ graph }: { graph: ArchitectureGraph }) {
                 }}
               >
                 <NodeShape node={node} layout={layout} x={pos.x} y={pos.y} stroke={stroke} />
+                {/* a taller, invisible hit area, so a node is a 44 px target even when the diagram scales down */}
+                <rect
+                  x={pos.x - layout.node.w / 2}
+                  y={pos.y - layout.node.h / 2 - 8}
+                  width={layout.node.w}
+                  height={layout.node.h + 16}
+                  fill="transparent"
+                />
                 {/* One <text> with a literal space between spans, so the visible text matches the accessible name. */}
                 <text x={pos.x} textAnchor="middle">
                   <tspan
